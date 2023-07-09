@@ -1,7 +1,9 @@
 package xxAROX.PresenceMan.Application.ui;
 
 import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme;
+import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneDarkIJTheme;
+import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneLightIJTheme;
+import com.jthemedetecor.OsThemeDetector;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.ui.tabs.GeneralTab;
@@ -55,8 +57,25 @@ public class AppUI extends JFrame {
 
     private void setLookAndFeel() {
         try {
-            FlatOneDarkIJTheme.setup();
-            FlatOneDarkIJTheme.setPreferredFontFamily(FlatLaf.getPreferredMonospacedFontFamily());
+            final OsThemeDetector detector = OsThemeDetector.getDetector();
+            final boolean isDarkThemeUsed = detector.isDark();
+            detector.registerListener(isDark -> SwingUtilities.invokeLater(() -> {
+                if (isDark) {
+                    FlatAtomOneDarkIJTheme.setup();
+                    FlatAtomOneDarkIJTheme.setPreferredFontFamily(FlatLaf.getPreferredMonospacedFontFamily());
+                } else {
+                    FlatAtomOneLightIJTheme.setup();
+                    FlatAtomOneLightIJTheme.setPreferredFontFamily(FlatLaf.getPreferredMonospacedFontFamily());
+                }
+                FlatLaf.updateUI();
+            }));
+            if (isDarkThemeUsed) {
+                FlatAtomOneDarkIJTheme.setup();
+                FlatAtomOneDarkIJTheme.setPreferredFontFamily(FlatLaf.getPreferredMonospacedFontFamily());
+            } else {
+                FlatAtomOneLightIJTheme.setup();
+                FlatAtomOneLightIJTheme.setPreferredFontFamily(FlatLaf.getPreferredMonospacedFontFamily());
+            }
             FlatLaf.updateUI();
         } catch (Throwable t) {
             App.getInstance().getLogger().error(t);
