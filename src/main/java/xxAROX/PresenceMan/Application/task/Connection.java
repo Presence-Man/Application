@@ -28,6 +28,7 @@ public final class Connection implements Runnable {
     @Override
     public void run() {
         try {
+            System.out.println(AppInfo.address.getAddress());
             socket = new Socket(AppInfo.address.getAddress(), AppInfo.address.getPort());
             out = new PrintWriter(socket.getOutputStream(),true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));

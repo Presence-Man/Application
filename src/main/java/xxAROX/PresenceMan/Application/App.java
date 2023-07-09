@@ -58,6 +58,6 @@ public final class App {
     }
 
     public void onLogout() {
-        connection.close();
+        if (connection != null) connection.close();
     }
 }

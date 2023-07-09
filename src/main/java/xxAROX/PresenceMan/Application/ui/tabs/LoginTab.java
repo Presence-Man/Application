@@ -23,7 +23,7 @@ public class LoginTab extends AUITab {
     private Thread addThread;
 
     public LoginTab(AppUI frame) {
-        super(frame, "Identify account", "This app needs your XUID and Gamertag to identify on what server you are playing right now!");
+        super(frame, "Link XBOX account");
     }
 
     private void reloadStateButton(){
