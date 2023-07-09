@@ -26,7 +26,7 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           draft: false
-          automatic_release_tag: "v${{ steps.metadata.outputs.VERSION }}"
+          automatic_release_tag: "latest"
           prerelease: false
-          title: "Release v${{ steps.metadata.outputs.VERSION }}"
-          files: "Application-1.0-SNAPSHOT.jar"
+          title: "Latest release"
+          files: "target/Application-1.0-SNAPSHOT.jar"
