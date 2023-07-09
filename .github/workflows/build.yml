@@ -29,4 +29,4 @@ jobs:
           automatic_release_tag: "latest"
           prerelease: false
           title: "Latest release"
-          files: "target/Application-1.0-SNAPSHOT.jar"
+          files: "target/*-SNAPSHOT.jar"
