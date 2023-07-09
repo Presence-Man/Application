@@ -29,5 +29,4 @@ jobs:
           automatic_release_tag: "v${{ steps.metadata.outputs.VERSION }}"
           prerelease: false
           title: "Release v${{ steps.metadata.outputs.VERSION }}"
-          files: |
-            **.jar
+          files: "Application-1.0-SNAPSHOT.jar"
