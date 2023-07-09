@@ -81,14 +81,7 @@
                     <archive>
                         <manifest>
                             <mainClass>xxAROX.PresenceMan.Application.Bootstrap</mainClass>
-                            <manifestEntries>
-                                <Multi-Release>true</Multi-Release>
-                                <Launcher-Agent-Class>xxAROX.PresenceMan.Application.Bootstrap</Launcher-Agent-Class>
-                            </manifestEntries>
                         </manifest>
-                        <manifestEntries>
-                            <Premain-Class>xxAROX.PresenceMan.Application.Bootstrap</Premain-Class>
-                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
