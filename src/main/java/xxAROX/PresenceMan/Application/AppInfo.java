@@ -13,6 +13,7 @@ public final class AppInfo {
     public final static String[] contributors = new String[]{
             "xxAROX",
     };
+    public static String discord_application_id = "345229890980937739";
 
     public static String getVersion(){
         return getVersion(".");

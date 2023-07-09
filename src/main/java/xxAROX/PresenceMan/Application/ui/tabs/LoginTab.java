@@ -86,8 +86,8 @@ public class LoginTab extends AUITab {
                 if (e instanceof InterruptedException) return null;
                 else if (e instanceof TimeoutException) {
                     SwingUtilities.invokeLater(() -> {
-                        this.closePopup();
-                        this.frame.showError("The login request timed out.\nPlease login within 60 seconds.");
+                        closePopup();
+                        frame.showError("The login request timed out.\nPlease login within 60 seconds.");
                     });
                 } else {
                     App.getInstance().getLogger().error(e);
