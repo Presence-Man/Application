@@ -7,7 +7,7 @@ import java.util.StringJoiner;
 
 public final class AppInfo {
     public final static String name = "Presence-Man";
-    public final static InetSocketAddress address = InetSocketAddress.createUnresolved("127.0.0.1", 1515);
+    public final static InetSocketAddress address = InetSocketAddress.createUnresolved("exoniamc.de", 1515);
     public final static int[] version = new int[]{ 0,0,1 };
     public static ImageIcon icon = new ImageIcon(Objects.requireNonNull(Bootstrap.class.getClassLoader().getResource("icon.png")));
     public final static String[] contributors = new String[]{
