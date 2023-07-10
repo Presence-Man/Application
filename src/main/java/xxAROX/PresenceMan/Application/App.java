@@ -1,5 +1,6 @@
 package xxAROX.PresenceMan.Application;
 
+import de.jcm.discordgamesdk.Core;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -10,14 +11,23 @@ import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 import xxAROX.PresenceMan.Application.task.Connection;
 import xxAROX.PresenceMan.Application.task.UpdateCheckTask;
 import xxAROX.PresenceMan.Application.ui.AppUI;
+import xxAROX.PresenceMan.Application.utils.Activities;
 import xxAROX.PresenceMan.Application.utils.CacheManager;
 import xxAROX.PresenceMan.Application.utils.Tray;
 
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 @Getter
 @ToString
 public final class App {
+    @Getter
+    private static Core discord_core;
+    @Getter
+    private static final List<Consumer<Core>> discordInitHandlers = new ArrayList<>();
+
     private static App instance;
     public static App getInstance() {
         return instance;
@@ -59,5 +69,11 @@ public final class App {
 
     public void onLogout() {
         if (connection != null) connection.close();
+    }
+
+    public static void setDiscordCore(Core discord_core) {
+        App.discord_core = discord_core;
+        for (Consumer<Core> discord_core_listener : discordInitHandlers) discord_core_listener.accept(discord_core);
+        discord_core.activityManager().updateActivity(Activities.none());
     }
 }
