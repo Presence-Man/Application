@@ -1,7 +1,6 @@
 package xxAROX.PresenceMan.Application;
 
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 import java.util.StringJoiner;
 
 public final class AppInfo {
@@ -33,17 +32,6 @@ public final class AppInfo {
     }
 
     public static void main(String[] args) {
-        var json = """
-                {
-                    "name": {name},
-                    "version": {version},
-                    "contributors": {contributors}
-                }
-                         """;
-        System.out.println(json
-                .replace("{name}", name)
-                .replace("{version}", Arrays.toString(version))
-                .replace("{contributors}", "[\"" + String.join("\", \"", contributors) + "\"]")
-        );
+        System.out.println(getVersion());
     }
 }

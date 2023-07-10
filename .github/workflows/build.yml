@@ -19,15 +19,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: "Get data"
+      - name: "Get version"
         id: metadata
         run: |
-          javac -d / src/main/java/xxAROX/PresenceMan/Application/AppInfo.java
-          php -r 'file_put_contents("build_info.json", exec("cd / && java xxAROX.PresenceMan.Application.AppInfo"));'
-          cat build_info.json
-          echo build_info.json readed
-          ls
-          echo "VERSION=$(php -r 'echo json_decode(file_get_contents("build_info.json"))->version;')" >> $GITHUB_OUTPUT
+          javac -d . src/main/java/xxAROX/PresenceMan/Application/AppInfo.java
+          echo "VERSION=$(java xxAROX.PresenceMan.Application.AppInfo)" >> $GITHUB_OUTPUT
           echo ${{ steps.metadata.outputs.VERSION }}
 
       - name: Build with Maven
@@ -38,7 +34,7 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           draft: false
-          automatic_release_tag: "latest"
+          automatic_release_tag: "v${{ steps.metadata.outputs.VERSION }}"
           prerelease: false
-          title: "Latest release"
-          files: "target/*-SNAPSHOT.jar"
+          title: "Release v${{ steps.metadata.outputs.VERSION }}"
+          files: "target/*.jar"
