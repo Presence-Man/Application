@@ -23,12 +23,9 @@ jobs:
         id: metadata
         run: |
           javac -d . src/main/java/xxAROX/PresenceMan/Application/AppInfo.java
-          java xxAROX.PresenceMan.Application.AppInfo
-          echo "JSON=$(java xxAROX.PresenceMan.Application.AppInfo)" >> $GITHUB_OUTPUT
-          echo ${{ steps.metadata.outputs.JSON }}
-          echo "VERSION=$(php -r 'json_decode("${{ steps.metadata.outputs.JSON }}", true)["version"]);')" >> $GITHUB_OUTPUT
-          echo "CONTRIBUTORS=$(php -r 'json_decode("${{ steps.metadata.outputs.JSON }}", true)["contributors"] ?? []);')" >> $GITHUB_OUTPUT
-          echo $VERSION
+          echo $(java xxAROX.PresenceMan.Application.AppInfo) > build_info.json
+          echo cat build_info.json
+          echo "VERSION=$(php -r 'json_decode(file_get_contents("build_info.json"), true)["version"]);')" >> $GITHUB_OUTPUT
           echo ${{ steps.metadata.outputs.VERSION }}
 
       - name: Build with Maven
