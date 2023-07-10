@@ -23,6 +23,7 @@ jobs:
         id: metadata
         run: |
           javac -d . src/main/java/xxAROX/PresenceMan/Application/AppInfo.java
+          java xxAROX.PresenceMan.Application.AppInfo
           echo "JSON=$(java xxAROX.PresenceMan.Application.AppInfo)" >> $GITHUB_OUTPUT
           echo ${{ steps.metadata.outputs.JSON }}
           echo "VERSION=$(php -r 'json_decode("${{ steps.metadata.outputs.JSON }}", true)["version"]);')" >> $GITHUB_OUTPUT
