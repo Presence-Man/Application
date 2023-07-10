@@ -23,7 +23,9 @@ jobs:
         id: metadata
         run: |
           javac -d . src/main/java/xxAROX/PresenceMan/Application/AppInfo.java
-          php -r 'file_put_contents("build_info.json", "$(java xxAROX.PresenceMan.Application.AppInfo)");'
+          php -r 'file_put_contents("build_info.json", exec("java xxAROX.PresenceMan.Application.AppInfo"));'
+          ls
+          cat build_info.json
           echo "VERSION=$(php -r 'echo json_decode(file_get_contents("build_info.json"))->version;')" >> $GITHUB_OUTPUT
           echo ${{ steps.metadata.outputs.VERSION }}
 
