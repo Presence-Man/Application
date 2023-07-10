@@ -4,10 +4,13 @@ import lombok.Getter;
 import lombok.ToString;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
+import xxAROX.PresenceMan.Application.Bootstrap;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
 @Getter
  @ToString
@@ -18,7 +21,7 @@ public final class Tray {
 
 
     public Tray() {
-        tray_icon = new TrayIcon(AppInfo.icon.getImage(), AppInfo.name, null);
+        tray_icon = new TrayIcon(new ImageIcon(Objects.requireNonNull(Bootstrap.class.getClassLoader().getResource(AppInfo.icon))).getImage(), AppInfo.name, null);
         tray_icon.setImageAutoSize(true);
         tray_icon.setToolTip(
                 (App.getInstance().getXboxUserInfo() != null ? "Logged in as " + App.getInstance().getXboxUserInfo().getGamertag() + "\n" : "")+

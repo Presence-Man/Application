@@ -6,10 +6,8 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+    if: "!contains(github.event.head_commit.message, 'ci ignore')"
+    runs-on: "ubuntu-latest"
 
     steps:
       - uses: actions/checkout@v3
@@ -20,6 +18,18 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+
+      - name: "Get data"
+        id: metadata
+        run: |
+          javac -d . src/main/java/xxAROX/PresenceMan/Application/AppInfo.java
+          cd xxAROX/PresenceMan/Application
+          echo "JSON=$(java xxAROX.PresenceMan.Application.AppInfo)" >> $GITHUB_OUTPUT
+          echo ${{ steps.metadata.outputs.JSON }}
+          echo "VERSION=$(php -r 'json_decode(${{ steps.metadata.outputs.JSON }})["version"]);')" >> $GITHUB_OUTPUT
+          echo "CONTRIBUTORS=$(php -r 'json_decode(${{ steps.metadata.outputs.JSON }})["contributors"] ?? []);')" >> $GITHUB_OUTPUT
+          echo $VERSION
+          echo ${{ steps.metadata.outputs.VERSION }}
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml

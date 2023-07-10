@@ -6,6 +6,7 @@ import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneLightIJ
 import com.jthemedetecor.OsThemeDetector;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
+import xxAROX.PresenceMan.Application.Bootstrap;
 import xxAROX.PresenceMan.Application.ui.tabs.GeneralTab;
 import xxAROX.PresenceMan.Application.ui.tabs.LoginTab;
 import xxAROX.PresenceMan.Application.ui.tabs.PrivacyPolicyTab;
@@ -20,6 +21,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class AppUI extends JFrame {
     private final JTabbedPane contentPane = new JTabbedPane();
@@ -84,7 +86,7 @@ public class AppUI extends JFrame {
 
     private void initWindow() {
         setTitle(AppInfo.name + " v" + AppInfo.getVersion());
-        setIconImage(AppInfo.icon.getImage());
+        setIconImage(new ImageIcon(Objects.requireNonNull(Bootstrap.class.getClassLoader().getResource(AppInfo.icon))).getImage());
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
