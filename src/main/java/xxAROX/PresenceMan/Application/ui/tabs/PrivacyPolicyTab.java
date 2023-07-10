@@ -8,10 +8,7 @@ import xxAROX.PresenceMan.Application.ui.AppUI;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
 
 public class PrivacyPolicyTab extends AUITab {
     public PrivacyPolicyTab(AppUI parent){
@@ -31,14 +28,12 @@ public class PrivacyPolicyTab extends AUITab {
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
         try {
-            Path htmlFilePath = Paths.get(Bootstrap.class.getClassLoader().getResource("privacy_policy.html").toURI());
-            byte[] htmlBytes = Files.readAllBytes(htmlFilePath);
-            String htmlContent = new String(htmlBytes);
-            privacyPolicyPane.setText(htmlContent);
-        } catch (IOException | URISyntaxException e) {
+            InputStream inputStream = Bootstrap.class.getClassLoader().getResourceAsStream("privacy_policy.html");
+            assert inputStream != null : "privacy_policy.html resource not found!";
+            privacyPolicyPane.setText(new String(inputStream.readAllBytes()));
+        } catch (IOException e) {
             App.getInstance().getLogger().error(e);
         }
-
         contentPane.add(scrollPane, BorderLayout.CENTER);
     }
 }
