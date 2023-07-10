@@ -12,7 +12,7 @@ import java.io.InputStream;
 
 public class PrivacyPolicyTab extends AUITab {
     public PrivacyPolicyTab(AppUI parent){
-        super(parent, "Privacy policy", "What are we doing with your data?");
+        super(parent, "Privacy policy");
     }
 
     @Override
@@ -30,7 +30,7 @@ public class PrivacyPolicyTab extends AUITab {
         try {
             InputStream inputStream = Bootstrap.class.getClassLoader().getResourceAsStream("privacy_policy.html");
             assert inputStream != null : "privacy_policy.html resource not found!";
-            privacyPolicyPane.setText(new String(inputStream.readAllBytes()));
+            privacyPolicyPane.setText("<html>\n" + new String(inputStream.readAllBytes()) + "\n</html>");
         } catch (IOException e) {
             App.getInstance().getLogger().error(e);
         }
