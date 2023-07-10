@@ -26,8 +26,8 @@ jobs:
           cd xxAROX/PresenceMan/Application
           echo "JSON=$(java xxAROX.PresenceMan.Application.AppInfo)" >> $GITHUB_OUTPUT
           echo ${{ steps.metadata.outputs.JSON }}
-          echo "VERSION=$(php -r 'json_decode(${{ steps.metadata.outputs.JSON }})["version"]);')" >> $GITHUB_OUTPUT
-          echo "CONTRIBUTORS=$(php -r 'json_decode(${{ steps.metadata.outputs.JSON }})["contributors"] ?? []);')" >> $GITHUB_OUTPUT
+          echo "VERSION=$(php -r 'json_decode("${{ steps.metadata.outputs.JSON }}", true)["version"]);')" >> $GITHUB_OUTPUT
+          echo "CONTRIBUTORS=$(php -r 'json_decode("${{ steps.metadata.outputs.JSON }}", true)["contributors"] ?? []);')" >> $GITHUB_OUTPUT
           echo $VERSION
           echo ${{ steps.metadata.outputs.VERSION }}
 
