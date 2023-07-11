@@ -51,9 +51,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: "latest"
-          name: "Release v${{ steps.metadata.outputs.VERSION }}"
+          name: "Latest releases"
           repository: "Presence-Man/releases"
-          # note you'll typically need to create a personal access token
-          # with permissions to create releases in the other repo
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
           files: "target/Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}.jar"
