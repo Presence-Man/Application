@@ -64,7 +64,9 @@ public final class App {
         SwingUtilities.invokeLater(() -> ui = new AppUI());
         scheduler.scheduleAsync(new UpdateCheckTask());
         xboxUserInfo = CacheManager.loadXboxUserInfo();
-        if (xboxUserInfo != null) discordInitHandlers.add(core -> App.getInstance().onLogin());
+        if (xboxUserInfo != null) {
+            discordInitHandlers.add(core -> App.getInstance().onLogin());
+        }
 
         while (ui == null) {
             logger.info("Waiting for UI to be initialized..");
@@ -120,6 +122,7 @@ public final class App {
     }
 
     public void onLogin() {
+        System.out.println("onLogin()");
         var base = APIActivity.none();
         base.setServer("Logged in as: " + xboxUserInfo.getGamertag());
         discord_core.activityManager().updateActivity(base.toDiscord());
@@ -131,7 +134,7 @@ public final class App {
 
     public static void setDiscordCore(Core discord_core) {
         App.discord_core = discord_core;
-        for (Consumer<Core> discord_core_listener : discordInitHandlers) discord_core_listener.accept(discord_core);
         discord_core.activityManager().updateActivity(APIActivity.none().toDiscord());
+        for (Consumer<Core> discord_core_listener : discordInitHandlers) discord_core_listener.accept(discord_core);
     }
 }

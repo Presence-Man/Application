@@ -57,16 +57,16 @@ public final class APIActivity {
     public Activity toDiscord() {
         Activity activity = new Activity();
         activity.setType(type.toDiscordType());
-        activity.setState(network == null ? "" : network);
-        activity.setDetails(server == null ? "" : server);
-        activity.timestamps().setStart(start == null ? null : Instant.ofEpochMilli(start));
-        activity.timestamps().setEnd(end == null ? null : Instant.ofEpochMilli(end));
-        activity.assets().setLargeImage(large_icon_key == null ? "" : large_icon_key);
-        activity.assets().setLargeText(large_icon_text == null ? "" : large_icon_text);
-        activity.assets().setSmallImage(small_icon_key == null ? "" : small_icon_key);
-        activity.assets().setSmallText(small_icon_text == null ? "" : small_icon_text);
-        activity.party().size().setCurrentSize(party_player_count);
-        activity.party().size().setMaxSize(party_max_player_count);
+        activity.setState(network != null ? network : "");
+        activity.setDetails(server != null ? server : "");
+        if (start != null) activity.timestamps().setStart(Instant.ofEpochMilli(start));
+        if (end != null) activity.timestamps().setEnd(Instant.ofEpochMilli(end));
+        if (large_icon_key != null) activity.assets().setLargeImage(large_icon_key);
+        if (large_icon_text != null) activity.assets().setLargeText(large_icon_text);
+        if (small_icon_key != null) activity.assets().setSmallImage(small_icon_key);
+        if (small_icon_text != null) activity.assets().setSmallText(small_icon_text);
+        if (party_player_count != null) activity.party().size().setCurrentSize(party_player_count);
+        if (party_max_player_count != null) activity.party().size().setMaxSize(party_max_player_count);
         return activity;
     }
 
@@ -101,7 +101,7 @@ public final class APIActivity {
         var activity = new APIActivity();
         activity.setNetwork("");
         activity.setServer("");
-        activity.setLarge_icon_key("bedrock");
+        activity.setLarge_icon_key("launcher");
         activity.setStart(Instant.now().toEpochMilli());
         return activity;
     }

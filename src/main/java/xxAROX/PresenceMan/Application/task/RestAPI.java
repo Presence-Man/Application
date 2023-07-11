@@ -17,7 +17,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -41,13 +40,11 @@ public class RestAPI {
         if (App.getInstance().getXboxUserInfo() == null) return;
         JsonObject body = new JsonObject();
         JsonObject response = request(Method.POST, "/user/heartbeat", new HashMap<>(), body);
+        if (response == null) return;
         APIActivity new_activity = null;
         if (!response.has("api_activity")) {
-            new_activity = new APIActivity();
-            new_activity.setNetwork("");
-            new_activity.setServer("");
-            new_activity.setLarge_icon_key("bedrock");
-            new_activity.setStart(Instant.now().toEpochMilli());
+            new_activity = APIActivity.none();
+            if (activity != null) new_activity.setStart(activity.getStart());
         } else if (response.get("api_activity").isJsonObject()) {
             new_activity = APIActivity.deserialize(response.get("api_activity").getAsJsonObject());
         }
@@ -113,7 +110,6 @@ public class RestAPI {
             return new Gson().fromJson(content.toString(), JsonObject.class);
         } catch (IOException e) {
             broken = true;
-            App.ui.showException(e);
         }
         return null;
     }
