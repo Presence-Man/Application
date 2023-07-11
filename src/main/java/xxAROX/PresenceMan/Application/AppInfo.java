@@ -6,7 +6,7 @@ import java.util.StringJoiner;
 
 public final class AppInfo {
     public final static String name = "Presence-Man";
-    public final static int[] version = new int[]{ 0,1,0 };
+    public final static int[] version = new int[]{ 0,1,1 };
     public static String icon = "icon.png";
     public static String discord_application_id = "1127704366565052526";
 
