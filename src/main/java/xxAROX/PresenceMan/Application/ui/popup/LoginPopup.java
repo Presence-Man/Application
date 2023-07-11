@@ -75,6 +75,7 @@ public class LoginPopup extends JDialog {
         }
         {
             JButton copyCodeButton = new JButton("Copy Code");
+            copyCodeButton.setFocusPainted(false);
             copyCodeButton.setBounds(this.getWidth() / 2 - 130 / 2, 130, 100, 20);
             copyCodeButton.addActionListener(event -> {
                 StringSelection selection = new StringSelection(this.deviceCode.userCode());

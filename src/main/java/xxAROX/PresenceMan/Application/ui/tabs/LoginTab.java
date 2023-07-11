@@ -43,6 +43,7 @@ public class LoginTab extends AUITab {
 
         {
             stateButton = new JButton(info == null ? "Login" : "Logout");
+            stateButton.setFocusPainted(false);
             stateButton.setBackground(info == null ? new Color(59, 155, 57) : new Color(150, 56, 56));
             stateButton.addActionListener(event -> {
                 if (stateButton.getText().equalsIgnoreCase("Login")) login();

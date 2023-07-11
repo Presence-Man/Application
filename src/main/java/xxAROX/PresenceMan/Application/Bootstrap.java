@@ -3,11 +3,13 @@ package xxAROX.PresenceMan.Application;
 import de.jcm.discordgamesdk.Core;
 import de.jcm.discordgamesdk.CreateParams;
 import de.jcm.discordgamesdk.GameSDKException;
-import xxAROX.PresenceMan.Application.utils.Activities;
+import lombok.SneakyThrows;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 
 public class Bootstrap {
+    @SneakyThrows
     public static void main(String[] args) {
         new App();
         new Thread(() -> {
@@ -17,7 +19,6 @@ public class Bootstrap {
                     params.setClientID(1127704366565052526L);
                     params.setFlags(CreateParams.getDefaultFlags());
                     try (Core core = new Core(params)) {
-                        App.getDiscordInitHandlers().add(c -> c.activityManager().updateActivity(Activities.none(), System.out::println));
                         App.setDiscordCore(core);
                         while (true) {
                             core.runCallbacks();
@@ -35,5 +36,9 @@ public class Bootstrap {
                 e.printStackTrace();
             }
         }).start();
+    }
+    protected static void shutdownHook() {
+        LogManager.shutdown();
+        Runtime.getRuntime().halt(0); // force exit
     }
 }
