@@ -31,6 +31,12 @@ jobs:
           mvn install:install-file -Dfile=./lib/discord-game-sdk4j-0.5.5.jar -DgroupId=discord-game-sdk4j -DartifactId=discord-game-sdk -Dversion=0.5.5 -Dpackaging=jar
           mvn -B package --file pom.xml
 
+      - name: Rename JAR
+        run: |
+          cd target/
+          cp Application-1.0-SNAPSHOT.jar Presence-Man-${{ steps.metadata.outputs.VERSION }}.jar
+          cd ../
+
       - name: "Create Release"
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
@@ -39,17 +45,15 @@ jobs:
           automatic_release_tag: "v${{ steps.metadata.outputs.VERSION }}"
           prerelease: false
           title: "Release v${{ steps.metadata.outputs.VERSION }}"
-          files: "target/*.jar"
+          files: "target/Presence-Man-${{ steps.metadata.outputs.VERSION }}.jar.jar"
 
       - name: Release to public
         uses: softprops/action-gh-release@v1
         with:
           tag_name: "v${{ steps.metadata.outputs.VERSION }}"
           name: "Release v${{ steps.metadata.outputs.VERSION }}"
-          draft: true
-          generate_release_notes: true
           repository: "Presence-Man/App"
           # note you'll typically need to create a personal access token
           # with permissions to create releases in the other repo
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-          files: "target/A*.jar"
+          files: "target/Presence-Man-${{ steps.metadata.outputs.VERSION }}.jar"
