@@ -27,7 +27,9 @@ jobs:
           echo ${{ steps.metadata.outputs.VERSION }}
 
       - name: Build with Maven
-        run: mvn -B package --file pom.xml
+        run: |
+          mvn install:install-file -Dfile=./lib/discord-game-sdk4j-0.5.5.jar -DgroupId=discord-game-sdk4j -DartifactId=discord-game-sdk -Dversion=0.5.5 -Dpackaging=jar
+          mvn -B package --file pom.xml
 
       - name: "Create Release"
         uses: "marvinpinto/action-automatic-releases@latest"
