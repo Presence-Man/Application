@@ -35,6 +35,7 @@ jobs:
         run: |
           cd target/
           cp Application-1.0-SNAPSHOT.jar Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}.jar
+          cp Application-1.0-SNAPSHOT.jar Presence-Man-App.jar
           cd ../
 
       - name: "Create Release"
@@ -54,4 +55,4 @@ jobs:
           name: "Latest releases"
           repository: "Presence-Man/releases"
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-          files: "target/Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}.jar"
+          files: "target/Presence-Man-App.jar"
