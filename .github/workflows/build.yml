@@ -52,7 +52,7 @@ jobs:
         with:
           tag_name: "v${{ steps.metadata.outputs.VERSION }}"
           name: "Release v${{ steps.metadata.outputs.VERSION }}"
-          repository: "Presence-Man/App"
+          repository: "Presence-Man/releases"
           # note you'll typically need to create a personal access token
           # with permissions to create releases in the other repo
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
