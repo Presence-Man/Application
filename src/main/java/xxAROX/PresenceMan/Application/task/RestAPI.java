@@ -143,17 +143,4 @@ public class RestAPI {
             return method.toUpperCase();
         }
     }
-
-    @AllArgsConstructor
-    public enum Protocol {
-        HTTP("http://"),
-        HTTPS("https://")
-        ;
-        private String protocol;
-
-        @Override
-        public String toString() {
-            return protocol;
-        }
-    }
 }

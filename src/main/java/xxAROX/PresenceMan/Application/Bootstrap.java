@@ -16,7 +16,7 @@ public class Bootstrap {
             try {
                 Core.initDownload();
                 try (CreateParams params = new CreateParams()) {
-                    params.setClientID(1127704366565052526L);
+                    params.setClientID(AppInfo.discord_application_id);
                     params.setFlags(CreateParams.getDefaultFlags());
                     try (Core core = new Core(params)) {
                         App.setDiscordCore(core);
