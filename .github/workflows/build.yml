@@ -40,3 +40,16 @@ jobs:
           prerelease: false
           title: "Release v${{ steps.metadata.outputs.VERSION }}"
           files: "target/*.jar"
+
+      - name: Release to public
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "v${{ steps.metadata.outputs.VERSION }}"
+          name: "Release v${{ steps.metadata.outputs.VERSION }}"
+          draft: true
+          generate_release_notes: true
+          repository: "Presence-Man/App"
+          # note you'll typically need to create a personal access token
+          # with permissions to create releases in the other repo
+          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          files: "target/*.jar"
