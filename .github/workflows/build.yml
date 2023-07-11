@@ -34,7 +34,7 @@ jobs:
       - name: Rename JAR
         run: |
           cd target/
-          cp Application-1.0-SNAPSHOT.jar Presence-Man-${{ steps.metadata.outputs.VERSION }}.jar
+          cp Application-1.0-SNAPSHOT.jar Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}.jar
           cd ../
 
       - name: "Create Release"
@@ -45,7 +45,7 @@ jobs:
           automatic_release_tag: "v${{ steps.metadata.outputs.VERSION }}"
           prerelease: false
           title: "Release v${{ steps.metadata.outputs.VERSION }}"
-          files: "target/Presence-Man-${{ steps.metadata.outputs.VERSION }}.jar.jar"
+          files: "target/Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}.jar"
 
       - name: Release to public
         uses: softprops/action-gh-release@v1
@@ -56,4 +56,4 @@ jobs:
           # note you'll typically need to create a personal access token
           # with permissions to create releases in the other repo
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-          files: "target/Presence-Man-v${{ steps.metadata.outputs.VERSION }}.jar"
+          files: "target/Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}.jar"
