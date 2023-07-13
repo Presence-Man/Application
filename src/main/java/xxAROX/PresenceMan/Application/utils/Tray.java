@@ -24,7 +24,6 @@ public final class Tray {
         tray_icon = new TrayIcon(new ImageIcon(Objects.requireNonNull(Bootstrap.class.getClassLoader().getResource(AppInfo.icon))).getImage(), AppInfo.name, null);
         tray_icon.setImageAutoSize(true);
         tray_icon.setToolTip(
-                (App.getInstance().getXboxUserInfo() != null ? "Logged in as " + App.getInstance().getXboxUserInfo().getGamertag() + "\n" : "")+
                 "Double left click to open the application\n"+
                 "Tripple right click to exit the application"
         );
@@ -46,9 +45,8 @@ public final class Tray {
         if (visible) return;
         if (!SystemTray.isSupported()) return;
         tray_icon.setToolTip(
-                (App.getInstance().getXboxUserInfo() != null ? "Logged in as " + App.getInstance().getXboxUserInfo().getGamertag() + "\n\n" : "")+
-                        "Double left click to open the application\n"+
-                        "Tripple right click to exit the application"
+                "Double left click to open the application\n"+
+                "Tripple right click to exit the application"
         );
         try {SystemTray.getSystemTray().add(tray_icon);visible = true;}
         catch (AWTException e) {App.getInstance().getLogger().error(e);}

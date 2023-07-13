@@ -1,8 +1,11 @@
 package xxAROX.PresenceMan.Application.entity;
 
 import com.google.gson.JsonObject;
+import de.jcm.discordgamesdk.CreateParams;
 import de.jcm.discordgamesdk.activity.Activity;
 import lombok.*;
+import xxAROX.PresenceMan.Application.App;
+import xxAROX.PresenceMan.Application.AppInfo;
 
 import java.time.Instant;
 
@@ -10,6 +13,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 public final class APIActivity {
+    private long client_id = AppInfo.discord_application_id;
     private @NonNull ActivityType type = ActivityType.PLAYING;
     private String network;
     private String server;
@@ -24,6 +28,7 @@ public final class APIActivity {
 
     public JsonObject serialize(){
         JsonObject json = new JsonObject();
+        json.addProperty("client_id", client_id);
         json.addProperty("type", type.name().toUpperCase());
         json.addProperty("network", network);
         json.addProperty("server", server);
@@ -40,6 +45,7 @@ public final class APIActivity {
 
     public static APIActivity deserialize(JsonObject json){
         APIActivity activity = new APIActivity();
+        activity.client_id = json.has("client_id") ? json.get("client_id").getAsLong() : AppInfo.discord_application_id;
         activity.type = json.has("type") ? ActivityType.valueOf(json.get("type").getAsString()) : ActivityType.PLAYING;
         activity.network = json.has("network") ? json.get("network").getAsString() : null;
         activity.server = json.has("server") ? json.get("server").getAsString() : null;
@@ -54,7 +60,8 @@ public final class APIActivity {
         return activity;
     }
 
-    public Activity toDiscord() {
+    public Activity toDiscord(CreateParams params) {
+        params.setClientID(client_id);
         Activity activity = new Activity();
         activity.setType(type.toDiscordType());
         activity.setState(network != null ? network : "");
@@ -100,7 +107,7 @@ public final class APIActivity {
     public static APIActivity none() {
         var activity = new APIActivity();
         activity.setNetwork("");
-        activity.setServer("");
+        activity.setServer(App.getInstance().xboxUserInfo == null ? "" : "Playing as " + App.getInstance().xboxUserInfo.getGamertag());
         activity.setLarge_icon_key("launcher");
         activity.setStart(Instant.now().toEpochMilli());
         return activity;

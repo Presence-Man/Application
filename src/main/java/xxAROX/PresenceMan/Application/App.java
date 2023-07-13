@@ -1,8 +1,9 @@
 package xxAROX.PresenceMan.Application;
 
 import de.jcm.discordgamesdk.Core;
+import de.jcm.discordgamesdk.CreateParams;
+import de.jcm.discordgamesdk.GameSDKException;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
@@ -20,6 +21,7 @@ import xxAROX.PresenceMan.Application.utils.Tray;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -29,6 +31,8 @@ import java.util.function.Consumer;
 @Getter
 @ToString
 public final class App {
+    @Getter
+    private static CreateParams discord_create_params;
     @Getter
     private static Core discord_core;
     @Getter
@@ -46,8 +50,8 @@ public final class App {
     private ScheduledFuture<?> tickFuture;
     private volatile boolean shutdown = false;
     private int currentTick = 0;
-
-    @Setter private XboxUserInfo xboxUserInfo = null;
+    private APIActivity api_activity = null;
+    public XboxUserInfo xboxUserInfo = null;
 
     @SneakyThrows
     public App() {
@@ -60,13 +64,13 @@ public final class App {
         ThreadFactoryBuilder builder = ThreadFactoryBuilder.builder().format("Tick Executor - #%d").build();
         tickExecutor = Executors.newScheduledThreadPool(1, builder);
         scheduler = new WaterdogScheduler();
+        tickFuture = tickExecutor.scheduleAtFixedRate(this::tickProcessor, 50, 50, TimeUnit.MILLISECONDS);
 
         SwingUtilities.invokeLater(() -> ui = new AppUI());
         scheduler.scheduleAsync(new UpdateCheckTask());
+
         xboxUserInfo = CacheManager.loadXboxUserInfo();
-        if (xboxUserInfo != null) {
-            discordInitHandlers.add(core -> App.getInstance().onLogin());
-        }
+        if (xboxUserInfo != null) discordInitHandlers.add(core -> App.getInstance().onLogin());
 
         while (ui == null) {
             logger.info("Waiting for UI to be initialized..");
@@ -74,12 +78,8 @@ public final class App {
         }
         ui.setReady();
         new Tray();
-        tickFuture = tickExecutor.scheduleAtFixedRate(this::tickProcessor, 50, 50, TimeUnit.MILLISECONDS);
 
-        scheduler.scheduleRepeating(() -> {
-
-            if (xboxUserInfo != null) RestAPI.heartbeat();
-        }, 20 * 5);
+        scheduler.scheduleRepeating(RestAPI::heartbeat, 20 * 5);
     }
 
     private void tickProcessor() {
@@ -121,20 +121,54 @@ public final class App {
         logger.info("Shutdown complete!");
     }
 
+    public static void setDiscordApplicationId(long id) {
+        if (discord_core != null) {
+            discord_core.close();
+            discord_core = null;
+        }
+        if (discord_create_params != null) {
+            discord_create_params.close();
+            discord_create_params = null;
+        }
+
+        try (CreateParams params = new CreateParams()) {
+            discord_create_params = params;
+            params.setClientID(id);
+            params.setFlags(CreateParams.getDefaultFlags());
+            try (Core core = new Core(params)) {
+                discord_core = core;
+            } catch (GameSDKException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void setDiscordCore(CreateParams discord_create_params, Core discord_core) {
+        App.discord_create_params = discord_create_params;
+        App.discord_core = discord_core;
+        setActivity(APIActivity.none());
+        for (Consumer<Core> discord_core_listener : discordInitHandlers) discord_core_listener.accept(discord_core);
+    }
+
+    public static void setActivity(APIActivity api_activity) {
+        if (api_activity == null) api_activity = APIActivity.none();
+        if (Objects.equals(getInstance().api_activity, api_activity)) return;
+        getInstance().api_activity = api_activity;
+        if (discord_core != null) discord_core.activityManager().updateActivity(api_activity.toDiscord(discord_create_params));
+    }
+
+    public static void clearActivity() {
+        getInstance().api_activity = null;
+        discord_core.activityManager().clearActivity();
+    }
+
     public void onLogin() {
-        System.out.println("onLogin()");
-        var base = APIActivity.none();
-        base.setServer("Logged in as: " + xboxUserInfo.getGamertag());
-        discord_core.activityManager().updateActivity(base.toDiscord());
+        setActivity(APIActivity.none());
     }
 
     public void onLogout() {
-        discord_core.activityManager().updateActivity(APIActivity.none().toDiscord());
-    }
-
-    public static void setDiscordCore(Core discord_core) {
-        App.discord_core = discord_core;
-        discord_core.activityManager().updateActivity(APIActivity.none().toDiscord());
-        for (Consumer<Core> discord_core_listener : discordInitHandlers) discord_core_listener.accept(discord_core);
+        CacheManager.storeXboxUserInfo(null);
+        xboxUserInfo = null;
+        setActivity(APIActivity.none());
     }
 }

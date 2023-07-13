@@ -41,7 +41,7 @@ public class UpdateCheckTask implements Runnable {
                 Semver versionSemver = new Semver(AppInfo.getVersion());
                 Semver latestVersionSemver = new Semver(latestVersion);
                 updateAvailable = latestVersionSemver.isGreaterThan(versionSemver);
-                if (versionSemver.isGreaterThan(latestVersionSemver)) App.getInstance().getLogger().warn("You are running a dev version of ViaProxy");
+                if (versionSemver.isGreaterThan(latestVersionSemver)) App.getInstance().getLogger().warn("You are running a dev version of PresenceMan");
             } catch (Throwable t) {
                 updateAvailable = !AppInfo.getVersion().equals(latestVersion);
             }
@@ -51,7 +51,7 @@ public class UpdateCheckTask implements Runnable {
                 boolean found = false;
                 for (JsonElement asset : assets) {
                     JsonObject assetObject = asset.getAsJsonObject();
-                    if (isViaProxyJar(object, assetObject)) {
+                    if (isPresenceManJar(object, assetObject)) {
                         found = true;
                         SwingUtilities.invokeLater(() -> this.showUpdateQuestion(assetObject.get("name").getAsString(), assetObject.get("browser_download_url").getAsString(), latestVersion));
                         break;
@@ -66,7 +66,7 @@ public class UpdateCheckTask implements Runnable {
     private void showUpdateWarning(final String latestVersion) {
         JOptionPane.showMessageDialog(
                 App.ui,
-                "You are running an outdated version of ViaProxy!\nCurrent version: " + AppInfo.getVersion() + "\nLatest version: " + latestVersion, AppInfo.name,
+                "You are running an outdated version of PresenceMan!\nCurrent version: " + AppInfo.getVersion() + "\nLatest version: " + latestVersion, AppInfo.name,
                 JOptionPane.WARNING_MESSAGE
         );
     }
@@ -74,7 +74,7 @@ public class UpdateCheckTask implements Runnable {
     private void showUpdateQuestion(final String name, final String downloadUrl, final String latestVersion) {
         int chosen = JOptionPane.showConfirmDialog(
                 App.ui,
-                "You are running an outdated version of ViaProxy!\nCurrent version: " + AppInfo.getVersion() + "\nLatest version: " + latestVersion + "\n\nDo you want to update?",
+                "You are running an outdated version of PresenceMan!\nCurrent version: " + AppInfo.getVersion() + "\nLatest version: " + latestVersion + "\n\nDo you want to update?",
                 AppInfo.name,
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
@@ -83,25 +83,25 @@ public class UpdateCheckTask implements Runnable {
             File f = new File(name);
             new DownloadPopup(App.ui, downloadUrl, f, () -> {
                 SwingUtilities.invokeLater(() -> {
-                    JOptionPane.showMessageDialog(App.ui, "Downloaded the latest version of ViaProxy!\nPress OK to restart.", "ViaProxy", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(App.ui, "Downloaded the latest version of PresenceMan!\nPress OK to restart.", "PresenceMan", JOptionPane.INFORMATION_MESSAGE);
                     try {
                         Runtime.getRuntime().exec(new String[]{System.getProperty("java.home") + "/bin/java", "-jar", f.getAbsolutePath()});
                         System.exit(0);
                     } catch (IOException e) {
-                        App.getInstance().getLogger().error("Could not start the new ViaProxy jar", e);
+                        App.getInstance().getLogger().error("Could not start the new PresenceMan jar", e);
                         App.ui.showException(e);
                     }
                 });
             }, t -> {
                 if (t != null) {
-                    App.getInstance().getLogger().error("Could not download the latest version of ViaProxy", t);
+                    App.getInstance().getLogger().error("Could not download the latest version of PresenceMan", t);
                     App.ui.showException(t);
                 }
             });
         }
     }
 
-    private boolean isViaProxyJar(final JsonObject root, final JsonObject assetObject) {
+    private boolean isPresenceManJar(final JsonObject root, final JsonObject assetObject) {
         return assetObject.get("name").getAsString().equals(root.get("name").getAsString() + ".jar");
     }
 

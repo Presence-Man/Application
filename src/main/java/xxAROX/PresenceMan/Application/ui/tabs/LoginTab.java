@@ -44,6 +44,8 @@ public class LoginTab extends AUITab {
         {
             stateButton = new JButton(info == null ? "Login" : "Logout");
             stateButton.setFocusPainted(false);
+            stateButton.setForeground(new Color(0, 0, 0));
+            stateButton.setFocusable(false);
             stateButton.setBackground(info == null ? new Color(59, 155, 57) : new Color(150, 56, 56));
             stateButton.addActionListener(event -> {
                 if (stateButton.getText().equalsIgnoreCase("Login")) login();
@@ -101,8 +103,6 @@ public class LoginTab extends AUITab {
 
     private void logout(){
         App.getInstance().onLogout();
-        App.getInstance().setXboxUserInfo(null);
-        CacheManager.storeXboxUserInfo(null);
         reloadStateButton();
     }
 
@@ -122,7 +122,7 @@ public class LoginTab extends AUITab {
                 } else {
                     SwingUtilities.invokeLater(() -> {
                         closePopup();
-                        App.getInstance().setXboxUserInfo(xboxUserInfo);
+                        App.getInstance().xboxUserInfo = xboxUserInfo;
                         CacheManager.storeXboxUserInfo(xboxUserInfo);
                         App.getInstance().onLogin();
                         reloadStateButton();

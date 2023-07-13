@@ -6,8 +6,6 @@ import de.jcm.discordgamesdk.GameSDKException;
 import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 
-import java.io.IOException;
-
 public class Bootstrap {
     @SneakyThrows
     public static void main(String[] args) {
@@ -19,7 +17,9 @@ public class Bootstrap {
                     params.setClientID(AppInfo.discord_application_id);
                     params.setFlags(CreateParams.getDefaultFlags());
                     try (Core core = new Core(params)) {
-                        App.setDiscordCore(core);
+                        core.activityManager().registerCommand("minecraft://");
+                        App.setDiscordCore(params, core);
+                        System.out.println("Discord is initialized!");
                         while (true) {
                             core.runCallbacks();
                             try {
@@ -32,7 +32,7 @@ public class Bootstrap {
                         e.printStackTrace();
                     }
                 }
-            } catch (IOException e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
         }).start();

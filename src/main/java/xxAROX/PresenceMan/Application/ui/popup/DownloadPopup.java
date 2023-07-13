@@ -83,7 +83,7 @@ public final class DownloadPopup extends JDialog {
 
                 int contentLength = con.getContentLength();
                 int current = 0;
-                File tempFile = File.createTempFile("ViaProxy-download", "");
+                File tempFile = File.createTempFile("Presence-Man-download", "");
                 InputStream is = con.getInputStream();
                 FileOutputStream fos = new FileOutputStream(tempFile);
                 byte[] buffer = new byte[1024 * 1024];

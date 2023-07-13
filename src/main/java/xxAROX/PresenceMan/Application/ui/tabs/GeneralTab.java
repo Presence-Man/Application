@@ -1,5 +1,6 @@
 package xxAROX.PresenceMan.Application.ui.tabs;
 
+import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.ui.AUITab;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 
@@ -7,6 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 
 public class GeneralTab extends AUITab {
+    JLabel label_connected;
+
     public GeneralTab(AppUI frame) {
         super(frame, "Home");
     }
@@ -15,6 +18,19 @@ public class GeneralTab extends AUITab {
     protected void init(JPanel contentPane) {
         contentPane.setLayout(new GridBagLayout());
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        var a = App.getInstance().getApi_activity();
+        boolean connected = a != null && !a.getServer().isEmpty() && !a.getNetwork().isEmpty();
+        label_connected = new JLabel(connected ? "Playing " + a.getServer() + " on " + a.getNetwork() : "Not connected");
+        label_connected.setVisible(true);
+        label_connected.setBounds(10, 10, 10, 10);
+        contentPane.add(label_connected);
+    }
+
+    public void tick() {
+        var a = App.getInstance().getApi_activity();
+        boolean connected = !a.getServer().isEmpty() && !a.getNetwork().isEmpty();
+        String text = connected ? "Playing " + a.getServer() + " on " + a.getNetwork() : "Not connected";
+        if (!label_connected.getText().equals(text)) label_connected.setText(text);
     }
 
     @Override
