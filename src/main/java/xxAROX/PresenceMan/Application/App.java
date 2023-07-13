@@ -11,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 import xxAROX.PresenceMan.Application.scheduler.WaterdogScheduler;
-import xxAROX.PresenceMan.Application.task.RestAPI;
 import xxAROX.PresenceMan.Application.task.UpdateCheckTask;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.utils.CacheManager;

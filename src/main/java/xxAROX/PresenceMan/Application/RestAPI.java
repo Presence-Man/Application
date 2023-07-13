@@ -1,11 +1,9 @@
-package xxAROX.PresenceMan.Application.task;
+package xxAROX.PresenceMan.Application;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import xxAROX.PresenceMan.Application.App;
-import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
 
 import java.io.BufferedReader;
