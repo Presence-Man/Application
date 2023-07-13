@@ -78,7 +78,10 @@ public final class App {
         ui.setReady();
         new Tray();
 
-        scheduler.scheduleRepeating(RestAPI::heartbeat, 20 * 5);
+        scheduler.scheduleRepeating(() -> {
+            App.ui.general_tab.tick();
+            RestAPI.heartbeat();
+        }, 20 * 5);
     }
 
     private void tickProcessor() {
