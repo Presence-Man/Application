@@ -19,8 +19,8 @@ public class GeneralTab extends AUITab {
         contentPane.setLayout(new GridBagLayout());
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         var a = App.getInstance().getApi_activity();
-        boolean connected = a != null && !a.getServer().isEmpty() && !a.getNetwork().isEmpty();
-        label_connected = new JLabel(connected ? "Playing " + a.getServer() + " on " + a.getNetwork() : "Not connected");
+        boolean connected = a != null && App.getInstance().getConnection() != null;
+        label_connected = new JLabel(connected ? App.getInstance().getConnection().getSafeName() : "Not connected");
         label_connected.setVisible(true);
         label_connected.setBounds(10, 10, 10, 10);
         contentPane.add(label_connected);
@@ -28,8 +28,8 @@ public class GeneralTab extends AUITab {
 
     public void tick() {
         var a = App.getInstance().getApi_activity();
-        boolean connected = !a.getServer().isEmpty() && !a.getNetwork().isEmpty();
-        String text = connected ? "Playing " + a.getServer() + " on " + a.getNetwork() : "Not connected";
+        boolean connected = a != null && App.getInstance().getConnection() != null;
+        var text = connected ? App.getInstance().getConnection().getSafeName() : "Not connected";
         if (!label_connected.getText().equals(text)) label_connected.setText(text);
     }
 

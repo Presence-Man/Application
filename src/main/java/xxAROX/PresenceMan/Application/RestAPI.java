@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
+import xxAROX.PresenceMan.Application.entity.Connection;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,17 +40,31 @@ public class RestAPI {
         body.addProperty("xuid", App.getInstance().xboxUserInfo.getXuid());
         body.addProperty("gamertag", App.getInstance().xboxUserInfo.getGamertag());
         if (App.getDiscord_core() != null) body.addProperty("client_id", App.getDiscord_core().userManager().getCurrentUser().getUserId());
+
         JsonObject response = request(Method.POST, "/user/heartbeat", new HashMap<>(), body);
-        if (response == null) return;
+        if (response == null) {
+            App.getInstance().connection = null;
+            return;
+        }
         APIActivity new_activity = null;
-        if (!response.has("api_activity") || response.get("api_activity").isJsonNull()) {
-            new_activity = APIActivity.none();
-        } else if (response.get("api_activity").isJsonObject()) {
-            new_activity = APIActivity.deserialize(response.get("api_activity").getAsJsonObject());
-        } else if (response.get("api_activity").getAsString().equalsIgnoreCase("clear")) {
+        if (!response.has("api_activity") || response.get("api_activity").isJsonNull()) new_activity = APIActivity.none();
+        else if (response.get("api_activity").isJsonObject()) new_activity = APIActivity.deserialize(response.get("api_activity").getAsJsonObject());
+        else if (response.get("api_activity").getAsString().equalsIgnoreCase("clear")) {
             App.clearActivity();
             return;
         }
+        if (!response.has("connection") || response.get("connection").isJsonNull() || !response.get("connection").isJsonObject()) {
+            App.getInstance().connection = null;
+            return;
+        }
+        JsonObject connection = response.get("connection").getAsJsonObject();
+        String server_ip = connection.get("ip").getAsString();
+        String network = connection.get("network").getAsString();
+        String server = connection.get("server").getAsString();
+
+        if (App.getInstance().connection != null) App.getInstance().connection.apply(server_ip, network, server);
+        else App.getInstance().connection = new Connection(server_ip, network, server);
+
         App.setActivity(new_activity);
     }
 
