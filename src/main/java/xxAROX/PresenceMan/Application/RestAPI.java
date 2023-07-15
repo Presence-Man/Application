@@ -38,7 +38,7 @@ public class RestAPI {
         JsonObject body = new JsonObject();
         body.addProperty("xuid", App.getInstance().xboxUserInfo.getXuid());
         body.addProperty("gamertag", App.getInstance().xboxUserInfo.getGamertag());
-        if (App.getDiscord_core() != null) body.addProperty("user_id", App.getDiscord_core().userManager().getCurrentUser().getUserId());
+        if (App.getDiscord_core() != null) body.addProperty("client_id", App.getDiscord_core().userManager().getCurrentUser().getUserId());
         JsonObject response = request(Method.POST, "/user/heartbeat", new HashMap<>(), body);
         if (response == null) return;
         APIActivity new_activity = null;
