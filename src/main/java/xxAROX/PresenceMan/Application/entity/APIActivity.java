@@ -58,6 +58,7 @@ public final class APIActivity {
     }
 
     public Activity toDiscord(CreateParams params) {
+        if (params == null) return null;
         params.setClientID(client_id);
         Activity activity = new Activity();
         activity.setType(type.toDiscordType());

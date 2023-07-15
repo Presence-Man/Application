@@ -171,9 +171,14 @@ public final class App {
                     .replace("{gamertag}", App.getInstance().xboxUserInfo.getGamertag())
             );
         }
-        var activity = api_activity.toDiscord(discord_create_params);
-        activity.timestamps().setStart(Instant.ofEpochMilli(created));
-        if (discord_core != null) discord_core.activityManager().updateActivity(activity);
+        if (discord_core != null && discord_create_params != null) {
+            var activity = api_activity.toDiscord(discord_create_params);
+            activity.timestamps().setStart(Instant.ofEpochMilli(created));
+            discord_core.activityManager().updateActivity(activity);
+            System.out.println("Updated discord activity!");
+        } else {
+            System.out.println("Discord is not initialized!");
+        }
     }
 
     public static void clearActivity() {

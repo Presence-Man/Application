@@ -18,7 +18,9 @@ public class Bootstrap {
                     params.setFlags(CreateParams.getDefaultFlags());
                     try (Core core = new Core(params)) {
                         core.activityManager().registerCommand("minecraft://");
-                        App.setDiscordCore(params, core);
+                        synchronized (params) {
+                            App.setDiscordCore(params, core);
+                        }
                         System.out.println("Discord is initialized!");
                         while (true) {
                             core.runCallbacks();

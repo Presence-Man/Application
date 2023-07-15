@@ -34,12 +34,12 @@ public class RestAPI {
     }
 
     public static void heartbeat(){
-        if (App.getDiscord_core() == null) return;
+        if (App.getDiscord_core() == null || !App.getDiscord_core().isOpen()) return;
         if (App.getInstance().xboxUserInfo == null) return;
         JsonObject body = new JsonObject();
         body.addProperty("xuid", App.getInstance().xboxUserInfo.getXuid());
         body.addProperty("gamertag", App.getInstance().xboxUserInfo.getGamertag());
-        if (App.getDiscord_core() != null) body.addProperty("client_id", App.getDiscord_core().userManager().getCurrentUser().getUserId());
+        body.addProperty("user_id", App.getDiscord_core().userManager().getCurrentUser().getUserId());
 
         JsonObject response = request(Method.POST, "/user/heartbeat", new HashMap<>(), body);
         if (response == null) {
@@ -53,10 +53,6 @@ public class RestAPI {
             App.clearActivity();
             return;
         }
-        if (!response.has("connection") || response.get("connection").isJsonNull() || !response.get("connection").isJsonObject()) {
-            App.getInstance().connection = null;
-            return;
-        }
         if (response.has("connection") && !response.get("connection").isJsonNull() && response.get("connection").isJsonObject()) {
             JsonObject connection = response.get("connection").getAsJsonObject();
             String server_ip = connection.get("ip").getAsString();
@@ -67,7 +63,11 @@ public class RestAPI {
             else App.getInstance().connection = new Connection(server_ip, network, server);
         } else App.getInstance().connection = null;
 
-        App.setActivity(new_activity);
+        if (response.has("success") && response.get("success").isJsonNull() || !response.get("success").getAsBoolean())
+            System.out.println("Error on heartbeat: " + response.get("status").getAsString() + ": " + response.get("message").getAsString());
+        else
+            App.setActivity(new_activity);
+
     }
 
 
