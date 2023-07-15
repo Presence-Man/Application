@@ -57,13 +57,15 @@ public class RestAPI {
             App.getInstance().connection = null;
             return;
         }
-        JsonObject connection = response.get("connection").getAsJsonObject();
-        String server_ip = connection.get("ip").getAsString();
-        String network = connection.get("network").getAsString();
-        String server = connection.get("server").getAsString();
+        if (response.has("connection") && !response.get("connection").isJsonNull() && response.get("connection").isJsonObject()) {
+            JsonObject connection = response.get("connection").getAsJsonObject();
+            String server_ip = connection.get("ip").getAsString();
+            String network = connection.get("network").getAsString();
+            String server = connection.get("server").getAsString();
 
-        if (App.getInstance().connection != null) App.getInstance().connection.apply(server_ip, network, server);
-        else App.getInstance().connection = new Connection(server_ip, network, server);
+            if (App.getInstance().connection != null) App.getInstance().connection.apply(server_ip, network, server);
+            else App.getInstance().connection = new Connection(server_ip, network, server);
+        } else App.getInstance().connection = null;
 
         App.setActivity(new_activity);
     }
