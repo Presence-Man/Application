@@ -18,6 +18,7 @@ import xxAROX.PresenceMan.Application.utils.ThreadFactoryBuilder;
 import xxAROX.PresenceMan.Application.utils.Tray;
 
 import javax.swing.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -30,6 +31,7 @@ import java.util.function.Consumer;
 @Getter
 @ToString
 public final class App {
+    @Getter static final long created = Instant.now().toEpochMilli();
     @Getter
     private static CreateParams discord_create_params;
     @Getter
@@ -152,6 +154,7 @@ public final class App {
     public static void setActivity(APIActivity api_activity) {
         if (api_activity == null) api_activity = APIActivity.none();
         if (Objects.equals(getInstance().api_activity, api_activity)) return;
+        api_activity.setStart(created);
         getInstance().api_activity = api_activity;
         if (discord_core != null) discord_core.activityManager().updateActivity(api_activity.toDiscord(discord_create_params));
     }
