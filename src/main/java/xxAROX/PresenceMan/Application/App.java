@@ -157,9 +157,20 @@ public final class App {
     public static void setActivity(APIActivity api_activity) {
         if (api_activity == null) api_activity = APIActivity.none();
         if (Objects.equals(getInstance().api_activity, api_activity)) return;
-        api_activity.setStart(created);
         getInstance().api_activity = api_activity;
-        if (discord_core != null) discord_core.activityManager().updateActivity(api_activity.toDiscord(discord_create_params));
+        if (App.getInstance().xboxUserInfo != null) {
+            api_activity.setState(api_activity.getState()
+                    .replace("{xuid}", App.getInstance().xboxUserInfo.getXuid())
+                    .replace("{gamertag}", App.getInstance().xboxUserInfo.getGamertag())
+            );
+            api_activity.setDetails(api_activity.getDetails()
+                    .replace("{xuid}", App.getInstance().xboxUserInfo.getXuid())
+                    .replace("{gamertag}", App.getInstance().xboxUserInfo.getGamertag())
+            );
+        }
+        var activity = api_activity.toDiscord(discord_create_params);
+        activity.timestamps().setStart(Instant.ofEpochMilli(created));
+        if (discord_core != null) discord_core.activityManager().updateActivity(activity);
     }
 
     public static void clearActivity() {

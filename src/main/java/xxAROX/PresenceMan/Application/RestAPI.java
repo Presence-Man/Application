@@ -44,7 +44,6 @@ public class RestAPI {
         APIActivity new_activity = null;
         if (!response.has("api_activity") || response.get("api_activity").isJsonNull()) {
             new_activity = APIActivity.none();
-            if (App.getInstance().getApi_activity() != null) new_activity.setStart(App.getInstance().getApi_activity().getStart());
         } else if (response.get("api_activity").isJsonObject()) {
             new_activity = APIActivity.deserialize(response.get("api_activity").getAsJsonObject());
         } else if (response.get("api_activity").getAsString().equalsIgnoreCase("clear")) {

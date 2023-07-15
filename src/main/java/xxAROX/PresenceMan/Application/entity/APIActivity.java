@@ -15,9 +15,8 @@ import java.time.Instant;
 public final class APIActivity {
     private long client_id = AppInfo.discord_application_id;
     private @NonNull ActivityType type = ActivityType.PLAYING;
-    private String network;
-    private String server;
-    private Long start;
+    private String state;
+    private String details;
     private Long end;
     private String large_icon_key;
     private String large_icon_text;
@@ -30,9 +29,8 @@ public final class APIActivity {
         JsonObject json = new JsonObject();
         json.addProperty("client_id", client_id);
         json.addProperty("type", type.name().toUpperCase());
-        json.addProperty("network", network);
-        json.addProperty("server", server);
-        json.addProperty("start", start);
+        json.addProperty("state", state);
+        json.addProperty("details", details);
         json.addProperty("end", end);
         json.addProperty("large_icon_key", large_icon_key);
         json.addProperty("large_icon_text", large_icon_text);
@@ -47,9 +45,8 @@ public final class APIActivity {
         APIActivity activity = new APIActivity();
         activity.client_id = json.has("client_id") ? json.get("client_id").getAsLong() : AppInfo.discord_application_id;
         activity.type = json.has("type") ? ActivityType.valueOf(json.get("type").getAsString()) : ActivityType.PLAYING;
-        activity.network = json.has("network") ? json.get("network").getAsString() : null;
-        activity.server = json.has("server") ? json.get("server").getAsString() : null;
-        activity.start = json.has("start") ? json.get("start").getAsLong() : null;
+        activity.state = json.has("state") ? json.get("state").getAsString() : null;
+        activity.details = json.has("details") ? json.get("details").getAsString() : null;
         activity.end = json.has("end") ? json.get("end").getAsLong() : null;
         activity.large_icon_key = json.has("large_icon_key") ? json.get("large_icon_key").getAsString() : null;
         activity.large_icon_text = json.has("large_icon_text") ? json.get("large_icon_text").getAsString() : null;
@@ -64,9 +61,8 @@ public final class APIActivity {
         params.setClientID(client_id);
         Activity activity = new Activity();
         activity.setType(type.toDiscordType());
-        activity.setState(network != null ? network : "");
-        activity.setDetails(server != null ? server : "");
-        if (start != null) activity.timestamps().setStart(Instant.ofEpochMilli(start));
+        activity.setState(state != null ? state : "");
+        activity.setDetails(details != null ? details : "");
         if (end != null) activity.timestamps().setEnd(Instant.ofEpochMilli(end));
         if (large_icon_key != null) activity.assets().setLargeImage(large_icon_key);
         if (large_icon_text != null) activity.assets().setLargeText(large_icon_text);
@@ -106,10 +102,9 @@ public final class APIActivity {
 
     public static APIActivity none() {
         var activity = new APIActivity();
-        activity.setNetwork("");
-        activity.setServer(App.getInstance().xboxUserInfo == null ? "" : "Playing as " + App.getInstance().xboxUserInfo.getGamertag());
+        activity.setState("");
+        activity.setDetails(App.getInstance().xboxUserInfo == null ? "" : "Playing as " + App.getInstance().xboxUserInfo.getGamertag());
         activity.setLarge_icon_key("launcher");
-        activity.setStart(Instant.now().toEpochMilli());
         return activity;
     }
 }
