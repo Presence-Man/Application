@@ -9,6 +9,7 @@ import java.util.Objects;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Deprecated
 public final class Connection {
     private String ip;
     private String network;

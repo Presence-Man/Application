@@ -4,7 +4,7 @@ import java.util.StringJoiner;
 
 public final class AppInfo {
     public final static String name = "Presence-Man";
-    public final static int[] version = new int[]{ 0,1,1 };
+    public final static int[] version = new int[]{ 0,1,2 };
     public static String icon = "icon.png";
     public static long discord_application_id = 1127704366565052526L;
 
@@ -20,11 +20,5 @@ public final class AppInfo {
 
     public static void main(String[] args) {
         System.out.println(getVersion());
-    }
-
-    public final static class Backend {
-        public final static String protocol = "http://";
-        public final static String address = "127.0.0.1";
-        public final static int port = 1515;
     }
 }

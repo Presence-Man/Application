@@ -23,7 +23,6 @@ import javax.swing.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -42,7 +41,10 @@ public final class App {
     private static final List<Consumer<Core>> discordInitHandlers = new ArrayList<>();
 
     private static App instance;
+    @Deprecated
     public Connection connection;
+    public String network = null;
+    public String server = null;
 
     public static App getInstance() {
         return instance;
@@ -156,7 +158,7 @@ public final class App {
 
     public static void setActivity(APIActivity api_activity) {
         if (api_activity == null) api_activity = APIActivity.none();
-        if (Objects.equals(getInstance().api_activity, api_activity)) return;
+        if (api_activity.equals(getInstance().api_activity)) return;
         getInstance().api_activity = api_activity;
         if (App.getInstance().xboxUserInfo != null) {
             api_activity.setState(api_activity.getState()

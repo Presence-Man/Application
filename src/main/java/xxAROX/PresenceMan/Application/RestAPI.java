@@ -2,11 +2,12 @@ package xxAROX.PresenceMan.Application;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import de.jcm.discordgamesdk.GameSDKException;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
-import xxAROX.PresenceMan.Application.entity.Connection;
 import xxAROX.PresenceMan.Application.entity.Gateway;
+import xxAROX.PresenceMan.Application.task.ReconnectingTask;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,33 +21,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RestAPI {
-    private static String ip;
-    private static volatile boolean broken = false;
-    private static volatile boolean broken_sent = false;
-
-    static {
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(new URL("http://checkip.amazonaws.com").openStream()));
-            ip = in.readLine(); //you get the IP as a String
-        } catch (IOException e) {
-            App.ui.showError("This app doesn't work in offline mode!");
-            System.exit(0);
-        }
+    public static class Endpoints {
+        public static String heartbeat = "/api/v1/users/heartbeat";
     }
-
     public static void heartbeat(){
         if (App.getDiscord_core() == null || !App.getDiscord_core().isOpen()) return;
+        try {App.getDiscord_core().userManager().getCurrentUser();} catch (GameSDKException ignore) {return;}
         if (App.getInstance().xboxUserInfo == null) return;
         JsonObject body = new JsonObject();
         body.addProperty("xuid", App.getInstance().xboxUserInfo.getXuid());
         body.addProperty("gamertag", App.getInstance().xboxUserInfo.getGamertag());
-        body.addProperty("user_id", App.getDiscord_core().userManager().getCurrentUser().getUserId());
+        body.addProperty("user_id", String.valueOf(App.getDiscord_core().userManager().getCurrentUser().getUserId()));
 
-        JsonObject response = request(Method.POST, "/user/heartbeat", new HashMap<>(), body);
+        JsonObject response = request(Method.POST, RestAPI.Endpoints.heartbeat, new HashMap<>(), body);
         if (response == null) {
-            App.getInstance().connection = null;
+            App.getInstance().network = null;
+            App.getInstance().server = null;
             return;
         }
+        App.getInstance().network = response.has("network") && !response.get("network").isJsonNull() ? response.get("network").getAsString() : null;
+        App.getInstance().server = response.has("server") && !response.get("server").isJsonNull() ? response.get("server").getAsString() : null;
+
         APIActivity new_activity = null;
         if (!response.has("api_activity") || response.get("api_activity").isJsonNull()) new_activity = APIActivity.none();
         else if (response.get("api_activity").isJsonObject()) new_activity = APIActivity.deserialize(response.get("api_activity").getAsJsonObject());
@@ -54,21 +49,10 @@ public class RestAPI {
             App.clearActivity();
             return;
         }
-        if (response.has("connection") && !response.get("connection").isJsonNull() && response.get("connection").isJsonObject()) {
-            JsonObject connection = response.get("connection").getAsJsonObject();
-            String server_ip = connection.get("ip").getAsString();
-            String network = connection.get("network").getAsString();
-            String server = connection.get("server").getAsString();
-
-            if (App.getInstance().connection != null) App.getInstance().connection.apply(server_ip, network, server);
-            else App.getInstance().connection = new Connection(server_ip, network, server);
-        } else App.getInstance().connection = null;
 
         if (response.has("success") && response.get("success").isJsonNull() || !response.get("success").getAsBoolean())
             System.out.println("Error on heartbeat: " + response.get("status").getAsString() + ": " + response.get("message").getAsString());
-        else
-            App.setActivity(new_activity);
-
+        else App.setActivity(new_activity);
     }
 
 
@@ -85,9 +69,10 @@ public class RestAPI {
         return request(method, endpoint, query, body, new HashMap<>());
     }
     private static JsonObject request(@NonNull Method method, @NonNull String endpoint, @NonNull Map<String, String> query, @NonNull JsonObject body, @NonNull Map<String, String> headers) {
-        if (broken && !broken_sent) {
-            broken_sent = true;
+        if (Gateway.broken && !Gateway.broken_popup) {
+            Gateway.broken_popup = true;
             App.ui.showError("Backend server is unreachable, please try again later!\n<html><i>If this happens often please contact @xx_arox on Discord!</i></html>");
+            ReconnectingTask.activate();
             return null;
         }
         try {
@@ -119,7 +104,7 @@ public class RestAPI {
             con.disconnect();
             return new Gson().fromJson(content.toString(), JsonObject.class);
         } catch (IOException e) {
-            if (!broken) broken = true;
+            if (!Gateway.broken) Gateway.broken = true;
         }
         return null;
     }
