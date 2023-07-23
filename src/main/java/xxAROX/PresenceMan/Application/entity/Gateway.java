@@ -8,7 +8,6 @@ public class Gateway {
     public static boolean broken_popup = false;
 
     public static String getUrl() {
-        if (broken) throw new IllegalArgumentException("Backend is not reachable");
         return protocol + address + ":" + port;
     }
 }
