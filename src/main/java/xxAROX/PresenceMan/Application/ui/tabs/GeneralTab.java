@@ -20,10 +20,10 @@ public class GeneralTab extends AUITab {
         contentPane.setLayout(new GridBagLayout());
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         var a = App.getInstance().getApi_activity();
-        boolean connected = a != null && App.getInstance().getConnection() != null;
-        label_connected = new JLabel(connected ? "Connected to " + App.getInstance().getConnection().getNetwork() : NOT_CONNECTED);
+        boolean connected = a != null && App.getInstance().getNetwork() != null && App.getInstance().getServer() != null;
+        label_connected = new JLabel(connected ? "Connected to " + App.getInstance().getServer() + " on " + App.getInstance().getNetwork() : NOT_CONNECTED);
         label_connected.setVisible(true);
-        label_connected.setBounds(10, 10, 17, 17);
+        label_connected.setBounds(10, 10, 20, 20);
         contentPane.add(label_connected);
     }
 

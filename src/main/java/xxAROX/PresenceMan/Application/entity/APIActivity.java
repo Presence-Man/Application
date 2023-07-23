@@ -8,10 +8,12 @@ import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 
 import java.time.Instant;
+import java.util.Objects;
 
 @Getter @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public final class APIActivity {
     private long client_id = AppInfo.discord_application_id;
     private @NonNull ActivityType type = ActivityType.PLAYING;
@@ -72,6 +74,30 @@ public final class APIActivity {
         if (party_player_count != null) activity.party().size().setCurrentSize(party_player_count);
         if (party_max_player_count != null) activity.party().size().setMaxSize(party_max_player_count);
         return activity;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        APIActivity activity = (APIActivity) o;
+        return getClient_id() == activity.getClient_id()
+                && getType() == activity.getType()
+                && Objects.equals(getState(), activity.getState())
+                && Objects.equals(getDetails(), activity.getDetails())
+                && Objects.equals(getEnd(), activity.getEnd())
+                && Objects.equals(getLarge_icon_key(), activity.getLarge_icon_key())
+                && Objects.equals(getLarge_icon_text(), activity.getLarge_icon_text())
+                && Objects.equals(getSmall_icon_key(), activity.getSmall_icon_key())
+                && Objects.equals(getSmall_icon_text(), activity.getSmall_icon_text())
+                && Objects.equals(getParty_max_player_count(), activity.getParty_max_player_count())
+                && Objects.equals(getParty_player_count(), activity.getParty_player_count())
+        ;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getClient_id(), getType(), getState(), getDetails(), getEnd(), getLarge_icon_key(), getLarge_icon_text(), getSmall_icon_key(), getSmall_icon_text(), getParty_max_player_count(), getParty_player_count());
     }
 
     @AllArgsConstructor
