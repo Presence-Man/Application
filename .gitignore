@@ -1,4 +1,4 @@
 target/
 out/
 
-presence-man-cache.json
+.presence-man-cache.json

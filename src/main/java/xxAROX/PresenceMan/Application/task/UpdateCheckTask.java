@@ -66,7 +66,7 @@ public class UpdateCheckTask implements Runnable {
     private void showUpdateWarning(final String latestVersion) {
         JOptionPane.showMessageDialog(
                 App.ui,
-                "You are running an outdated version of PresenceMan!\nCurrent version: " + AppInfo.getVersion() + "\nLatest version: " + latestVersion, AppInfo.name,
+                "You are running an outdated version of " + AppInfo.name + "!\nCurrent version: " + AppInfo.getVersion() + "\nLatest version: " + latestVersion, AppInfo.name,
                 JOptionPane.WARNING_MESSAGE
         );
     }

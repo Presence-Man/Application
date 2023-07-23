@@ -17,7 +17,6 @@ public class Bootstrap {
                     params.setClientID(AppInfo.discord_application_id);
                     params.setFlags(CreateParams.getDefaultFlags());
                     try (Core core = new Core(params)) {
-                        core.activityManager().registerCommand("minecraft://");
                         synchronized (params) {
                             App.setDiscordCore(params, core);
                         }

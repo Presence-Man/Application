@@ -12,6 +12,7 @@ import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.Connection;
 import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 import xxAROX.PresenceMan.Application.scheduler.WaterdogScheduler;
+import xxAROX.PresenceMan.Application.task.FetchGatewayInformationTask;
 import xxAROX.PresenceMan.Application.task.UpdateCheckTask;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.utils.CacheManager;
@@ -72,6 +73,7 @@ public final class App {
 
         SwingUtilities.invokeLater(() -> ui = new AppUI());
         scheduler.scheduleAsync(new UpdateCheckTask());
+        App.getInstance().getScheduler().scheduleAsync(new FetchGatewayInformationTask());
 
         xboxUserInfo = CacheManager.loadXboxUserInfo();
         if (xboxUserInfo != null) discordInitHandlers.add(core -> App.getInstance().onLogin());
@@ -82,11 +84,6 @@ public final class App {
         }
         ui.setReady();
         new Tray();
-
-        scheduler.scheduleRepeating(() -> {
-            App.ui.general_tab.tick();
-            RestAPI.heartbeat();
-        }, 20 * 5);
     }
 
     private void tickProcessor() {

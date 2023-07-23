@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.Connection;
+import xxAROX.PresenceMan.Application.entity.Gateway;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -90,7 +91,7 @@ public class RestAPI {
             return null;
         }
         try {
-            URL url = new URL(AppInfo.Backend.protocol + AppInfo.Backend.address + ":" + AppInfo.Backend.port + endpoint + getParamsString(query));
+            URL url = new URL(Gateway.getUrl() + endpoint + getParamsString(query));
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod(method.toString());
             con.setRequestProperty("Content-Type", "application/json");

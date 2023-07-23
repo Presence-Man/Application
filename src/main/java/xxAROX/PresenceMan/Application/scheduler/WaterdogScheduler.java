@@ -26,8 +26,7 @@ public class WaterdogScheduler {
         instance = this;
 
         ThreadFactoryBuilder builder = ThreadFactoryBuilder.builder().format("Scheduler Executor - #%d").build();
-        int idleThreads = Runtime.getRuntime().availableProcessors();
-        this.threadedExecutor = new ThreadPoolExecutor(idleThreads, Integer.MAX_VALUE, 60, TimeUnit.SECONDS, new SynchronousQueue<>(), builder);
+        this.threadedExecutor = new ThreadPoolExecutor(1, Integer.MAX_VALUE, 60, TimeUnit.SECONDS, new SynchronousQueue<>(), builder);
     }
 
     public static WaterdogScheduler getInstance() {

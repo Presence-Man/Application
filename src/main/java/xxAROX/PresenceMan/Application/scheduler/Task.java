@@ -1,14 +1,16 @@
 package xxAROX.PresenceMan.Application.scheduler;
 
 
+import lombok.SneakyThrows;
 import xxAROX.PresenceMan.Application.App;
 
 import javax.swing.*;
+import java.io.IOException;
 
 public abstract class Task implements Runnable {
     private TaskHandler<Task> handler;
 
-    public abstract void onRun(int currentTick);
+    public abstract void onRun(int currentTick) throws IOException;
 
     public abstract void onCancel();
 
@@ -16,6 +18,7 @@ public abstract class Task implements Runnable {
         if (App.ui != null) SwingUtilities.invokeLater(() -> App.ui.showException(error));
     }
 
+    @SneakyThrows
     @Override
     public void run() {
         this.onRun(this.handler.getLastRunTick());

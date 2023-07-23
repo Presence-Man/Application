@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public final class CacheManager {
     private static final Gson GSON = new Gson();
-    private static final File CACHE_FILE = new File("presence-man-cache.json");
+    private static final File CACHE_FILE = new File(".presence-man-cache.json");
     private static JsonObject json = new JsonObject();
 
     static {
