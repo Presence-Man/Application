@@ -29,8 +29,8 @@ public class GeneralTab extends AUITab {
 
     public void tick() {
         var a = App.getInstance().getApi_activity();
-        boolean connected = a != null && App.getInstance().getConnection() != null;
-        var text = connected ? "Connected to " + App.getInstance().getConnection().getNetwork() : NOT_CONNECTED;
+        boolean connected = a != null && App.getInstance().getNetwork() != null && App.getInstance().getServer() != null;
+        var text = connected ? "Connected to " + App.getInstance().getServer() + " on " + App.getInstance().getNetwork() : NOT_CONNECTED;
         if (!label_connected.getText().equals(text)) label_connected.setText(text);
     }
 

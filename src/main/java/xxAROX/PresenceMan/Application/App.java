@@ -9,7 +9,6 @@ import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
-import xxAROX.PresenceMan.Application.entity.Connection;
 import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 import xxAROX.PresenceMan.Application.scheduler.WaterdogScheduler;
 import xxAROX.PresenceMan.Application.task.FetchGatewayInformationTask;
@@ -41,8 +40,6 @@ public final class App {
     private static final List<Consumer<Core>> discordInitHandlers = new ArrayList<>();
 
     private static App instance;
-    @Deprecated
-    public Connection connection;
     public String network = null;
     public String server = null;
 
