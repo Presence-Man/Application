@@ -45,17 +45,17 @@ public final class APIActivity {
 
     public static APIActivity deserialize(JsonObject json){
         APIActivity activity = new APIActivity();
-        activity.client_id = json.has("client_id") ? json.get("client_id").getAsLong() : AppInfo.discord_application_id;
-        activity.type = json.has("type") ? ActivityType.valueOf(json.get("type").getAsString()) : ActivityType.PLAYING;
-        activity.state = json.has("state") ? json.get("state").getAsString() : null;
-        activity.details = json.has("details") ? json.get("details").getAsString() : null;
-        activity.end = json.has("end") ? json.get("end").getAsLong() : null;
-        activity.large_icon_key = json.has("large_icon_key") ? json.get("large_icon_key").getAsString() : null;
-        activity.large_icon_text = json.has("large_icon_text") ? json.get("large_icon_text").getAsString() : null;
-        activity.small_icon_key = json.has("small_icon_key") ? json.get("small_icon_key").getAsString() : null;
-        activity.small_icon_text = json.has("small_icon_text") ? json.get("small_icon_text").getAsString() : null;
-        activity.party_max_player_count = json.has("party_max_player_count") ? json.get("party_max_player_count").getAsInt() : null;
-        activity.party_player_count = json.has("party_player_count") ? json.get("party_player_count").getAsInt() : null;
+        activity.client_id = json.has("client_id") && !json.get("client_id").isJsonNull() ? json.get("client_id").getAsLong() : AppInfo.discord_application_id;
+        activity.type = json.has("type") && !json.get("type").isJsonNull() ? ActivityType.valueOf(json.get("type").getAsString()) : ActivityType.PLAYING;
+        activity.state = json.has("state") && !json.get("state").isJsonNull() ? json.get("state").getAsString() : null;
+        activity.details = json.has("details") && !json.get("details").isJsonNull() ? json.get("details").getAsString() : null;
+        activity.end = json.has("end") && !json.get("end").isJsonNull() ? json.get("end").getAsLong() : null;
+        activity.large_icon_key = json.has("large_icon_key") && !json.get("large_icon_key").isJsonNull() ? json.get("large_icon_key").getAsString() : null;
+        activity.large_icon_text = json.has("large_icon_text") && !json.get("large_icon_text").isJsonNull() ? json.get("large_icon_text").getAsString() : null;
+        activity.small_icon_key = json.has("small_icon_key") && !json.get("small_icon_key").isJsonNull() ? json.get("small_icon_key").getAsString() : null;
+        activity.small_icon_text = json.has("small_icon_text") && !json.get("small_icon_text").isJsonNull() ? json.get("small_icon_text").getAsString() : null;
+        activity.party_max_player_count = json.has("party_max_player_count") && !json.get("party_max_player_count").isJsonNull() ? json.get("party_max_player_count").getAsInt() : null;
+        activity.party_player_count = json.has("party_player_count") && !json.get("party_player_count").isJsonNull() ? json.get("party_player_count").getAsInt() : null;
         return activity;
     }
 

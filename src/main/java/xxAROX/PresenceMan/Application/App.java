@@ -158,11 +158,15 @@ public final class App {
         if (api_activity.equals(getInstance().api_activity)) return;
         getInstance().api_activity = api_activity;
         if (App.getInstance().xboxUserInfo != null) {
-            api_activity.setState(api_activity.getState()
+            if (api_activity.getState() != null) api_activity.setState(api_activity.getState()
+                    .replace("{network}", App.getInstance().network == null ? "null" : App.getInstance().network)
+                    .replace("{server}", App.getInstance().server == null ? "null" : App.getInstance().server)
                     .replace("{xuid}", App.getInstance().xboxUserInfo.getXuid())
                     .replace("{gamertag}", App.getInstance().xboxUserInfo.getGamertag())
             );
-            api_activity.setDetails(api_activity.getDetails()
+            if (api_activity.getDetails() != null) api_activity.setDetails(api_activity.getDetails()
+                    .replace("{network}", App.getInstance().network == null ? "null" : App.getInstance().network)
+                    .replace("{server}", App.getInstance().server == null ? "null" : App.getInstance().server)
                     .replace("{xuid}", App.getInstance().xboxUserInfo.getXuid())
                     .replace("{gamertag}", App.getInstance().xboxUserInfo.getGamertag())
             );

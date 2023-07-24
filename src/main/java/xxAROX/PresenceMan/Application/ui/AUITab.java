@@ -9,7 +9,7 @@ import javax.swing.*;
 @ToString
 public abstract class AUITab {
     protected final AppUI frame;
-    private final String name;
+    protected final String name;
     private final String tip;
     private final JPanel contentPane;
 

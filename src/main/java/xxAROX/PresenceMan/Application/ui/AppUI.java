@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class AppUI extends JFrame {
-    private final JTabbedPane contentPane = new JTabbedPane();
+    public final JTabbedPane contentPane = new JTabbedPane();
     private final List<AUITab> tabs = new ArrayList<>();
     private final Tray tray = new Tray();
 

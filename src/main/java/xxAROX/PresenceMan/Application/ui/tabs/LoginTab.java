@@ -18,12 +18,15 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class LoginTab extends AUITab {
+    private static final String LOGGED_IN = "XBOX account";
+    private static final String LOGGED_OUT = "Link XBOX account";
+
     private JButton stateButton;
     private LoginPopup login_popup;
     private Thread addThread;
 
     public LoginTab(AppUI frame) {
-        super(frame, "Link XBOX account");
+        super(frame, App.getInstance().xboxUserInfo == null ? LOGGED_OUT : LOGGED_IN);
     }
 
     private void reloadStateButton(){
@@ -32,6 +35,7 @@ public class LoginTab extends AUITab {
             stateButton.setToolTipText(info == null ? null : "Logged in as " + info.getGamertag());
             stateButton.setText(info == null ? "Login" : "Logout");
             stateButton.setBackground(info == null ? new Color(59, 155, 57) : new Color(150, 56, 56));
+            App.ui.contentPane.setTitleAt(App.ui.contentPane.indexOfTab(name), App.getInstance().xboxUserInfo == null ? LOGGED_OUT : LOGGED_IN);
         }
     }
 

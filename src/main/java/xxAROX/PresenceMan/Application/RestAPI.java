@@ -55,8 +55,6 @@ public class RestAPI {
         if (new_activity == null) new_activity = APIActivity.none();
         if (new_activity.equals(App.getInstance().getApi_activity())) return;
 
-        System.out.println(new_activity);
-
         if (response.has("success") && response.get("success").isJsonNull() || !response.get("success").getAsBoolean())
             System.out.println("Error on heartbeat: " + response.get("status").getAsString() + ": " + response.get("message").getAsString());
         else App.setActivity(new_activity);
