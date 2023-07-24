@@ -42,13 +42,20 @@ public class RestAPI {
         App.getInstance().network = response.has("network") && !response.get("network").isJsonNull() ? response.get("network").getAsString() : null;
         App.getInstance().server = response.has("server") && !response.get("server").isJsonNull() ? response.get("server").getAsString() : null;
 
-        APIActivity new_activity = null;
-        if (!response.has("api_activity") || response.get("api_activity").isJsonNull()) new_activity = APIActivity.none();
-        else if (response.get("api_activity").isJsonObject()) new_activity = APIActivity.deserialize(response.get("api_activity").getAsJsonObject());
+        APIActivity new_activity;
+        if (!response.has("api_activity") || response.get("api_activity").isJsonNull()) new_activity = null;
+        else if (response.get("api_activity").isJsonObject()) {
+            new_activity = APIActivity.deserialize(response.get("api_activity").getAsJsonObject());
+            System.out.println(APIActivity.deserialize(response.get("api_activity").getAsJsonObject()));
+        }
         else if (response.get("api_activity").getAsString().equalsIgnoreCase("clear")) {
             App.clearActivity();
             return;
-        }
+        } else new_activity = null;
+        if (new_activity == null) new_activity = APIActivity.none();
+        if (new_activity.equals(App.getInstance().getApi_activity())) return;
+
+        System.out.println(new_activity);
 
         if (response.has("success") && response.get("success").isJsonNull() || !response.get("success").getAsBoolean())
             System.out.println("Error on heartbeat: " + response.get("status").getAsString() + ": " + response.get("message").getAsString());
