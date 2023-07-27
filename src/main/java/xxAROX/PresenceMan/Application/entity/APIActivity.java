@@ -106,7 +106,6 @@ public final class APIActivity {
         STREAMING("STREAMING"),
         LISTENING("LISTENING"),
         UNUSED("UNUSED"),
-        CUSTOM("CUSTOM"),
         COMPETING("COMPETING")
         ;
         private String raw;
@@ -120,7 +119,6 @@ public final class APIActivity {
                 case "STREAMING" -> de.jcm.discordgamesdk.activity.ActivityType.STREAMING;
                 case "LISTENING" -> de.jcm.discordgamesdk.activity.ActivityType.LISTENING;
                 case "UNUSED" -> de.jcm.discordgamesdk.activity.ActivityType.UNUSED;
-                case "CUSTOM" -> de.jcm.discordgamesdk.activity.ActivityType.CUSTOM;
                 case "COMPETING" -> de.jcm.discordgamesdk.activity.ActivityType.COMPETING;
                 default -> de.jcm.discordgamesdk.activity.ActivityType.PLAYING;
             };
@@ -131,7 +129,9 @@ public final class APIActivity {
         var activity = new APIActivity();
         activity.setState("");
         activity.setDetails(App.getInstance().xboxUserInfo == null ? "" : "Playing as " + App.getInstance().xboxUserInfo.getGamertag());
-        activity.setLarge_icon_key("launcher");
+        activity.setLarge_icon_key("bedrock");
+        activity.setSmall_icon_text(App.getInstance().xboxUserInfo == null ? ""  : "Playing as " + App.getInstance().xboxUserInfo.getGamertag());
+        activity.setSmall_icon_key(App.getInstance().xboxUserInfo == null ? ""  : Gateway.getUrl() + "/api/v1/heads/" + App.getInstance().xboxUserInfo.getGamertag());
         return activity;
     }
 }
