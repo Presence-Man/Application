@@ -131,7 +131,7 @@ public final class APIActivity {
         activity.setDetails(App.getInstance().xboxUserInfo == null ? "" : "Playing as " + App.getInstance().xboxUserInfo.getGamertag());
         activity.setLarge_icon_key("bedrock");
         activity.setSmall_icon_text(App.getInstance().xboxUserInfo == null ? ""  : "Playing as " + App.getInstance().xboxUserInfo.getGamertag());
-        activity.setSmall_icon_key(App.getInstance().xboxUserInfo == null ? ""  : Gateway.getUrl() + "/api/v1/heads/" + App.getInstance().xboxUserInfo.getGamertag());
+        activity.setSmall_icon_key(App.getInstance().xboxUserInfo == null ? ""  : Gateway.getUrl() + "/api/v1/heads/" + App.getInstance().xboxUserInfo.getXuid());
         return activity;
     }
 }
