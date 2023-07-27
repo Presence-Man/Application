@@ -170,6 +170,8 @@ public final class App {
                     .replace("{xuid}", App.getInstance().xboxUserInfo.getXuid())
                     .replace("{gamertag}", App.getInstance().xboxUserInfo.getGamertag())
             );
+            if (api_activity.getLarge_icon_key() == null || api_activity.getLarge_icon_key().isBlank()) api_activity.setLarge_icon_key("bedrock");
+            if (api_activity.getLarge_icon_text() == null || api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(AppInfo.name + " - " + AppInfo.getVersion());
         }
         if (discord_core != null && discord_create_params != null) {
             var activity = api_activity.toDiscord(discord_create_params);
