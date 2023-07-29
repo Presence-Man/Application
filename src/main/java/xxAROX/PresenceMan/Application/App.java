@@ -163,15 +163,27 @@ public final class App {
                     .replace("{server}", App.getInstance().server == null ? "null" : App.getInstance().server)
                     .replace("{xuid}", App.getInstance().xboxUserInfo.getXuid())
                     .replace("{gamertag}", App.getInstance().xboxUserInfo.getGamertag())
+                    .replace("{App.name}", AppInfo.name)
+                    .replace("{App.version}", AppInfo.getVersion())
             );
             if (api_activity.getDetails() != null) api_activity.setDetails(api_activity.getDetails()
                     .replace("{network}", App.getInstance().network == null ? "null" : App.getInstance().network)
                     .replace("{server}", App.getInstance().server == null ? "null" : App.getInstance().server)
                     .replace("{xuid}", App.getInstance().xboxUserInfo.getXuid())
                     .replace("{gamertag}", App.getInstance().xboxUserInfo.getGamertag())
+                    .replace("{App.name}", AppInfo.name)
+                    .replace("{App.version}", AppInfo.getVersion())
             );
             if (api_activity.getLarge_icon_key() == null || api_activity.getLarge_icon_key().isBlank()) api_activity.setLarge_icon_key("bedrock");
-            if (api_activity.getLarge_icon_text() == null || api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(AppInfo.name + " - " + AppInfo.getVersion());
+
+            if (api_activity.getLarge_icon_text() != null && !api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(api_activity.getLarge_icon_text()
+                    .replace("{network}", App.getInstance().network == null ? "null" : App.getInstance().network)
+                    .replace("{server}", App.getInstance().server == null ? "null" : App.getInstance().server)
+                    .replace("{xuid}", App.getInstance().xboxUserInfo.getXuid())
+                    .replace("{gamertag}", App.getInstance().xboxUserInfo.getGamertag())
+                    .replace("{App.name}", AppInfo.name)
+                    .replace("{App.version}", AppInfo.getVersion())
+            );
         }
         if (discord_core != null && discord_create_params != null) {
             var activity = api_activity.toDiscord(discord_create_params);
