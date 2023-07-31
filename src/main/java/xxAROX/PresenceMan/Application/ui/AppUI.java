@@ -7,6 +7,7 @@ import com.jthemedetecor.OsThemeDetector;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.Bootstrap;
+import xxAROX.PresenceMan.Application.ui.tabs.FeaturedServersTab;
 import xxAROX.PresenceMan.Application.ui.tabs.GeneralTab;
 import xxAROX.PresenceMan.Application.ui.tabs.LoginTab;
 import xxAROX.PresenceMan.Application.ui.tabs.PrivacyPolicyTab;
@@ -31,6 +32,7 @@ public class AppUI extends JFrame {
     public final GeneralTab general_tab = new GeneralTab(this);
     public final LoginTab login_tab = new LoginTab(this);
     public final PrivacyPolicyTab privacy_policy_tab = new PrivacyPolicyTab(this);
+    public final FeaturedServersTab featured_servers_tab = new FeaturedServersTab(this);
 
     public AppUI() {
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> this.showException(e));
@@ -38,12 +40,14 @@ public class AppUI extends JFrame {
         this.setLookAndFeel();
         this.initWindow();
         {
+            contentPane.setLayout(new GridBagLayout());
             AUITab last = null;
             for (Field field : Arrays.stream(this.getClass().getFields()).filter(field -> AUITab.class.isAssignableFrom(field.getType())).toList()) {
                 try {
-                    tabs.add((AUITab) field.get(this));
-                    ((AUITab) field.get(this)).add(contentPane);
-                    last = (AUITab) field.get(this);
+                    var tab = (AUITab) field.get(this);
+                    tabs.add(tab);
+                    tab.add(contentPane);
+                    last = tab;
                 } catch (IllegalAccessException e) {
                     App.getInstance().getLogger().error(e);
                 }

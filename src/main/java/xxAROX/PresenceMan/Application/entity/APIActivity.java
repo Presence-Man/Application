@@ -4,13 +4,15 @@ import com.google.gson.JsonObject;
 import de.jcm.discordgamesdk.CreateParams;
 import de.jcm.discordgamesdk.activity.Activity;
 import lombok.*;
+import lombok.experimental.Accessors;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
+import xxAROX.PresenceMan.Application.entity.enums.APITimestamp;
 
 import java.time.Instant;
 import java.util.Objects;
 
-@Getter @Setter
+@Getter @Setter @Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
@@ -20,6 +22,7 @@ public final class APIActivity {
     private String state;
     private String details;
     private Long end;
+    private APITimestamp start;
     private String large_icon_key;
     private String large_icon_text;
     private String small_icon_key;
@@ -33,6 +36,7 @@ public final class APIActivity {
         json.addProperty("type", type.name().toUpperCase());
         json.addProperty("state", state);
         json.addProperty("details", details);
+        json.addProperty("start", start == null ? null : start.getValue());
         json.addProperty("end", end);
         json.addProperty("large_icon_key", large_icon_key);
         json.addProperty("large_icon_text", large_icon_text);
@@ -66,6 +70,18 @@ public final class APIActivity {
         activity.setType(type.toDiscordType());
         activity.setState(state != null ? state : "");
         activity.setDetails(details != null ? details : "");
+        if (start != null) {
+            switch ((int) start.getValue()) {
+                case (int) -1L -> start.setValue(App.getCreated());
+                case (int) -2L -> start.setValue(App.network_session_created);
+                case (int) -3L -> start.setValue(App.server_session_created);
+            }
+        } else {
+            start = APITimestamp.CUSTOM;
+            start.setValue(App.getCreated());
+        }
+        activity.timestamps().setStart(Instant.ofEpochMilli(start.getValue()));
+
         if (end != null) activity.timestamps().setEnd(Instant.ofEpochMilli(end));
         if (large_icon_key != null) activity.assets().setLargeImage(large_icon_key);
         if (large_icon_text != null) activity.assets().setLargeText(large_icon_text);
@@ -128,10 +144,10 @@ public final class APIActivity {
     public static APIActivity none() {
         var activity = new APIActivity();
         activity.setState("");
-        activity.setDetails(App.getInstance().xboxUserInfo == null ? "" : "Playing as " + App.getInstance().xboxUserInfo.getGamertag());
+        activity.setDetails("");
         activity.setLarge_icon_key("bedrock");
         activity.setLarge_icon_text(AppInfo.name + " - " + AppInfo.getVersion());
-        activity.setSmall_icon_text(App.getInstance().xboxUserInfo == null ? ""  : "Playing as " + App.getInstance().xboxUserInfo.getGamertag());
+        activity.setSmall_icon_text(App.getInstance().xboxUserInfo == null ? ""  : App.getInstance().xboxUserInfo.getGamertag());
         activity.setSmall_icon_key(App.getInstance().xboxUserInfo == null ? ""  : Gateway.getUrl() + "/api/v1/heads/" + App.getInstance().xboxUserInfo.getXuid());
         return activity;
     }

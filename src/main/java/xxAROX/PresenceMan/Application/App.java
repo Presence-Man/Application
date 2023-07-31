@@ -9,6 +9,7 @@ import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
+import xxAROX.PresenceMan.Application.entity.FeaturedServer;
 import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 import xxAROX.PresenceMan.Application.scheduler.WaterdogScheduler;
 import xxAROX.PresenceMan.Application.task.FetchGatewayInformationTask;
@@ -32,6 +33,8 @@ import java.util.function.Consumer;
 @ToString
 public final class App {
     @Getter static final long created = Instant.now().toEpochMilli();
+    public static Long network_session_created = null;
+    public static Long server_session_created = null;
     @Getter
     private static CreateParams discord_create_params;
     @Getter
@@ -56,6 +59,7 @@ public final class App {
     private int currentTick = 0;
     private APIActivity api_activity = null;
     public XboxUserInfo xboxUserInfo = null;
+    public FeaturedServer featuredServer = null;
 
     @SneakyThrows
     public App() {
@@ -153,45 +157,39 @@ public final class App {
         for (Consumer<Core> discord_core_listener : discordInitHandlers) discord_core_listener.accept(discord_core);
     }
 
+    public static String replace(String input){
+        return input
+                .replace("{network}", App.getInstance().network == null ? "null" : App.getInstance().network)
+                .replace("{server}", App.getInstance().server == null ? "null" : App.getInstance().server)
+                .replace("{xuid}", App.getInstance().xboxUserInfo.getXuid())
+                .replace("{gamertag}", App.getInstance().xboxUserInfo.getGamertag())
+                .replace("{App.name}", AppInfo.name)
+                .replace("{App.version}", AppInfo.getVersion())
+        ;
+    }
+
     public static void setActivity(APIActivity api_activity) {
+        setActivity(api_activity, true);
+    }
+    public static void setActivity(APIActivity api_activity, boolean queue) {
         if (api_activity == null) api_activity = APIActivity.none();
         if (api_activity.equals(getInstance().api_activity)) return;
         getInstance().api_activity = api_activity;
         if (App.getInstance().xboxUserInfo != null) {
-            if (api_activity.getState() != null) api_activity.setState(api_activity.getState()
-                    .replace("{network}", App.getInstance().network == null ? "null" : App.getInstance().network)
-                    .replace("{server}", App.getInstance().server == null ? "null" : App.getInstance().server)
-                    .replace("{xuid}", App.getInstance().xboxUserInfo.getXuid())
-                    .replace("{gamertag}", App.getInstance().xboxUserInfo.getGamertag())
-                    .replace("{App.name}", AppInfo.name)
-                    .replace("{App.version}", AppInfo.getVersion())
-            );
-            if (api_activity.getDetails() != null) api_activity.setDetails(api_activity.getDetails()
-                    .replace("{network}", App.getInstance().network == null ? "null" : App.getInstance().network)
-                    .replace("{server}", App.getInstance().server == null ? "null" : App.getInstance().server)
-                    .replace("{xuid}", App.getInstance().xboxUserInfo.getXuid())
-                    .replace("{gamertag}", App.getInstance().xboxUserInfo.getGamertag())
-                    .replace("{App.name}", AppInfo.name)
-                    .replace("{App.version}", AppInfo.getVersion())
-            );
+            if (api_activity.getState() != null) api_activity.setState(replace(api_activity.getState()));
+            if (api_activity.getDetails() != null) api_activity.setDetails(replace(api_activity.getDetails()));
             if (api_activity.getLarge_icon_key() == null || api_activity.getLarge_icon_key().isBlank()) api_activity.setLarge_icon_key("bedrock");
-
-            if (api_activity.getLarge_icon_text() != null && !api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(api_activity.getLarge_icon_text()
-                    .replace("{network}", App.getInstance().network == null ? "null" : App.getInstance().network)
-                    .replace("{server}", App.getInstance().server == null ? "null" : App.getInstance().server)
-                    .replace("{xuid}", App.getInstance().xboxUserInfo.getXuid())
-                    .replace("{gamertag}", App.getInstance().xboxUserInfo.getGamertag())
-                    .replace("{App.name}", AppInfo.name)
-                    .replace("{App.version}", AppInfo.getVersion())
-            );
+            if (api_activity.getLarge_icon_text() != null && !api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(replace(api_activity.getLarge_icon_text()));
         }
         if (discord_core != null && discord_create_params != null) {
             var activity = api_activity.toDiscord(discord_create_params);
-            activity.timestamps().setStart(Instant.ofEpochMilli(created));
             discord_core.activityManager().updateActivity(activity);
             System.out.println("Updated discord activity!");
         } else {
-            System.out.println("Discord is not initialized!");
+            if (queue) {
+                APIActivity finalApi_activity = api_activity;
+                discordInitHandlers.add(core -> setActivity(finalApi_activity, false));
+            } else System.out.println("Discord is not initialized!");
         }
     }
 

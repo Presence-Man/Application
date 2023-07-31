@@ -17,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,8 +40,22 @@ public class RestAPI {
             App.getInstance().server = null;
             return;
         }
-        App.getInstance().network = response.has("network") && !response.get("network").isJsonNull() ? response.get("network").getAsString() : null;
-        App.getInstance().server = response.has("server") && !response.get("server").isJsonNull() ? response.get("server").getAsString() : null;
+        if (App.getInstance().featuredServer != null) return;
+        System.out.println("ignoring featuredServer");
+
+        String network = response.has("network") && !response.get("network").isJsonNull() ? response.get("network").getAsString() : null;
+        String before_network = App.getInstance().network;
+        if (before_network == null || !before_network.equalsIgnoreCase(network)) {
+            App.network_session_created = Instant.now().toEpochMilli();
+            App.getInstance().network = network;
+        }
+
+        String server = response.has("server") && !response.get("server").isJsonNull() ? response.get("server").getAsString() : null;
+        String before_server = App.getInstance().server;
+        if (before_server == null || !before_server.equalsIgnoreCase(server)) {
+            App.server_session_created = Instant.now().toEpochMilli();
+            App.getInstance().server = server;
+        }
 
         APIActivity new_activity;
         if (!response.has("api_activity") || response.get("api_activity").isJsonNull()) new_activity = null;
