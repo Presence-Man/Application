@@ -118,7 +118,7 @@ public class FeaturedServersTab extends AUITab {
         }
         activity
                 .setDetails(network.name)
-                .setState(game.getName() + (mode == null ? "" : "-" + mode.getName()))
+                .setState(game.getName() + (mode == null ? "" : " - " + mode.getName()))
         ;
         if (mode != null && mode.getIcon() != null) activity.setLarge_icon_key(mode.getIcon());
         if (game.getIcon() != null) activity.setLarge_icon_key(game.getIcon());
