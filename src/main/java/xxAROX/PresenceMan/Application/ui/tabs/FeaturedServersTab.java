@@ -120,9 +120,9 @@ public class FeaturedServersTab extends AUITab {
                 .setDetails(network.name)
                 .setState(game.getName() + (mode == null ? "" : " - " + mode.getName()))
         ;
-        if (mode != null && mode.getIcon() != null) activity.setLarge_icon_key(mode.getIcon());
-        if (game.getIcon() != null) activity.setLarge_icon_key(game.getIcon());
         if (network.getIcon() != null) activity.setLarge_icon_key(network.getIcon());
+        if (game.getIcon() != null) activity.setLarge_icon_key(game.getIcon());
+        if (mode != null && mode.getIcon() != null) activity.setLarge_icon_key(mode.getIcon());
         App.setActivity(activity);
     }
 
@@ -140,7 +140,7 @@ public class FeaturedServersTab extends AUITab {
                     add(new __Server("Duels", "hive-hub-games-duels"));
                     add(new __Server("Spleef", "hive-hub-games-spleef"));
                 }});
-                put(new __Server("Treasure wars", "hive-treasure-wars"), new ArrayList<>(){{
+                put(new __Server("Treasure Wars", "hive-treasure-wars"), new ArrayList<>(){{
                     add(new __Server("Solos (No Teams)"));
                     add(new __Server("Duos (Teams of 2)"));
                     add(new __Server("Trios (Teams of 3)"));
