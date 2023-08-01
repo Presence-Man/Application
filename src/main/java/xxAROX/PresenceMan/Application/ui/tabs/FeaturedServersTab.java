@@ -135,7 +135,7 @@ public class FeaturedServersTab extends AUITab {
                 new HashMap<>(){{
                 put(new __Server("Hub", "hive-hub"), new ArrayList<>());
                 put(new __Server("Arcade", "hive-arcade"), new ArrayList<>());
-                put(new __Server("Hub Games", "hive-hub-games"), new ArrayList<>(){{
+                put(new __Server("Hub Games"), new ArrayList<>(){{
                     add(new __Server("Nemo slap", "hive-hub-games-nemo-slap"));
                     add(new __Server("Duels", "hive-hub-games-duels"));
                     add(new __Server("Spleef", "hive-hub-games-spleef"));
@@ -156,6 +156,8 @@ public class FeaturedServersTab extends AUITab {
                 put(new __Server("Capture the Flag", "hive-capture-the-flag"), new ArrayList<>(){{
                     add(new __Server("Regular"));
                 }});
+                put(new __Server("Quest island", "hive-quest-island"), new ArrayList<>());
+                put(new __Server("Parkour", "hive-parkour"), new ArrayList<>());
                 put(new __Server("Hide and seek", "hive-hide-and-seek"), new ArrayList<>(){{
                     add(new __Server("Regular"));
                 }});
