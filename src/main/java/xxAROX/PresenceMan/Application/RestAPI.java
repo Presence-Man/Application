@@ -41,7 +41,6 @@ public class RestAPI {
             return;
         }
         if (App.getInstance().featuredServer != null) return;
-        System.out.println("ignoring featuredServer");
 
         String network = response.has("network") && !response.get("network").isJsonNull() ? response.get("network").getAsString() : null;
         String before_network = App.getInstance().network;

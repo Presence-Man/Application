@@ -86,7 +86,7 @@ public class FeaturedServersTab extends AUITab {
         if (server != null && server.games != null) {
             for (Map.Entry<__Server, List<__Server>> entry : server.games.entrySet()) game.addItem(entry.getKey());
         }
-        game.setEnabled(game.getItemCount() > 0);
+        game.setVisible(game.getItemCount() > 0);
     }
     protected void refreshMode(){
         mode.removeAllItems();
@@ -94,7 +94,7 @@ public class FeaturedServersTab extends AUITab {
         List<__Server> modes = server == null || server.getGames() == null ? new ArrayList<>() : server.getGames().get((__Server) this.game.getSelectedItem());
         if (modes == null) modes = new ArrayList<>();
         for (__Server mode : modes) this.mode.addItem(mode);
-        mode.setEnabled(mode.getItemCount() > 0);
+        mode.setVisible(mode.getItemCount() > 0);
     }
 
     protected void update_presence(){
@@ -117,8 +117,8 @@ public class FeaturedServersTab extends AUITab {
             App.getInstance().featuredServer = featured_server;
         }
         activity
-                .setDetails(network.name)
-                .setState(game.getName() + (mode == null ? "" : " - " + mode.getName()))
+                .setDetails("Playing " + game.getName() + (mode == null ? "" : " - " + mode.getName()))
+                .setState("on " + network.name)
         ;
         if (network.getIcon() != null) activity.setLarge_icon_key(network.getIcon());
         if (game.getIcon() != null) activity.setLarge_icon_key(game.getIcon());
