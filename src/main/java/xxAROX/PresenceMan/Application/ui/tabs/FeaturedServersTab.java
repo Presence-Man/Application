@@ -205,16 +205,60 @@ public class FeaturedServersTab extends AUITab {
         CUBECRAFT(new FeaturedServer(
                 "CubeCraft",
                 new HashMap<>(){{
-                    put(new __Server("Skywars", "cubecraft-skywars"), new ArrayList<>(){{
-                        add(new __Server("Solos"));
-                        add(new __Server("Duos"));
-                        add(new __Server("Trios"));
-                        add(new __Server("Squads"));
+                    put(new __Server("Lobby", "cubecraft-lobby"), new ArrayList<>());
+                    put(new __Server("Beta games", "cubecraft-beta-games"), new ArrayList<>(){{
+                        add(new __Server("Giga Blockwars"));
                     }});
-                    // TODO
+                    put(new __Server("Eggwars", "cubecraft-eggwars"), new ArrayList<>(){{
+                        add(new __Server("Solo"));
+                        add(new __Server("Teams of 2"));
+                        add(new __Server("Teams of 4"));
+                        add(new __Server("Teams of 10"));
+                        add(new __Server("Duels"));
+                    }});
+                    put(new __Server("Skywars", "cubecraft-skywars"), new ArrayList<>(){{
+                        add(new __Server("Solo"));
+                        add(new __Server("Teams of 2"));
+                        add(new __Server("Teams of 4"));
+                        add(new __Server("Teams of 10"));
+                        add(new __Server("Duels"));
+                        add(new __Server("Chaos"));
+                    }});
+                    put(new __Server("Lucky Blocks", "cubecraft-lucky-blocks"), new ArrayList<>(){{
+                        add(new __Server("Solo"));
+                        add(new __Server("Teams of 4"));
+                        add(new __Server("Duels"));
+                    }});
+                    put(new __Server("Battle Arena", "cubecraft-battle-arena"), new ArrayList<>(){{
+                        add(new __Server("Free for All"));
+                        add(new __Server("Game Duels"));
+                        add(new __Server("Duels"));
+                    }});
+                    put(new __Server("Blockwars", "cubecraft-blockwars"), new ArrayList<>(){{
+                        add(new __Server("CTF Duels"));
+                        add(new __Server("Capture the Flag"));
+                        add(new __Server("Giga"));
+                        add(new __Server("Bridges"));
+                        add(new __Server("Bridges Duels"));
+                    }});
+                    put(new __Server("Skyblock", "cubecraft-skyblock"), new ArrayList<>());
+                    put(new __Server("Mineware", "cubecraft-mineware"), new ArrayList<>());
+                    put(new __Server("Parkour", "cubecraft-parkour"), new ArrayList<>());
+                    put(new __Server("Survival Games", "cubecraft-survival-games"), new ArrayList<>(){{
+                        add(new __Server("Solo"));
+                        add(new __Server("Teams of 2"));
+                    }});
                 }},
                 "cubecraft"
-        ));
+        )),
+        GALAXITE(new FeaturedServer(
+                "Galaxite",
+                 new HashMap<>(){{
+                     put(new __Server("Lobby", "bedrock"), new ArrayList<>());
+                }},
+                "bedrock"
+        ))
+        ;
 
         private FeaturedServer server;
 
