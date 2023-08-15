@@ -134,12 +134,6 @@ public class FeaturedServersTab extends AUITab {
                 "The Hive",
                 new HashMap<>(){{
                 put(new __Server("Hub", "hive-hub"), new ArrayList<>());
-                put(new __Server("Arcade", "hive-arcade"), new ArrayList<>());
-                put(new __Server("Hub Games"), new ArrayList<>(){{
-                    add(new __Server("Nemo slap", "hive-hub-games-nemo-slap"));
-                    add(new __Server("Duels", "hive-hub-games-duels"));
-                    add(new __Server("Spleef", "hive-hub-games-spleef"));
-                }});
                 put(new __Server("Treasure Wars", "hive-treasure-wars"), new ArrayList<>(){{
                     add(new __Server("Solos (No Teams)"));
                     add(new __Server("Duos (Teams of 2)"));
