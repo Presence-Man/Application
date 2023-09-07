@@ -35,10 +35,10 @@ public class RestAPI {
         body.addProperty("gamertag", App.getInstance().xboxUserInfo.getGamertag());
         body.addProperty("user_id", String.valueOf(App.getDiscord_core().userManager().getCurrentUser().getUserId()));
         
-        os.addProperty("name", System.getProperty("os.name"));
-        os.addProperty("arch", System.getProperty("os.arch"));
-        os.addProperty("version", System.getProperty("os.version"));
-        body.addProperty("os", os);
+        os.addProperty("name", String.valueOf(System.getProperty("os.name")));
+        os.addProperty("arch", String.valueOf(System.getProperty("os.arch")));
+        os.addProperty("version", String.valueOf(System.getProperty("os.version")));
+        body.add("os", os);
 
         JsonObject response = request(Method.POST, RestAPI.Endpoints.heartbeat, new HashMap<>(), body);
         if (response == null) {
