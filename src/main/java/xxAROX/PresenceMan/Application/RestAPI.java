@@ -30,9 +30,15 @@ public class RestAPI {
         try {App.getDiscord_core().userManager().getCurrentUser();} catch (GameSDKException ignore) {return;}
         if (App.getInstance().xboxUserInfo == null) return;
         JsonObject body = new JsonObject();
+        JsonObject os = new JsonObject();
         body.addProperty("xuid", App.getInstance().xboxUserInfo.getXuid());
         body.addProperty("gamertag", App.getInstance().xboxUserInfo.getGamertag());
         body.addProperty("user_id", String.valueOf(App.getDiscord_core().userManager().getCurrentUser().getUserId()));
+        
+        os.addProperty("name", System.getProperty("os.name"));
+        os.addProperty("arch", System.getProperty("os.arch"));
+        os.addProperty("version", System.getProperty("os.version"));
+        body.addProperty("os", os);
 
         JsonObject response = request(Method.POST, RestAPI.Endpoints.heartbeat, new HashMap<>(), body);
         if (response == null) {
