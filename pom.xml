@@ -65,7 +65,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-transport-native-kqueue</artifactId>
-            <version>4.1.84.Final</version>
+            <version>4.1.99.Final</version>
             <classifier>osx-x86_64</classifier>
             <scope>compile</scope>
         </dependency>
