@@ -244,13 +244,6 @@ public class FeaturedServersTab extends AUITab {
                     }});
                 }},
                 "cubecraft"
-        )),
-        GALAXITE(new FeaturedServer(
-                "Galaxite",
-                 new HashMap<>(){{
-                     put(new __Server("Lobby", "bedrock"), new ArrayList<>());
-                }},
-                "bedrock"
         ))
         ;
 
