@@ -48,6 +48,21 @@ jobs:
           title: "Development Release v${{ steps.metadata.outputs.VERSION }}"
           files: "target/Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}-dev.jar"
 
+      - name: "Create dev-version-app.txt"
+        run: "echo \"${{ steps.metadata.outputs.VERSION }}\" >> dev-version-app.txt"
+
+      - name: "Pushes latest dev-version-app.txt file"
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+        with:
+          source_file: 'dev-version-app.txt'
+          destination_repo: 'Presence-Man/releases'
+          destination_folder: ''
+          user_email: 'arox.email.0@gmail.com'
+          user_name: 'xxAROX'
+          commit_message: 'Updated dev-version'
+
       - name: Release to public
         uses: softprops/action-gh-release@v1
         with:
