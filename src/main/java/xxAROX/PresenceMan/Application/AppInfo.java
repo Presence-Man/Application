@@ -3,10 +3,11 @@ package xxAROX.PresenceMan.Application;
 import java.util.StringJoiner;
 
 public final class AppInfo {
+    public final static int[] version = new int[]{ 1,1,2 };
     public final static String name = "Presence-Man";
-    public final static int[] version = new int[]{ 1,1,1 };
     public static String icon = "icon.png";
     public static long discord_application_id = 1133823892486623344L;
+    public final static boolean development = false;
 
     public static String getVersion(){
         return getVersion(".");
