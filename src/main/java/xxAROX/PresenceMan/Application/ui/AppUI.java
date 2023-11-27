@@ -25,9 +25,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class AppUI extends JFrame {
-    public static final int BORDER_PADDING = 10;
-    public static final int BODY_BLOCK_PADDING = 10;
-
     public final JTabbedPane contentPane = new JTabbedPane();
     private final List<AUITab> tabs = new ArrayList<>();
     private final Tray tray = new Tray();
@@ -123,11 +120,13 @@ public class AppUI extends JFrame {
     }
 
     public void showException(Throwable t) {
-        App.getInstance().getLogger().error("Caught exception in thread " + Thread.currentThread().getName(), t);
-        StringBuilder builder = new StringBuilder("An error occurred:\n");
-        builder.append("[").append(t.getClass().getSimpleName()).append("] ").append(t.getMessage()).append("\n");
-        for (StackTraceElement element : t.getStackTrace()) builder.append(element.toString()).append("\n");
-        this.showError(builder.toString());
+        t.printStackTrace();
+        /*
+         * StringBuilder builder = new StringBuilder("An error occurred:\n");
+         * builder.append("[").append(t.getClass().getSimpleName()).append("] ").append(t.getMessage()).append("\n");
+         * for (StackTraceElement element : t.getStackTrace()) builder.append(element.toString()).append("\n");
+         * showError(builder.toString());
+         */
     }
 
     public void showInfo(String message) {

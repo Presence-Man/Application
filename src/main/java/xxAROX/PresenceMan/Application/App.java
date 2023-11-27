@@ -184,7 +184,6 @@ public final class App {
         if (discord_core != null && discord_create_params != null) {
             var activity = api_activity.toDiscord(discord_create_params);
             discord_core.activityManager().updateActivity(activity);
-            System.out.println("Updated discord activity!");
         } else {
             if (queue) {
                 APIActivity finalApi_activity = api_activity;

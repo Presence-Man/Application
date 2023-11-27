@@ -24,9 +24,11 @@ public class FetchGatewayInformationTask extends Task {
             while ((inputLine = in.readLine()) != null) content.append(inputLine);
             in.close();
             JsonObject gateway = new Gson().fromJson(content.toString(), JsonObject.class);
+
             Gateway.protocol = gateway.get("protocol").getAsString();
             Gateway.address = gateway.get("address").getAsString();
-            Gateway.port = gateway.get("port").getAsInt();
+            Gateway.port = gateway.has("port") && !gateway.get("port").isJsonNull() ? gateway.get("port").getAsInt() : null;
+
             ping_backend();
         } catch (IOException e) {
             System.out.println("Error while fetching gateway information: ");
@@ -46,7 +48,7 @@ public class FetchGatewayInformationTask extends Task {
             StringBuilder content = new StringBuilder();
             while ((inputLine = in.readLine()) != null) content.append(inputLine);
             in.close();
-            result = content.toString().toLowerCase().contains("presence-man");
+            result = content.toString().toLowerCase().contains("jan sohn / xxarox");
         } catch (IOException ignore) {
         }
         Gateway.broken = result;
@@ -54,6 +56,7 @@ public class FetchGatewayInformationTask extends Task {
             ReconnectingTask.deactivate();
             Gateway.broken = false;
             Gateway.broken_popup = false;
+            System.out.println("Connected to backend successfully!");
         } else {
             Gateway.broken = true;
             ReconnectingTask.activate();

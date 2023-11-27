@@ -2,6 +2,7 @@ package xxAROX.PresenceMan.Application;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import de.jcm.discordgamesdk.GameSDKException;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -31,18 +32,14 @@ public class RestAPI {
         if (App.getDiscord_core() == null || !App.getDiscord_core().isOpen()) return;
         try {App.getDiscord_core().userManager().getCurrentUser();} catch (GameSDKException ignore) {return;}
         if (App.getInstance().xboxUserInfo == null) return;
+
         JsonObject body = new JsonObject();
-        JsonObject os = new JsonObject();
         body.addProperty("xuid", App.getInstance().xboxUserInfo.getXuid());
         body.addProperty("gamertag", App.getInstance().xboxUserInfo.getGamertag());
         body.addProperty("user_id", String.valueOf(App.getDiscord_core().userManager().getCurrentUser().getUserId()));
 
-        os.addProperty("name", String.valueOf(System.getProperty("os.name")));       // TODO: remove this line of code, I don't care about statistics anymore!!
-        os.addProperty("arch", String.valueOf(System.getProperty("os.arch")));       // TODO: remove this line of code, I don't care about statistics anymore!!
-        os.addProperty("version", String.valueOf(System.getProperty("os.version"))); // TODO: remove this line of code, I don't care about statistics anymore!!
-        body.add("os", os);                                                          // TODO: remove this line of code, I don't care about statistics anymore!!
-
         JsonObject response = request(Method.POST, RestAPI.Endpoints.heartbeat, new HashMap<>(), body);
+        Gateway.connected = response != null;
         if (response == null) {
             App.getInstance().network = null;
             App.getInstance().server = null;
@@ -130,7 +127,9 @@ public class RestAPI {
             in.close();
             con.disconnect();
             return new Gson().fromJson(content.toString(), JsonObject.class);
+        } catch (JsonSyntaxException ignore) {
         } catch (IOException e) {
+            if (Gateway.connected) Gateway.connected = false;
             if (!Gateway.broken) Gateway.broken = true;
         }
         return null;
