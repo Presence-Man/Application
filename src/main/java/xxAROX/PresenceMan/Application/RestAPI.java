@@ -24,6 +24,8 @@ import java.util.Map;
 public class RestAPI {
     public static class Endpoints {
         public static String heartbeat = "/api/v1/users/heartbeat";
+        public static String skin = "/api/v1/images/skins/";
+        public static String head = "/api/v1/images/heads/";
     }
     public static void heartbeat(){
         if (App.getDiscord_core() == null || !App.getDiscord_core().isOpen()) return;
@@ -34,11 +36,11 @@ public class RestAPI {
         body.addProperty("xuid", App.getInstance().xboxUserInfo.getXuid());
         body.addProperty("gamertag", App.getInstance().xboxUserInfo.getGamertag());
         body.addProperty("user_id", String.valueOf(App.getDiscord_core().userManager().getCurrentUser().getUserId()));
-        
-        os.addProperty("name", String.valueOf(System.getProperty("os.name")));
-        os.addProperty("arch", String.valueOf(System.getProperty("os.arch")));
-        os.addProperty("version", String.valueOf(System.getProperty("os.version")));
-        body.add("os", os);
+
+        os.addProperty("name", String.valueOf(System.getProperty("os.name")));       // TODO: remove this line of code, I don't care about statistics anymore!!
+        os.addProperty("arch", String.valueOf(System.getProperty("os.arch")));       // TODO: remove this line of code, I don't care about statistics anymore!!
+        os.addProperty("version", String.valueOf(System.getProperty("os.version"))); // TODO: remove this line of code, I don't care about statistics anymore!!
+        body.add("os", os);                                                          // TODO: remove this line of code, I don't care about statistics anymore!!
 
         JsonObject response = request(Method.POST, RestAPI.Endpoints.heartbeat, new HashMap<>(), body);
         if (response == null) {

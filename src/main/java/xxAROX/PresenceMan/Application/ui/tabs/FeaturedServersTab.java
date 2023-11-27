@@ -69,12 +69,12 @@ public class FeaturedServersTab extends AUITab {
         {
             JButton update_button = new JButton("Update");
             update_button.setBounds(0, 0, 500, 50);
-            contentPane.add(update_button);
             update_button.setBackground(new Color(53, 155, 47));
             update_button.setForeground(new Color(0, 0, 0));
             update_button.addActionListener(e -> {
                 if (e.getActionCommand().equalsIgnoreCase(update_button.getText())) update_presence();
             });
+            contentPane.add(update_button);
         }
 
         refreshGame();

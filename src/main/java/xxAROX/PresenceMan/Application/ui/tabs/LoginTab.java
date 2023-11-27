@@ -20,6 +20,11 @@ import java.util.function.Function;
 public class LoginTab extends AUITab {
     private static final String TEXT = "XBOX account";
 
+    private static final String LOGIN_TEXT = "Login";
+    private static final Color LOGIN_COLOR = new Color(59, 155, 57);
+    private static final String LOGOUT_TEXT = "Logout";
+    private static final Color LOGOUT_COLOR = new Color(150, 56, 56);
+
     private JButton stateButton;
     private LoginPopup login_popup;
     private Thread addThread;
@@ -29,27 +34,24 @@ public class LoginTab extends AUITab {
     }
 
     private void reloadStateButton(){
-        XboxUserInfo info = App.getInstance().getXboxUserInfo();
-        if (stateButton != null) {
-            stateButton.setToolTipText(info == null ? null : "Logged in as " + info.getGamertag());
-            stateButton.setText(info == null ? "Login" : "Logout");
-            stateButton.setBackground(info == null ? new Color(59, 155, 57) : new Color(150, 56, 56));
-            App.ui.contentPane.setTitleAt(App.ui.contentPane.indexOfTab(name), TEXT);
-        }
+        boolean logged_in = App.getInstance().getXboxUserInfo() != null;
+        stateButton.setText(logged_in ? LOGIN_TEXT : LOGOUT_TEXT);
+        stateButton.setBackground(logged_in ? LOGIN_COLOR : LOGOUT_COLOR);
+        App.ui.contentPane.setTitleAt(App.ui.contentPane.indexOfTab(name), TEXT);
     }
 
     @Override
     protected void init(JPanel contentPane) {
-        XboxUserInfo info = App.getInstance().getXboxUserInfo();
+        boolean logged_in = App.getInstance().getXboxUserInfo() != null;
         contentPane.setLayout(new GridBagLayout());
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         {
-            stateButton = new JButton(info == null ? "Login" : "Logout");
+            stateButton = new JButton(logged_in ? "Login" : "Logout");
             stateButton.setFocusPainted(false);
             stateButton.setForeground(new Color(0, 0, 0));
             stateButton.setFocusable(false);
-            stateButton.setBackground(info == null ? new Color(59, 155, 57) : new Color(150, 56, 56));
+            stateButton.setBackground(logged_in ? LOGIN_COLOR : LOGOUT_COLOR);
             stateButton.addActionListener(event -> {
                 if (stateButton.getText().equalsIgnoreCase("Login")) login();
                 else if (stateButton.getText().equalsIgnoreCase("Logout")) logout();
@@ -113,12 +115,10 @@ public class LoginTab extends AUITab {
         this.addThread = new Thread(() -> {
             try {
                 XboxUserInfo xboxUserInfo = requestHandler.apply(msaDeviceCode -> {
-                    SwingUtilities.invokeLater(() -> {
-                        new LoginPopup(frame, msaDeviceCode, popup -> login_popup = popup, () -> {
-                            closePopup();
-                            addThread.interrupt();
-                        });
-                    });
+                    SwingUtilities.invokeLater(() -> new LoginPopup(frame, msaDeviceCode, popup -> login_popup = popup, () -> {
+                        closePopup();
+                        addThread.interrupt();
+                    }));
                 });
                 if (xboxUserInfo == null) {
                     frame.showError("Login failed, please try again!");

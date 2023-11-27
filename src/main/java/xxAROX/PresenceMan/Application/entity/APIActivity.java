@@ -7,11 +7,11 @@ import lombok.*;
 import lombok.experimental.Accessors;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
+import xxAROX.PresenceMan.Application.RestAPI;
 import xxAROX.PresenceMan.Application.entity.enums.APITimestamp;
 
 import java.time.Instant;
 import java.util.Objects;
-import java.lang.System;
 
 @Getter @Setter @Accessors(chain = true)
 @AllArgsConstructor
@@ -149,7 +149,7 @@ public final class APIActivity {
         activity.setLarge_icon_key("bedrock");
         activity.setLarge_icon_text(AppInfo.name + " - " + AppInfo.getVersion());
         activity.setSmall_icon_text(App.getInstance().xboxUserInfo == null ? ""  : App.getInstance().xboxUserInfo.getGamertag());
-        activity.setSmall_icon_key(App.getInstance().xboxUserInfo == null ? ""  : Gateway.getUrl() + "/api/v1/heads/" + App.getInstance().xboxUserInfo.getXuid() + "/" + (System.currentTimeMillis() /1000));
+        activity.setSmall_icon_key(App.getInstance().xboxUserInfo == null ? ""  : Gateway.getUrl() + RestAPI.Endpoints.head + App.getInstance().xboxUserInfo.getXuid() + "/" + (System.currentTimeMillis() /1000));
         return activity;
     }
 }

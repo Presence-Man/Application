@@ -9,7 +9,9 @@ import java.awt.*;
 
 public class GeneralTab extends AUITab {
     private static final String NOT_CONNECTED = "Not connected";
-    JLabel label_connected;
+    private static final String CONNECTED = "Connected to {server} on {network}";
+
+    JLabel label_connection_status;
 
     public GeneralTab(AppUI frame) {
         super(frame, "Home");
@@ -19,19 +21,15 @@ public class GeneralTab extends AUITab {
     protected void init(JPanel contentPane) {
         contentPane.setLayout(new GridBagLayout());
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        var a = App.getInstance().getApi_activity();
-        boolean connected = a != null && App.getInstance().getNetwork() != null && App.getInstance().getServer() != null;
-        label_connected = new JLabel(connected ? "Connected to " + App.getInstance().getServer() + " on " + App.getInstance().getNetwork() : NOT_CONNECTED);
-        label_connected.setVisible(true);
-        label_connected.setBounds(10, 10, 20, 20);
-        contentPane.add(label_connected);
+
+        label_connection_status = new JLabel(getConnectedMessage(), SwingConstants.CENTER);
+        label_connection_status.setVisible(true);
+        contentPane.add(label_connection_status);
     }
 
     public void tick() {
-        var a = App.getInstance().getApi_activity();
-        boolean connected = a != null && App.getInstance().getNetwork() != null && App.getInstance().getServer() != null;
-        var text = connected ? "Connected to " + App.getInstance().getServer() + " on " + App.getInstance().getNetwork() : NOT_CONNECTED;
-        if (!label_connected.getText().equals(text)) label_connected.setText(text);
+        var text = getConnectedMessage();
+        if (!label_connection_status.getText().equals(text)) label_connection_status.setText(text);
     }
 
     @Override
@@ -40,5 +38,15 @@ public class GeneralTab extends AUITab {
 
     @Override
     public void onClose() {
+    }
+
+    private static String getConnectedMessage(){
+        var activity = App.getInstance().getApi_activity();
+        boolean connected = activity != null && App.getInstance().getNetwork() != null && App.getInstance().getServer() != null;
+        return connected ?
+                CONNECTED
+                    .replace("{server}", App.getInstance().getServer())
+                    .replace("{network}", App.getInstance().getNetwork())
+                : NOT_CONNECTED;
     }
 }
