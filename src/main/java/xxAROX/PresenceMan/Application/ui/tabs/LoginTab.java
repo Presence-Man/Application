@@ -1,8 +1,7 @@
 package xxAROX.PresenceMan.Application.ui.tabs;
 
-import net.raphimc.mcauth.MinecraftAuth;
-import net.raphimc.mcauth.step.msa.StepMsaDeviceCode;
-import net.raphimc.mcauth.util.MicrosoftConstants;
+import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
+import net.raphimc.minecraftauth.util.MicrosoftConstants;
 import org.apache.http.impl.client.CloseableHttpClient;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
@@ -34,7 +33,7 @@ public class LoginTab extends AUITab {
     }
 
     private void reloadStateButton(){
-        boolean logged_in = App.getInstance().getXboxUserInfo() != null;
+        boolean logged_in = App.getInstance().getXboxUserInfo() == null;
         stateButton.setText(logged_in ? LOGIN_TEXT : LOGOUT_TEXT);
         stateButton.setBackground(logged_in ? LOGIN_COLOR : LOGOUT_COLOR);
         App.ui.contentPane.setTitleAt(App.ui.contentPane.indexOfTab(name), TEXT);
@@ -42,19 +41,19 @@ public class LoginTab extends AUITab {
 
     @Override
     protected void init(JPanel contentPane) {
-        boolean logged_in = App.getInstance().getXboxUserInfo() != null;
+        boolean logged_in = App.getInstance().getXboxUserInfo() == null;
         contentPane.setLayout(new GridBagLayout());
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         {
-            stateButton = new JButton(logged_in ? "Login" : "Logout");
+            stateButton = new JButton(logged_in ? LOGIN_TEXT : LOGOUT_TEXT);
             stateButton.setFocusPainted(false);
             stateButton.setForeground(new Color(0, 0, 0));
             stateButton.setFocusable(false);
             stateButton.setBackground(logged_in ? LOGIN_COLOR : LOGOUT_COLOR);
             stateButton.addActionListener(event -> {
-                if (stateButton.getText().equalsIgnoreCase("Login")) login();
-                else if (stateButton.getText().equalsIgnoreCase("Logout")) logout();
+                if (stateButton.getText().equalsIgnoreCase(LOGIN_TEXT)) login();
+                else if (stateButton.getText().equalsIgnoreCase(LOGOUT_TEXT)) logout();
             });
             stateButton.setVisible(false);
             stateButton.setPreferredSize(new Dimension(315, 45));
@@ -89,7 +88,7 @@ public class LoginTab extends AUITab {
     private void login(){
         handleLogin(msaDeviceCodeConsumer -> {
             try (CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-                return new XboxUserInfo(MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
+                return new XboxUserInfo(XboxUserInfo.DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
             } catch (Exception e) {
                 if (e instanceof InterruptedException) return null;
                 else if (e instanceof TimeoutException) {
@@ -114,14 +113,15 @@ public class LoginTab extends AUITab {
     private void handleLogin(Function<Consumer<StepMsaDeviceCode.MsaDeviceCode>, XboxUserInfo> requestHandler) {
         this.addThread = new Thread(() -> {
             try {
-                XboxUserInfo xboxUserInfo = requestHandler.apply(msaDeviceCode -> {
-                    SwingUtilities.invokeLater(() -> new LoginPopup(frame, msaDeviceCode, popup -> login_popup = popup, () -> {
-                        closePopup();
-                        addThread.interrupt();
-                    }));
-                });
+                XboxUserInfo xboxUserInfo = requestHandler.apply(msaDeviceCode -> SwingUtilities.invokeLater(() -> new LoginPopup(frame, msaDeviceCode, popup -> login_popup = popup, () -> {
+                    closePopup();
+                    addThread.interrupt();
+                })));
                 if (xboxUserInfo == null) {
-                    frame.showError("Login failed, please try again!");
+                    SwingUtilities.invokeLater(() -> {
+                        this.closePopup();
+                        this.frame.showError("Login failed, please try again!");
+                    });
                 } else {
                     SwingUtilities.invokeLater(() -> {
                         closePopup();

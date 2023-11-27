@@ -1,11 +1,9 @@
 package xxAROX.PresenceMan.Application.ui.popup;
 
-import net.raphimc.mcauth.step.msa.StepMsaDeviceCode;
+import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -45,44 +43,24 @@ public class LoginPopup extends JDialog {
     private void initComponents() {
         JPanel contentPane = new JPanel();
         contentPane.setLayout(null);
-        this.setContentPane(contentPane);
-        {
-            JLabel browserLabel = new JLabel("Please open the following URL in your browser:");
-            browserLabel.setBounds(10, 10, 380, 20);
-            contentPane.add(browserLabel);
+        JLabel browserLabel = new JLabel("Please open the following URL in your browser:");
+        browserLabel.setBounds(10, 10, 380, 20);
+        contentPane.add(browserLabel);
 
-            JLabel urlLabel = new JLabel("<html><a href=\"\">" + this.deviceCode.verificationUri() + "</a></html>");
-            urlLabel.setBounds(10, 30, 380, 20);
-            urlLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    parent.openURL(deviceCode.verificationUri());
-                }
-            });
-            contentPane.add(urlLabel);
+        JLabel urlLabel = new JLabel("<html><a href=\"\">" + deviceCode.getDirectVerificationUri() + "</a></html>");
+        urlLabel.setBounds(10, 30, 380, 20);
+        urlLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                parent.openURL(deviceCode.getDirectVerificationUri());
+            }
+        });
+        contentPane.add(urlLabel);
 
-            JLabel enterCodeLabel = new JLabel("Enter the following code:");
-            enterCodeLabel.setBounds(10, 50, 380, 20);
-            contentPane.add(enterCodeLabel);
-
-            JLabel codeLabel = new JLabel(this.deviceCode.userCode());
-            codeLabel.setBounds(10, 70, 380, 20);
-            contentPane.add(codeLabel);
-
-            JLabel closeInfo = new JLabel("The popup will close automatically after you have been logged in.");
-            closeInfo.setBounds(10, 100, 380, 20);
-            contentPane.add(closeInfo);
-        }
-        {
-            JButton copyCodeButton = new JButton("Copy Code");
-            copyCodeButton.setFocusPainted(false);
-            copyCodeButton.setBounds(this.getWidth() / 2 - 130 / 2, 130, 100, 20);
-            copyCodeButton.addActionListener(event -> {
-                StringSelection selection = new StringSelection(this.deviceCode.userCode());
-                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
-            });
-            contentPane.add(copyCodeButton);
-        }
+        JLabel closeInfo = new JLabel("The popup will close automatically after you have been logged in.");
+        closeInfo.setBounds(10, 100, 380, 20);
+        contentPane.add(closeInfo);
+        setContentPane(contentPane);
     }
 
     public void markExternalClose() {

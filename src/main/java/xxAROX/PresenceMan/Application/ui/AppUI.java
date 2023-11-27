@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class AppUI extends JFrame {
+    public static final int BORDER_PADDING = 10;
+    public static final int BODY_BLOCK_PADDING = 10;
+
     public final JTabbedPane contentPane = new JTabbedPane();
     private final List<AUITab> tabs = new ArrayList<>();
     private final Tray tray = new Tray();
@@ -35,7 +38,7 @@ public class AppUI extends JFrame {
     public final FeaturedServersTab featured_servers_tab = new FeaturedServersTab(this);
 
     public AppUI() {
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> this.showException(e));
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> showException(e));
 
         this.setLookAndFeel();
         this.initWindow();

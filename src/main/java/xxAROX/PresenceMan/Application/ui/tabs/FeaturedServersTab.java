@@ -102,6 +102,7 @@ public class FeaturedServersTab extends AUITab {
         var game = (__Server) this.game.getSelectedItem();
         if (network == null || game == null) {
             App.getInstance().featuredServer = null;
+            App.setActivity(APIActivity.none());
             return;
         }
         var mode = (__Server) this.mode.getSelectedItem();
