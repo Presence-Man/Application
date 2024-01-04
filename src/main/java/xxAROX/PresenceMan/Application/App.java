@@ -56,6 +56,7 @@ public final class App {
     private ScheduledExecutorService tickExecutor;
     private ScheduledFuture<?> tickFuture;
     private volatile boolean shutdown = false;
+    private volatile String discord_user_id = null;
     private int currentTick = 0;
     private APIActivity api_activity = null;
     public XboxUserInfo xboxUserInfo = null;
@@ -80,6 +81,10 @@ public final class App {
 
         xboxUserInfo = CacheManager.loadXboxUserInfo();
         if (xboxUserInfo != null) discordInitHandlers.add(core -> App.getInstance().onLogin());
+        discordInitHandlers.add(core -> {
+            discord_user_id = String.valueOf(App.getDiscord_core().userManager().getCurrentUser().getUserId());
+            App.getInstance().onLogin();
+        });
 
         while (ui == null) {
             logger.info("Waiting for UI to be initialized..");

@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.Gateway;
+import xxAROX.PresenceMan.Application.sockets.SocketThread;
+import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.HeartbeatPacket;
 import xxAROX.PresenceMan.Application.task.ReconnectingTask;
 
 import java.io.BufferedReader;
@@ -39,6 +41,12 @@ public class RestAPI {
         body.addProperty("user_id", String.valueOf(App.getDiscord_core().userManager().getCurrentUser().getUserId()));
 
         JsonObject response = request(Method.POST, RestAPI.Endpoints.heartbeat, new HashMap<>(), body);
+        SocketThread socket = null;
+        var heartbeatPacket = new HeartbeatPacket();
+        heartbeatPacket.setUser_id(body.get("user_id").getAsString());
+        socket.sendPacket(heartbeatPacket, (pk) -> {
+
+        });
         Gateway.connected = response != null;
         if (response == null) {
             App.getInstance().network = null;
