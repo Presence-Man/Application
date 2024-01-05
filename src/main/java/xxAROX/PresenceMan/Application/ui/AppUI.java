@@ -58,7 +58,9 @@ public class AppUI extends JFrame {
         ToolTipManager.sharedInstance().setInitialDelay(100);
         ToolTipManager.sharedInstance().setDismissDelay(10_000);
         SwingUtilities.updateComponentTreeUI(this);
-        this.setVisible(true);
+        setVisible(false);
+        setExtendedState(JFrame.ICONIFIED);
+        tray.showInTray();
     }
 
     private void setLookAndFeel() {
