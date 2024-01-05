@@ -32,6 +32,7 @@ public final class Tray {
             public void mouseReleased(MouseEvent e) {
                 if (e.getClickCount() == 2 && e.getButton() == 1) {
                     App.ui.setVisible(true);
+                    App.ui.setExtendedState(JFrame.NORMAL);
                     hideFromTray();
                 } else if (e.getClickCount() == 3 && e.getButton() == 3) {
                     App.getInstance().shutdown();
