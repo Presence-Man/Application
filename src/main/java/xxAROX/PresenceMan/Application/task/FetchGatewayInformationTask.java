@@ -38,7 +38,8 @@ public class FetchGatewayInformationTask extends Task {
             e.printStackTrace();
         }
         App.getInstance().getScheduler().scheduleRepeating(() -> {
-            RestAPI.heartbeat();
+            String result = RestAPI.heartbeat();
+            if (result != null) System.out.println("Heartbeat result: " + result);
             App.ui.general_tab.tick();
         }, 20 * 5);
     }

@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.Gateway;
+import xxAROX.PresenceMan.Application.sockets.SocketThread;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.HeartbeatPacket;
 import xxAROX.PresenceMan.Application.task.ReconnectingTask;
 
@@ -24,19 +25,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RestAPI {
+    private static volatile boolean pending_heartbeat = false;
     public static class Endpoints {
         public static String heartbeat = "/api/v1/users/heartbeat";
         public static String skin = "/api/v1/images/skins/";
         public static String head = "/api/v1/images/heads/";
     }
-    public static void heartbeat(){
-        if (App.getInstance().socket == null) return;
-        if (App.getDiscord_core() == null || !App.getDiscord_core().isOpen()) return;
-        try {App.getDiscord_core().userManager().getCurrentUser();} catch (GameSDKException ignore) {return;}
-        if (App.getInstance().xboxUserInfo == null) return;
+    public static String heartbeat(){
+        if (SocketThread.getInstance().getSession_token() == null) return null;
+        if (pending_heartbeat) return null;
+        if (App.getInstance().socket == null) return null;
+        if (App.getInstance().xboxUserInfo == null) return null;
+        if (App.getDiscord_core() == null || !App.getDiscord_core().isOpen()) return "Discord is not open";
+        try {App.getDiscord_core().userManager().getCurrentUser();} catch (GameSDKException e) {return e.getMessage();}
 
+        pending_heartbeat = true;
         App.getInstance().socket.sendPacket(new HeartbeatPacket(), (pk) -> {
+            System.out.println(8);
+            pending_heartbeat = false;
             if (App.getInstance().featuredServer != null) return;
+            System.out.println(9);
             String network = pk.getNetwork();
             String before_network = App.getInstance().network;
 
@@ -44,6 +52,7 @@ public class RestAPI {
                 App.network_session_created = Instant.now().toEpochMilli();
                 App.getInstance().network = network;
             }
+            System.out.println(10);
 
             String server = pk.getServer();
             String before_server = App.getInstance().server;
@@ -51,16 +60,19 @@ public class RestAPI {
                 App.server_session_created = Instant.now().toEpochMilli();
                 App.getInstance().server = server;
             }
+            System.out.println(11);
 
             APIActivity new_activity = pk.getApi_activity();
             if (new_activity == null) new_activity = APIActivity.none();
             if (new_activity.equals(App.getInstance().getApi_activity())) return;
             App.setActivity(new_activity);
+            System.out.println(12);
         }, err -> {
             App.getInstance().network = null;
             App.getInstance().server = null;
             System.out.println("Error on heartbeat: " + err);
         });
+        return null;
     }
 
 

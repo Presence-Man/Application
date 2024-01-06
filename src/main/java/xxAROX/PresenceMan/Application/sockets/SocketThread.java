@@ -7,7 +7,6 @@ import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.entity.Gateway;
 import xxAROX.PresenceMan.Application.sockets.protocol.CallbackPacketManager;
 import xxAROX.PresenceMan.Application.sockets.protocol.PacketPool;
-import xxAROX.PresenceMan.Application.sockets.protocol.compressor.CompressorException;
 import xxAROX.PresenceMan.Application.sockets.protocol.compressor.GzipCompressor;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.CallbackPacket;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.Packet;
@@ -24,7 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class SocketThread implements Runnable {
-    private String session_token = null;
+    @Getter private volatile String session_token = null;
     @Getter private static SocketThread instance;
     @Getter private InetSocketAddress backend_address;
     @Getter private Socket socket;
@@ -55,29 +54,27 @@ public class SocketThread implements Runnable {
                 shutdown();
             } else {
                 connectionState.set(State.CONNECTING);
-                System.out.println(tries_left.get() == default_tries ? "Connecting.." : "Reconnecting..");
+                System.out.println(tries_left.get() +1 == default_tries ? "Connecting.." : "Reconnecting..");
                 if (socket.connect()) {
                     connectionState.set(State.CONNECTED);
                     tries_left.set(default_tries);
-                    System.out.println(tries_left.get() == default_tries ? "Connected!" : "Reconnected!");
                 } else {
                     connectionState.set(State.DISCONNECTED);
-                    System.out.println(tries_left.get() == default_tries ? "Failed to connect to backend!" :"Reconnecting failed!");
+                    System.out.println(tries_left.get() +1 == default_tries ? "Failed to connect to backend!" :"Reconnecting failed!");
                 }
             }
         }
-        else if (connectionState.get().equals(State.CONNECTED)) {
-            System.out.println("Connecting..");
+        else if (connectionState.get().equals(State.CONNECTED) || (connectionState.get().equals(State.GREETING) && App.getInstance().getCurrentTick() %(20*15) == 0 && session_token == null)) {
             connectionState.set(State.GREETING);
             HelloPacket packet = new HelloPacket(
                     xboxInfo.getXuid(),
                     App.getInstance().getDiscord_user_id(),
-                    xboxInfo.getGamertag(),
-                    null
+                    xboxInfo.getGamertag()
             );
             sendPacket(packet, (pk) -> {
-                if (pk.getSToken() != null) {
-                    session_token = pk.getSToken();
+                System.out.println(pk);
+                if (pk.getToken() != null) {
+                    session_token = pk.getToken();
                     System.out.println("Successfully connected to backend!");
                 }
             }, System.out::println);
@@ -86,35 +83,27 @@ public class SocketThread implements Runnable {
 
     @Override public void run() {
         do {
-            if (connectionState.get().equals(State.CONNECTED)) {
+            if (connectionState.get().equals(State.GREETING) || connectionState.get().equals(State.TRUSTED)) {
                 String buffer = null;
                 try {
-                    if (connectionState.get().equals(State.SHUTDOWN) || connectionState.get().equals(State.DISCONNECTED)) {
-                        buffer = "";
-                        continue;
-                    }
-                    byte[] bytes = new byte[65535];
-                    DatagramPacket received = new DatagramPacket(bytes, bytes.length);
-                    try {
-                        socket.getSocket().receive(received);
-                    } catch (IOException e) {
-                       e.printStackTrace();
-                    }
-                    buffer =  GzipCompressor.getInstance().decompress(received.getData()).trim();
-                } catch (CompressorException e) {
-                    System.out.println("Error while decompressing packet:");
+                    buffer = socket.read();
+                } catch (Exception e) {
+                    System.out.println("Error while reading packet:");
                     e.printStackTrace();
                 }
-                if (buffer != null && !buffer.isEmpty() && !buffer.isBlank()) {
+                if (buffer != null && !buffer.isEmpty()) {
+                    System.out.println("BUFFER -> " + buffer);
                     Packet packet = PacketPool.decode(buffer);
                     if (packet instanceof UnknownPacket) continue;
                     if (packet instanceof CallbackPacket callbackPacket && callbackPacket.getCallback_id() != null) {
+                        System.out.println(packet);
                         CallbackPacket cbp = CallbackPacketManager.handle(callbackPacket);
                         if (cbp != null) sendPacket(cbp);
                     }
                 }
             }
         } while (!connectionState.get().equals(State.SHUTDOWN));
+        System.out.println("[SocketThread]: bye!");
     }
 
     public void shutdown(){

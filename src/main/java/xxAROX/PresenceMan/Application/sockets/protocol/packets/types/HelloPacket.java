@@ -11,15 +11,12 @@ public class HelloPacket extends CallbackPacket {
     private String discord_user_id = null;
     private String gamertag = null;
 
-    // NOTE: Callback
-    private String sToken = null;
 
     @Override
     protected JsonObject encodeBody(JsonObject json) {
         json.addProperty("xuid", xuid);
         json.addProperty("duid", discord_user_id);
         json.addProperty("gamertag", gamertag);
-        json.addProperty("stoken", sToken);
         return super.encodeBody(json);
     }
 
@@ -28,7 +25,6 @@ public class HelloPacket extends CallbackPacket {
         xuid = json.get("xuid").getAsString();
         discord_user_id = json.has("duid") && !json.get("duid").isJsonNull() ? json.get("duid").getAsString() : discord_user_id;
         gamertag = json.has("gamertag") && !json.get("gamertag").isJsonNull() ? json.get("gamertag").getAsString() : gamertag;
-        sToken = json.has("stoken") && !json.get("stoken").isJsonNull() ? json.get("stoken").getAsString() : sToken;
         super.decodeBody(json);
     }
 
