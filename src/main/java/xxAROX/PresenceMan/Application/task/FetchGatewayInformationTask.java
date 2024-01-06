@@ -26,9 +26,12 @@ public class FetchGatewayInformationTask extends Task {
             JsonObject gateway = new Gson().fromJson(content.toString(), JsonObject.class);
 
             Gateway.protocol = gateway.get("protocol").getAsString();
+            Gateway.ip = gateway.get("ip").getAsString();
             Gateway.address = gateway.get("address").getAsString();
             Gateway.port = gateway.has("port") && !gateway.get("port").isJsonNull() ? gateway.get("port").getAsInt() : null;
+            Gateway.usual_port = gateway.has("usual_port") && !gateway.get("usual_port").isJsonNull() ? gateway.get("usual_port").getAsInt() : 15151;
 
+            System.out.println("Got gateway information!");
             ping_backend();
         } catch (IOException e) {
             System.out.println("Error while fetching gateway information: ");
@@ -57,8 +60,10 @@ public class FetchGatewayInformationTask extends Task {
             Gateway.broken = false;
             Gateway.broken_popup = false;
             System.out.println("Connected to backend successfully!");
+            App.getInstance().initSocket();
         } else {
             Gateway.broken = true;
+            System.out.println("Couldn't connect to backend successfully, reconnecting..");
             ReconnectingTask.activate();
         }
     }

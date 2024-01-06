@@ -1,6 +1,7 @@
 package xxAROX.PresenceMan.Application.sockets;
 
 import lombok.Getter;
+import xxAROX.PresenceMan.Application.App;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -17,14 +18,14 @@ public final class Socket {
         close();
         try {
             DatagramSocket _socket = new DatagramSocket();
-            _socket.connect(connection.getCloud_address().getAddress(), connection.getCloud_address().getPort());
+            _socket.connect(connection.getBackend_address().getAddress(), connection.getBackend_address().getPort());
             _socket.setReuseAddress(true);
             _socket.setReceiveBufferSize(65535);
             _socket.setSendBufferSize(65535);
             socket = _socket;
             return true;
         } catch (IOException e) {
-            connection.getLogger().error("Error while connecting to cloud: {}", e.getMessage());
+            App.getInstance().getLogger().error("Error while connecting to cloud: {}", e.getMessage());
         }
         return false;
     }

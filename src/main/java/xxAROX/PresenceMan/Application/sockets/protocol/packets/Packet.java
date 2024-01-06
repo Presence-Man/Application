@@ -7,14 +7,14 @@ import lombok.ToString;
 
 @Getter @Setter @ToString
 abstract public class Packet extends PacketType {
-    public String xuid;
+    public String token = "";
     public JsonObject data = new JsonObject();
 
     public Packet() {
     }
 
     public final void decode(JsonObject json) {
-        xuid = json.get("xuid").getAsString();
+        token = !json.has("token") || json.get("token").isJsonNull() ? "" : json.get("token").getAsString();
         data = json.get("data").getAsJsonObject();
         decodeBody(json);
     }
@@ -22,7 +22,7 @@ abstract public class Packet extends PacketType {
         JsonObject json = new JsonObject();
         this.encodeBody(json);
         json.addProperty("type", getPacketType());
-        json.addProperty("xuid", xuid);
+        json.addProperty("token", token);
         json.add("data", data);
         return json;
     }

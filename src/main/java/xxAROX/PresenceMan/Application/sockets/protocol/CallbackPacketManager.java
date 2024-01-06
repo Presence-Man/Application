@@ -1,7 +1,7 @@
 package xxAROX.PresenceMan.Application.sockets.protocol;
 
 import lombok.NonNull;
-import xxAROX.PresenceMan.Application.sockets.SocketThread;
+import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.CallbackPacket;
 
 import java.util.HashMap;
@@ -24,7 +24,7 @@ public final class CallbackPacketManager {
                 return null;
             }
         } catch (Exception e) {
-            SocketThread.getInstance().getLogger().error("Error while executing callback for a {} packet: {}", packet.getPacketType(), e.getMessage());
+            App.getInstance().getLogger().error("Error while executing callback for a {} packet: {}", packet.getPacketType(), e.getMessage());
             return null;
         }
         return packet;

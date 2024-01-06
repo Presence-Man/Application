@@ -12,6 +12,7 @@ import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.FeaturedServer;
 import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 import xxAROX.PresenceMan.Application.scheduler.WaterdogScheduler;
+import xxAROX.PresenceMan.Application.sockets.SocketThread;
 import xxAROX.PresenceMan.Application.task.FetchGatewayInformationTask;
 import xxAROX.PresenceMan.Application.task.UpdateCheckTask;
 import xxAROX.PresenceMan.Application.ui.AppUI;
@@ -43,6 +44,7 @@ public final class App {
     private static final List<Consumer<Core>> discordInitHandlers = new ArrayList<>();
 
     private static App instance;
+    public SocketThread socket = null;
     public String network = null;
     public String server = null;
 
@@ -82,8 +84,11 @@ public final class App {
         xboxUserInfo = CacheManager.loadXboxUserInfo();
         if (xboxUserInfo != null) discordInitHandlers.add(core -> App.getInstance().onLogin());
         discordInitHandlers.add(core -> {
-            discord_user_id = String.valueOf(App.getDiscord_core().userManager().getCurrentUser().getUserId());
-            App.getInstance().onLogin();
+            try {
+                discord_user_id = String.valueOf(App.getDiscord_core().userManager().getCurrentUser().getUserId());
+                App.getInstance().onLogin();
+            } catch (GameSDKException ignore) {
+            }
         });
 
         while (ui == null) {
@@ -210,5 +215,9 @@ public final class App {
         CacheManager.storeXboxUserInfo(null);
         xboxUserInfo = null;
         setActivity(APIActivity.none());
+    }
+
+    public void initSocket() {
+        if (socket == null) socket = new SocketThread();
     }
 }
