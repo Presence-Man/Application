@@ -1,14 +1,14 @@
 package xxAROX.PresenceMan.Application;
 
-import de.jcm.discordgamesdk.Core;
-import de.jcm.discordgamesdk.CreateParams;
-import de.jcm.discordgamesdk.GameSDKException;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.ToString;
+import net.arikia.dev.drpc.DiscordEventHandlers;
+import net.arikia.dev.drpc.DiscordRPC;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
+import xxAROX.PresenceMan.Application.entity.DiscordInfo;
 import xxAROX.PresenceMan.Application.entity.FeaturedServer;
 import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 import xxAROX.PresenceMan.Application.scheduler.WaterdogScheduler;
@@ -22,13 +22,10 @@ import xxAROX.PresenceMan.Application.utils.Tray;
 
 import javax.swing.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 @Getter
 @ToString
@@ -36,12 +33,8 @@ public final class App {
     @Getter static final long created = Instant.now().toEpochMilli();
     public static Long network_session_created = null;
     public static Long server_session_created = null;
-    @Getter
-    private static CreateParams discord_create_params;
-    @Getter
-    private static Core discord_core;
-    @Getter
-    private static final List<Consumer<Core>> discordInitHandlers = new ArrayList<>();
+
+    @Getter private DiscordInfo discord_info = new DiscordInfo();
 
     private static App instance;
     public SocketThread socket = null;
@@ -58,9 +51,8 @@ public final class App {
     private ScheduledExecutorService tickExecutor;
     private ScheduledFuture<?> tickFuture;
     private volatile boolean shutdown = false;
-    private volatile String discord_user_id = null;
     private int currentTick = 0;
-    private APIActivity api_activity = null;
+    public APIActivity api_activity = null;
     public XboxUserInfo xboxUserInfo = null;
     public FeaturedServer featuredServer = null;
 
@@ -71,9 +63,12 @@ public final class App {
             return;
         }
         instance = this;
+        Runtime.getRuntime().addShutdownHook(new Thread(DiscordRPC::discordShutdown));
+        initDiscord();
 
         ThreadFactoryBuilder builder = ThreadFactoryBuilder.builder().format("Tick Executor - #%d").build();
         tickExecutor = Executors.newScheduledThreadPool(1, builder);
+
         scheduler = new WaterdogScheduler();
         tickFuture = tickExecutor.scheduleAtFixedRate(this::tickProcessor, 50, 50, TimeUnit.MILLISECONDS);
 
@@ -82,14 +77,7 @@ public final class App {
         App.getInstance().getScheduler().scheduleAsync(new FetchGatewayInformationTask());
 
         xboxUserInfo = CacheManager.loadXboxUserInfo();
-        if (xboxUserInfo != null) discordInitHandlers.add(core -> App.getInstance().onLogin());
-        discordInitHandlers.add(core -> {
-            try {
-                discord_user_id = String.valueOf(App.getDiscord_core().userManager().getCurrentUser().getUserId());
-                App.getInstance().onLogin();
-            } catch (GameSDKException ignore) {
-            }
-        });
+        if (xboxUserInfo != null) discord_info.registerHandler(() -> App.getInstance().onLogin());
 
         while (ui == null) {
             logger.info("Waiting for UI to be initialized..");
@@ -109,6 +97,7 @@ public final class App {
     }
 
     private void onTick(int currentTick) {
+        scheduler.scheduleAsync(DiscordRPC::discordRunCallbacks);
         scheduler.onTick(currentTick);
     }
 
@@ -121,10 +110,10 @@ public final class App {
         } catch (Exception e) {
             logger.error("Unable to shutdown app gracefully", e);
         } finally {
+            DiscordRPC.discordShutdown();
             Bootstrap.shutdownHook();
         }
     }
-
     private void shutdown0() throws Exception {
         Thread.sleep(500);
 
@@ -138,35 +127,6 @@ public final class App {
         logger.info("Shutdown complete!");
     }
 
-    public static void setDiscordApplicationId(long id) {
-        if (discord_core != null) {
-            discord_core.close();
-            discord_core = null;
-        }
-        if (discord_create_params != null) {
-            discord_create_params.close();
-            discord_create_params = null;
-        }
-
-        try (CreateParams params = new CreateParams()) {
-            discord_create_params = params;
-            params.setClientID(id);
-            params.setFlags(CreateParams.getDefaultFlags());
-            try (Core core = new Core(params)) {
-                discord_core = core;
-            } catch (GameSDKException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public static void setDiscordCore(CreateParams discord_create_params, Core discord_core) {
-        App.discord_create_params = discord_create_params;
-        App.discord_core = discord_core;
-        setActivity(APIActivity.none());
-        for (Consumer<Core> discord_core_listener : discordInitHandlers) discord_core_listener.accept(discord_core);
-    }
-
     public static String replace(String input){
         return input
                 .replace("{network}", App.getInstance().network == null ? "null" : App.getInstance().network)
@@ -176,35 +136,6 @@ public final class App {
                 .replace("{App.name}", AppInfo.name)
                 .replace("{App.version}", AppInfo.getVersion())
         ;
-    }
-
-    public static void setActivity(APIActivity api_activity) {
-        setActivity(api_activity, true);
-    }
-    public static void setActivity(APIActivity api_activity, boolean queue) {
-        if (api_activity == null) api_activity = APIActivity.none();
-        if (api_activity.equals(getInstance().api_activity)) return;
-        getInstance().api_activity = api_activity;
-        if (App.getInstance().xboxUserInfo != null) {
-            if (api_activity.getState() != null) api_activity.setState(replace(api_activity.getState()));
-            if (api_activity.getDetails() != null) api_activity.setDetails(replace(api_activity.getDetails()));
-            if (api_activity.getLarge_icon_key() == null || api_activity.getLarge_icon_key().isBlank()) api_activity.setLarge_icon_key("bedrock");
-            if (api_activity.getLarge_icon_text() != null && !api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(replace(api_activity.getLarge_icon_text()));
-        }
-        if (discord_core != null && discord_create_params != null) {
-            var activity = api_activity.toDiscord(discord_create_params);
-            discord_core.activityManager().updateActivity(activity);
-        } else {
-            if (queue) {
-                APIActivity finalApi_activity = api_activity;
-                discordInitHandlers.add(core -> setActivity(finalApi_activity, false));
-            } else System.out.println("Discord is not initialized!");
-        }
-    }
-
-    public static void clearActivity() {
-        getInstance().api_activity = null;
-        discord_core.activityManager().clearActivity();
     }
 
     public void onLogin() {
@@ -219,5 +150,50 @@ public final class App {
 
     public void initSocket() {
         if (socket == null) socket = new SocketThread();
+    }
+
+    public void initDiscord(){
+        initDiscord(String.valueOf(AppInfo.discord_application_id));
+    }
+    public synchronized void initDiscord(String application_id) {
+        if (discord_info == null) discord_info = new DiscordInfo();
+        if (discord_info.getCurrent_application_id().equals(application_id)) return;
+        if (discord_info.getDiscord_user_id() != null) DiscordRPC.discordShutdown();
+        discord_info.setCurrent_application_id(application_id);
+        DiscordEventHandlers handlers = new DiscordEventHandlers.Builder()
+                .setReadyEventHandler((user) -> {
+                    var discord_info = App.getInstance().discord_info;
+                    discord_info.setDiscord_user_id(user.userId);
+                    discord_info.ready = true;
+                    discord_info.checkHandlers();
+                    System.out.println("Welcome @" + user.username + ", discord is ready!");
+                })
+                .build()
+        ;
+        DiscordRPC.discordInitialize(discord_info.getCurrent_application_id(), handlers, false);
+        DiscordRPC.discordRegister(discord_info.getCurrent_application_id(), "");
+        setActivity(APIActivity.none());
+    }
+
+    public static void setActivity(APIActivity api_activity) {
+        setActivity(api_activity, true);
+    }
+    public static void setActivity(APIActivity api_activity, boolean queue) {
+        App app = App.getInstance();
+        if (api_activity == null) api_activity = APIActivity.none();
+        if (api_activity.equals(app.api_activity)) return;
+        app.api_activity = api_activity;
+        if (app.xboxUserInfo != null) {
+            if (api_activity.getState() != null) api_activity.setState(replace(api_activity.getState()));
+            if (api_activity.getDetails() != null) api_activity.setDetails(replace(api_activity.getDetails()));
+            if (api_activity.getLarge_icon_key() == null || api_activity.getLarge_icon_key().isBlank()) api_activity.setLarge_icon_key("bedrock");
+            if (api_activity.getLarge_icon_text() != null && !api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(replace(api_activity.getLarge_icon_text()));
+        }
+        App.getInstance().initDiscord(String.valueOf(api_activity.getClient_id()));
+        if (app.discord_info.ready) DiscordRPC.discordUpdatePresence(api_activity.toDiscord());
+        else if (queue) {
+            APIActivity finalApi_activity = api_activity;
+            app.discord_info.registerHandler(() -> setActivity(finalApi_activity, false));
+        }
     }
 }

@@ -1,16 +1,13 @@
 package xxAROX.PresenceMan.Application.entity;
 
 import com.google.gson.JsonObject;
-import de.jcm.discordgamesdk.CreateParams;
-import de.jcm.discordgamesdk.activity.Activity;
 import lombok.*;
 import lombok.experimental.Accessors;
+import net.arikia.dev.drpc.DiscordRichPresence;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
-import xxAROX.PresenceMan.Application.RestAPI;
 import xxAROX.PresenceMan.Application.entity.enums.APITimestamp;
 
-import java.time.Instant;
 import java.util.Objects;
 
 @Getter @Setter @Accessors(chain = true)
@@ -20,16 +17,16 @@ import java.util.Objects;
 public final class APIActivity {
     private long client_id = AppInfo.discord_application_id;
     private @NonNull ActivityType type = ActivityType.PLAYING;
-    private String state;
-    private String details;
-    private Long end;
-    private APITimestamp start;
-    private String large_icon_key;
-    private String large_icon_text;
-    private String small_icon_key;
-    private String small_icon_text;
-    private Integer party_max_player_count;
-    private Integer party_player_count;
+    private String state = null;
+    private String details = null;
+    private Long end = null;
+    private APITimestamp start = null;
+    private String large_icon_key = null;
+    private String large_icon_text = null;
+    private String small_icon_key = null;
+    private String small_icon_text = null;
+    private Integer party_max_player_count = null;
+    private Integer party_player_count = null;
 
     public JsonObject serialize(){
         JsonObject json = new JsonObject();
@@ -64,12 +61,8 @@ public final class APIActivity {
         return activity;
     }
 
-    public Activity toDiscord(CreateParams params) {
-        if (params == null) return null;
-        params.setClientID(client_id);
-        Activity activity = new Activity();
-        activity.setType(type.toDiscordType());
-        activity.setState(state != null ? state : "");
+    public DiscordRichPresence toDiscord() {
+        DiscordRichPresence.Builder activity = new DiscordRichPresence.Builder(state != null ? state : "");
         activity.setDetails(details != null ? details : "");
         if (start != null) {
             switch ((int) start.getValue()) {
@@ -81,16 +74,13 @@ public final class APIActivity {
             start = APITimestamp.CUSTOM;
             start.setValue(App.getCreated());
         }
-        activity.timestamps().setStart(Instant.ofEpochMilli(start.getValue()));
+        activity.setStartTimestamps(start.getValue());
 
-        if (end != null) activity.timestamps().setEnd(Instant.ofEpochMilli(end));
-        if (large_icon_key != null) activity.assets().setLargeImage(large_icon_key);
-        if (large_icon_text != null) activity.assets().setLargeText(large_icon_text);
-        if (small_icon_key != null) activity.assets().setSmallImage(small_icon_key);
-        if (small_icon_text != null) activity.assets().setSmallText(small_icon_text);
-        if (party_player_count != null) activity.party().size().setCurrentSize(party_player_count);
-        if (party_max_player_count != null) activity.party().size().setMaxSize(party_max_player_count);
-        return activity;
+        if (end != null) activity.setEndTimestamp(end);
+        if (large_icon_key != null) activity.setBigImage(large_icon_key, large_icon_text);
+        if (small_icon_key != null) activity.setSmallImage(small_icon_key, small_icon_text);
+        if (party_player_count != null) activity.setParty("display", party_player_count, party_max_player_count);
+        return activity.build();
     }
 
     @Override
@@ -118,6 +108,7 @@ public final class APIActivity {
     }
 
     @AllArgsConstructor
+    @Deprecated
     public enum ActivityType {
         PLAYING("PLAYING"),
         STREAMING("STREAMING"),
@@ -131,25 +122,17 @@ public final class APIActivity {
         public String toString() {
             return raw;
         }
-        public de.jcm.discordgamesdk.activity.ActivityType toDiscordType(){
-            return switch (raw) {
-                case "STREAMING" -> de.jcm.discordgamesdk.activity.ActivityType.STREAMING;
-                case "LISTENING" -> de.jcm.discordgamesdk.activity.ActivityType.LISTENING;
-                case "UNUSED" -> de.jcm.discordgamesdk.activity.ActivityType.UNUSED;
-                case "COMPETING" -> de.jcm.discordgamesdk.activity.ActivityType.COMPETING;
-                default -> de.jcm.discordgamesdk.activity.ActivityType.PLAYING;
-            };
-        }
     }
 
     public static APIActivity none() {
+        var app = App.getInstance();
         var activity = new APIActivity();
         activity.setState("");
         activity.setDetails("");
         activity.setLarge_icon_key("bedrock");
         activity.setLarge_icon_text(AppInfo.name + " - " + AppInfo.getVersion());
-        activity.setSmall_icon_text(App.getInstance().xboxUserInfo == null ? ""  : App.getInstance().xboxUserInfo.getGamertag());
-        activity.setSmall_icon_key(App.getInstance().xboxUserInfo == null ? ""  : Gateway.getUrl() + RestAPI.Endpoints.head + App.getInstance().xboxUserInfo.getXuid() + "/" + (System.currentTimeMillis() /1000));
+        activity.setSmall_icon_text(app == null || app.xboxUserInfo == null ? ""  : App.getInstance().xboxUserInfo.getGamertag());
+        //activity.setSmall_icon_key(app == null || app.xboxUserInfo == null ? ""  : Gateway.getUrl() + RestAPI.Endpoints.head + App.getInstance().xboxUserInfo.getXuid() + "/" + (System.currentTimeMillis() /1000));
         return activity;
     }
 }

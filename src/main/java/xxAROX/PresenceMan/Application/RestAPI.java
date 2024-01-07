@@ -3,7 +3,6 @@ package xxAROX.PresenceMan.Application;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import de.jcm.discordgamesdk.GameSDKException;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
@@ -32,14 +31,14 @@ public class RestAPI {
         public static String head = "/api/v1/images/heads/";
     }
     public static String heartbeat(){
-        if (SocketThread.getInstance().getSession_token() == null) return null;
-        if (pending_heartbeat) return null;
+        if (SocketThread.getInstance() != null && SocketThread.getInstance().getSession_token() == null) return null;
+        System.out.println("Doing heartbeat");
+        //if (pending_heartbeat) return null;
         if (App.getInstance().socket == null) return null;
         if (App.getInstance().xboxUserInfo == null) return null;
-        if (App.getDiscord_core() == null || !App.getDiscord_core().isOpen()) return "Discord is not open";
-        try {App.getDiscord_core().userManager().getCurrentUser();} catch (GameSDKException e) {return e.getMessage();}
 
         pending_heartbeat = true;
+        System.out.println("Sending heartbeat");
         App.getInstance().socket.sendPacket(new HeartbeatPacket(), (pk) -> {
             System.out.println(8);
             pending_heartbeat = false;

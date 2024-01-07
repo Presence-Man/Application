@@ -68,7 +68,7 @@ public class SocketThread implements Runnable {
             connectionState.set(State.GREETING);
             HelloPacket packet = new HelloPacket(
                     xboxInfo.getXuid(),
-                    App.getInstance().getDiscord_user_id(),
+                    App.getInstance().getDiscord_info().getDiscord_user_id(),
                     xboxInfo.getGamertag()
             );
             sendPacket(packet, (pk) -> {
