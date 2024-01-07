@@ -13,6 +13,7 @@ import xxAROX.PresenceMan.Application.entity.FeaturedServer;
 import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 import xxAROX.PresenceMan.Application.scheduler.WaterdogScheduler;
 import xxAROX.PresenceMan.Application.sockets.SocketThread;
+import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.ByeByePacket;
 import xxAROX.PresenceMan.Application.task.FetchGatewayInformationTask;
 import xxAROX.PresenceMan.Application.task.UpdateCheckTask;
 import xxAROX.PresenceMan.Application.ui.AppUI;
@@ -64,6 +65,9 @@ public final class App {
         }
         instance = this;
         Runtime.getRuntime().addShutdownHook(new Thread(DiscordRPC::discordShutdown));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (socket != null) socket.sendPacket(new ByeByePacket());
+        }));
         initDiscord();
 
         ThreadFactoryBuilder builder = ThreadFactoryBuilder.builder().format("Tick Executor - #%d").build();
@@ -98,6 +102,8 @@ public final class App {
 
     private void onTick(int currentTick) {
         scheduler.scheduleAsync(DiscordRPC::discordRunCallbacks);
+        if (App.ui != null) App.ui.general_tab.tick();
+        if (currentTick %20*5 == 0) RestAPI.heartbeat();
         scheduler.onTick(currentTick);
     }
 
@@ -149,7 +155,10 @@ public final class App {
     }
 
     public void initSocket() {
-        if (socket == null) socket = new SocketThread();
+        if (socket == null) {
+            socket = new SocketThread();
+            scheduler.scheduleAsync(socket);
+        }
     }
 
     public void initDiscord(){

@@ -38,14 +38,13 @@ public class SocketThread implements Runnable {
             System.out.println("Backend identified as " + backend_address.getAddress().getHostAddress() + ":" + backend_address.getPort());
             socket = new Socket(this);
             App.getInstance().getScheduler().scheduleRepeating(this::tick, 1);
-            new Thread(this).start();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
         }
     }
 
-    private synchronized void tick() {
+    private void tick() {
         var xboxInfo = App.getInstance().getXboxUserInfo();
         if (xboxInfo == null) return;
         if (connectionState.get().equals(State.DISCONNECTED) && App.getInstance().getCurrentTick() %(20*15) == 0) {
@@ -92,7 +91,7 @@ public class SocketThread implements Runnable {
                     e.printStackTrace();
                 }
                 if (buffer != null && !buffer.isEmpty()) {
-                    System.out.println("BUFFER -> " + buffer);
+                    System.out.println("Reading: " + buffer);
                     Packet packet = PacketPool.decode(buffer);
                     if (packet instanceof UnknownPacket) continue;
                     if (packet instanceof CallbackPacket callbackPacket && callbackPacket.getCallback_id() != null) {

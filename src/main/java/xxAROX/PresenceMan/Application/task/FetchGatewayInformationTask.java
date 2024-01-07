@@ -3,7 +3,6 @@ package xxAROX.PresenceMan.Application.task;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import xxAROX.PresenceMan.Application.App;
-import xxAROX.PresenceMan.Application.RestAPI;
 import xxAROX.PresenceMan.Application.entity.Gateway;
 import xxAROX.PresenceMan.Application.scheduler.Task;
 
@@ -37,11 +36,6 @@ public class FetchGatewayInformationTask extends Task {
             System.out.println("Error while fetching gateway information: ");
             e.printStackTrace();
         }
-        App.getInstance().getScheduler().scheduleRepeating(() -> {
-            String result = RestAPI.heartbeat();
-            if (result != null) System.out.println("Heartbeat result: " + result);
-            App.ui.general_tab.tick();
-        }, 20 * 5);
     }
 
     public static void ping_backend() {
@@ -60,11 +54,10 @@ public class FetchGatewayInformationTask extends Task {
             ReconnectingTask.deactivate();
             Gateway.broken = false;
             Gateway.broken_popup = false;
-            System.out.println("Connected to backend successfully!");
             App.getInstance().initSocket();
         } else {
             Gateway.broken = true;
-            System.out.println("Couldn't connect to backend successfully, reconnecting..");
+            System.out.println("Couldn't connect to backend, reconnecting..");
             ReconnectingTask.activate();
         }
     }

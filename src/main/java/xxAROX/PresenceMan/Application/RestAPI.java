@@ -26,19 +26,16 @@ import java.util.Map;
 public class RestAPI {
     private static volatile boolean pending_heartbeat = false;
     public static class Endpoints {
-        public static String heartbeat = "/api/v1/users/heartbeat";
         public static String skin = "/api/v1/images/skins/";
         public static String head = "/api/v1/images/heads/";
     }
     public static String heartbeat(){
         if (SocketThread.getInstance() != null && SocketThread.getInstance().getSession_token() == null) return null;
-        System.out.println("Doing heartbeat");
         //if (pending_heartbeat) return null;
         if (App.getInstance().socket == null) return null;
         if (App.getInstance().xboxUserInfo == null) return null;
 
         pending_heartbeat = true;
-        System.out.println("Sending heartbeat");
         App.getInstance().socket.sendPacket(new HeartbeatPacket(), (pk) -> {
             System.out.println(8);
             pending_heartbeat = false;
