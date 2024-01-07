@@ -12,7 +12,6 @@ import xxAROX.PresenceMan.Application.sockets.protocol.packets.CallbackPacket;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.Packet;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.ByeByePacket;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.HeartbeatPacket;
-import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.HelloPacket;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.UnknownPacket;
 
 import java.io.IOException;
@@ -26,6 +25,7 @@ public class SocketThread implements Runnable {
     @Getter private volatile String session_token = null;
     @Getter private static SocketThread instance;
     @Getter private InetSocketAddress backend_address;
+    @Getter private volatile boolean heartbeat_pending = false;
     @Getter private Socket socket;
     @Getter private final AtomicReference<State> connectionState = new AtomicReference<>(State.DISCONNECTED);
     private final Integer default_tries = 10;
@@ -63,26 +63,33 @@ public class SocketThread implements Runnable {
                 }
             }
         }
-        else if (connectionState.get().equals(State.CONNECTED) || (connectionState.get().equals(State.GREETING) && App.getInstance().getCurrentTick() %(20*15) == 0 && session_token == null)) {
-            connectionState.set(State.GREETING);
-            HelloPacket packet = new HelloPacket(
-                    xboxInfo.getXuid(),
-                    App.getInstance().getDiscord_info().getDiscord_user_id(),
-                    xboxInfo.getGamertag()
-            );
-            sendPacket(packet, (pk) -> {
-                System.out.println(pk);
-                if (pk.getToken() != null) {
-                    session_token = pk.getToken();
-                    System.out.println("Successfully connected to backend!");
-                }
-            }, System.out::println);
+        else if (connectionState.get().equals(State.CONNECTED) && session_token == null) {
+            heartbeat();
         }
+    }
+
+    public synchronized void heartbeat(){
+        if (heartbeat_pending) return;
+        heartbeat_pending = true;
+        var xboxInfo = App.getInstance().getXboxUserInfo();
+        HeartbeatPacket packet = new HeartbeatPacket();
+        packet.setXuid(xboxInfo.getXuid());
+        packet.setGamertag(xboxInfo.getGamertag());
+        packet.setDiscord_user_id(App.getInstance().getDiscord_info().getDiscord_user_id());
+
+        sendPacket(packet, (pk) -> {
+            heartbeat_pending = false;
+            System.out.println(pk);
+            if (pk.getToken() != null) {
+                session_token = pk.getToken();
+                System.out.println("Successfully connected to backend!");
+            }
+        }, System.out::println);
     }
 
     @Override public void run() {
         do {
-            if (connectionState.get().equals(State.GREETING) || connectionState.get().equals(State.TRUSTED)) {
+            if (connectionState.get().equals(State.CONNECTED)) {
                 String buffer = null;
                 try {
                     buffer = socket.read();
@@ -107,19 +114,19 @@ public class SocketThread implements Runnable {
 
     public void shutdown(){
         if (connectionState.get().equals(State.SHUTDOWN)) return;
-        sendPacket(new ByeByePacket());
+        if (session_token != null) sendPacket(new ByeByePacket());
         connectionState.set(State.SHUTDOWN);
         socket.close();
     }
 
     public <T extends Packet> boolean sendPacket(@NonNull T packet){
         if (connectionState.get().equals(State.SHUTDOWN) || connectionState.get().equals(State.DISCONNECTED)) return false;
-        if (!connectionState.get().equals(State.TRUSTED) && packet instanceof HeartbeatPacket) return false;
-        if (packet instanceof HelloPacket && connectionState.get().equals(State.CONNECTED)) {
-            connectionState.set(State.GREETING);
-        }
+        if (!connectionState.get().equals(State.CONNECTED) && packet instanceof HeartbeatPacket) return false;
         packet.setToken(session_token);
-        if (packet instanceof HeartbeatPacket heartbeatPacket) heartbeatPacket.setSent(System.currentTimeMillis());
+        if (packet instanceof HeartbeatPacket heartbeatPacket) {
+            heartbeatPacket.setSent(System.currentTimeMillis());
+        }
+
         try {
             byte[] compressed = GzipCompressor.getInstance().compress(new Gson().toJson(packet.encode()));
             DatagramPacket pk = new DatagramPacket(compressed, compressed.length, backend_address.getAddress(), backend_address.getPort());
@@ -145,6 +152,9 @@ public class SocketThread implements Runnable {
                 if (on_error != null) on_error.accept(error);
             } else callback.accept((T) pk);
         });
+        if (packet instanceof HeartbeatPacket) {
+            System.out.println(Thread.currentThread().getName());
+        }
         return sendPacket(packet);
     }
     public <T extends CallbackPacket> boolean sendPacket(@NonNull T packet, @NonNull Consumer<T> callback){
@@ -155,8 +165,6 @@ public class SocketThread implements Runnable {
         DISCONNECTED,
         CONNECTING,
         CONNECTED,
-        GREETING,
-        TRUSTED,
         SHUTDOWN
     }
 }

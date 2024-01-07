@@ -89,6 +89,7 @@ public final class App {
         }
         ui.setReady();
         new Tray();
+        scheduler.scheduleRepeating(RestAPI::heartbeat, 20 *5);
     }
 
     private void tickProcessor() {
@@ -103,7 +104,6 @@ public final class App {
     private void onTick(int currentTick) {
         scheduler.scheduleAsync(DiscordRPC::discordRunCallbacks);
         if (App.ui != null) App.ui.general_tab.tick();
-        if (currentTick %20*5 == 0) RestAPI.heartbeat();
         scheduler.onTick(currentTick);
     }
 

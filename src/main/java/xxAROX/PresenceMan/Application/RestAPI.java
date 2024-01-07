@@ -36,7 +36,7 @@ public class RestAPI {
         if (App.getInstance().xboxUserInfo == null) return null;
 
         pending_heartbeat = true;
-        App.getInstance().socket.sendPacket(new HeartbeatPacket(), (pk) -> {
+        System.out.println(App.getInstance().socket.sendPacket(new HeartbeatPacket(), (pk) -> {
             System.out.println(8);
             pending_heartbeat = false;
             if (App.getInstance().featuredServer != null) return;
@@ -67,7 +67,7 @@ public class RestAPI {
             App.getInstance().network = null;
             App.getInstance().server = null;
             System.out.println("Error on heartbeat: " + err);
-        });
+        }));
         return null;
     }
 

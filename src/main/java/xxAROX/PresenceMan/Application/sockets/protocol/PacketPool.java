@@ -6,7 +6,6 @@ import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.Packet;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.ByeByePacket;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.HeartbeatPacket;
-import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.HelloPacket;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.UnknownPacket;
 
 import java.lang.reflect.InvocationTargetException;
@@ -17,7 +16,6 @@ public final class PacketPool {
     private static final Map<String, Class<? extends Packet>> packets = new HashMap<>();
     static {
         register(UnknownPacket.class);
-        register(HelloPacket.class);
         register(HeartbeatPacket.class);
         register(ByeByePacket.class);
     }

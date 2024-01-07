@@ -2,20 +2,29 @@ package xxAROX.PresenceMan.Application.sockets.protocol.packets.types;
 
 import com.google.gson.JsonObject;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.CallbackPacket;
 
-@Getter @Setter
+@Getter @Setter @ToString @NoArgsConstructor
 public class HeartbeatPacket extends CallbackPacket {
+    private String xuid = null; // required
+    private String discord_user_id = null; // optional
+    private String gamertag = null; // required
+    private long sent = 0;
+    // response
     private APIActivity api_activity = null;
     private String network = null;
     private String server = null;
-    private long sent = 0;
     private Long received = null;
 
     @Override
     protected JsonObject encodeBody(JsonObject payload) {
+        payload.addProperty("xuid", xuid);
+        payload.addProperty("duid", discord_user_id);
+        payload.addProperty("gamertag", gamertag);
         if (api_activity != null) payload.add("api_activity", api_activity.serialize());
         payload.addProperty("network", network);
         payload.addProperty("server", server);
@@ -26,6 +35,9 @@ public class HeartbeatPacket extends CallbackPacket {
 
     @Override
     protected void decodeBody(JsonObject object) {
+        xuid = object.get("xuid").getAsString();
+        discord_user_id = object.has("duid") && !object.get("duid").isJsonNull() ? object.get("duid").getAsString() : discord_user_id;
+        gamertag = object.has("gamertag") && !object.get("gamertag").isJsonNull() ? object.get("gamertag").getAsString() : gamertag;
         api_activity = object.has("api_activity") && object.get("api_activity").isJsonObject() ? APIActivity.deserialize(object.getAsJsonObject("sent")) : api_activity;
         network = object.has("network") && !object.get("network").isJsonNull() ? object.get("network").getAsString() : network;
         server = object.has("server") && !object.get("server").isJsonNull() ? object.get("server").getAsString() : server;
