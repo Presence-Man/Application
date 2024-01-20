@@ -7,7 +7,7 @@ public final class AppInfo {
     public final static String name = "Presence-Man";
     public static String icon = "icon.png";
     public static long discord_application_id = 1133823892486623344L;
-    public final static boolean development = false;
+    public static boolean development = false;
 
     public static String getVersion(){
         return getVersion(".");
