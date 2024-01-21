@@ -25,7 +25,6 @@ import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 import xxAROX.PresenceMan.Application.ui.AUITab;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.ui.popup.LoginPopup;
-import xxAROX.PresenceMan.Application.utils.CacheManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -114,7 +113,7 @@ public class LoginTab extends AUITab {
                         frame.showError("The login request timed out.\nPlease login within 60 seconds.");
                     });
                 } else {
-                    App.getInstance().getLogger().error(e);
+                    App.getLogger().error(e);
                     App.ui.showException(e);
                 }
             }
@@ -123,7 +122,7 @@ public class LoginTab extends AUITab {
     }
 
     private void logout(){
-        App.getInstance().onLogout();
+        App.getEvents().onLogout();
         reloadStateButton();
     }
 
@@ -142,9 +141,7 @@ public class LoginTab extends AUITab {
                 } else {
                     SwingUtilities.invokeLater(() -> {
                         closePopup();
-                        App.getInstance().xboxUserInfo = xboxUserInfo;
-                        CacheManager.storeXboxUserInfo(xboxUserInfo);
-                        App.getInstance().onLogin();
+                        App.getEvents().onLogin(xboxUserInfo);
                         reloadStateButton();
                         frame.showInfo("Logged in as " + xboxUserInfo.getGamertag() + "!");
                     });

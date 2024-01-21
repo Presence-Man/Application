@@ -73,7 +73,7 @@ public class FetchGatewayInformationTask extends Task {
             App.getInstance().initSocket();
         } else {
             Gateway.broken = true;
-            App.getInstance().getLogger().warn("Couldn't connect to backend, reconnecting..");
+            App.getLogger().warn("Couldn't connect to backend, reconnecting..");
             ReconnectingTask.activate();
         }
     }

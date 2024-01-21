@@ -28,7 +28,8 @@ import java.util.List;
 public class DiscordInfo {
     public boolean ready = false;
     private final List<Runnable> ready_handlers = new ArrayList<>();
-    private volatile String discord_user_id = null;
+    private volatile String id = null;
+    private volatile String username = null;
     private volatile String current_application_id = "null";
 
     public void registerHandler(Runnable runnable){
@@ -39,7 +40,7 @@ public class DiscordInfo {
         }
     }
     public void checkHandlers(){
-        if (ready && ready_handlers.size() > 0) {
+        if (ready && !ready_handlers.isEmpty()) {
             List<Runnable> for_deletion = new ArrayList<>();
             for (Runnable run : ready_handlers) {
                 run.run();

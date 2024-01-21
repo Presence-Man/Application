@@ -17,6 +17,7 @@
 
 package xxAROX.PresenceMan.Application;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.ToString;
@@ -28,6 +29,7 @@ import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.DiscordInfo;
 import xxAROX.PresenceMan.Application.entity.FeaturedServer;
 import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
+import xxAROX.PresenceMan.Application.events.IBaseListener;
 import xxAROX.PresenceMan.Application.scheduler.WaterdogScheduler;
 import xxAROX.PresenceMan.Application.sockets.SocketThread;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.ByeByePacket;
@@ -56,6 +58,7 @@ public final class App {
     @Getter private DiscordInfo discord_info = new DiscordInfo();
 
     private static App instance;
+    @Getter private static App.Events events;
     public SocketThread socket = null;
     public String network = null;
     public String server = null;
@@ -83,6 +86,8 @@ public final class App {
         }
         this.logger = logger;
         instance = this;
+        events = new Events(this);
+
         Runtime.getRuntime().addShutdownHook(new Thread(DiscordRPC::discordShutdown));
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (socket != null) socket.sendPacket(new ByeByePacket());
@@ -100,7 +105,6 @@ public final class App {
         App.getInstance().getScheduler().scheduleAsync(new FetchGatewayInformationTask());
 
         xboxUserInfo = CacheManager.loadXboxUserInfo();
-        if (xboxUserInfo != null) discord_info.registerHandler(() -> App.getInstance().onLogin());
         logger.info("App is in " + (AppInfo.development ? "development" : "production") + " mode");
 
         while (ui == null) {Thread.sleep(1000);}
@@ -120,6 +124,19 @@ public final class App {
         tickExecutor.shutdown();
         scheduler.shutdown();
         socket.shutdown();
+    }
+
+    public void updateServer(String new_network, String new_server) {
+        String before_network = network;
+        if (before_network == null || !before_network.equalsIgnoreCase(new_network)) {
+            network_session_created = new_network == null ? null : Instant.now().toEpochMilli();
+            network = new_network;
+        }
+        String before_server = server;
+        if (before_server == null || !before_server.equalsIgnoreCase(new_server)) {
+            server_session_created = new_server == null ? null : Instant.now().toEpochMilli();
+            server = new_server;
+        }
     }
 
     public void shutdown() {
@@ -143,16 +160,6 @@ public final class App {
         }
     }
 
-    public void onLogin() {
-        setActivity(APIActivity.none());
-    }
-
-    public void onLogout() {
-        CacheManager.storeXboxUserInfo(null);
-        xboxUserInfo = null;
-        setActivity(APIActivity.none());
-    }
-
     public void initSocket() {
         if (socket == null) {
             socket = new SocketThread();
@@ -166,21 +173,21 @@ public final class App {
     public synchronized void initDiscord(String application_id) {
         if (discord_info == null) discord_info = new DiscordInfo();
         if (discord_info.getCurrent_application_id().equals(application_id)) return;
-        if (discord_info.getDiscord_user_id() != null) DiscordRPC.discordShutdown();
+
         discord_info.setCurrent_application_id(application_id);
         DiscordEventHandlers handlers = new DiscordEventHandlers.Builder()
                 .setReadyEventHandler((user) -> {
                     var discord_info = App.getInstance().discord_info;
-                    discord_info.setDiscord_user_id(user.userId);
+                    discord_info.setId(user.userId);
+                    discord_info.setUsername(user.username);
                     discord_info.ready = true;
                     discord_info.checkHandlers();
-                    logger.info("Welcome @" + user.username + ", discord is ready!");
+                    events.onDiscordReady(discord_info);
                 })
                 .build()
         ;
         DiscordRPC.discordInitialize(discord_info.getCurrent_application_id(), handlers, false);
         DiscordRPC.discordRegister(discord_info.getCurrent_application_id(), "");
-        setActivity(APIActivity.none());
     }
 
     public static void setActivity(APIActivity api_activity) {
@@ -198,7 +205,10 @@ public final class App {
             if (api_activity.getLarge_icon_text() != null && !api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(Utils.replaceParams(api_activity.getLarge_icon_text()));
         }
         App.getInstance().initDiscord(String.valueOf(api_activity.getClient_id()));
-        if (app.discord_info.ready) DiscordRPC.discordUpdatePresence(api_activity.toDiscord());
+        if (app.discord_info.ready) {
+            events.onDiscordActivityUpdate(api_activity);
+            DiscordRPC.discordUpdatePresence(api_activity.toDiscord());
+        }
         else if (queue) {
             APIActivity finalApi_activity = api_activity;
             app.discord_info.registerHandler(() -> setActivity(finalApi_activity, false));
@@ -215,6 +225,30 @@ public final class App {
             tick(++currentTick);
         } catch (Exception e) {
             logger.error("Error while ticking application!", e);
+        }
+    }
+
+    @AllArgsConstructor
+    public final class Events implements IBaseListener {
+        private App app;
+
+        @Override
+        public void onLogin(XboxUserInfo info) {
+            xboxUserInfo = info;
+            CacheManager.storeXboxUserInfo(info);
+        }
+
+        @Override
+        public void onLogout() {
+            xboxUserInfo = null;
+            CacheManager.storeXboxUserInfo(null);
+            setActivity(APIActivity.none());
+        }
+
+        @Override
+        public void onDiscordReady(DiscordInfo info) {
+            logger.info("Welcome @" + info.getUsername() + ", discord is ready!");
+            setActivity(APIActivity.none());
         }
     }
 }

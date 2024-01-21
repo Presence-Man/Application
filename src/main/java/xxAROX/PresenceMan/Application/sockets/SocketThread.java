@@ -90,7 +90,7 @@ public class SocketThread implements Runnable {
         HeartbeatPacket packet = new HeartbeatPacket();
         packet.setXuid(xboxInfo.getXuid());
         packet.setGamertag(xboxInfo.getGamertag());
-        packet.setDiscord_user_id(App.getInstance().getDiscord_info().getDiscord_user_id());
+        packet.setDiscord_user_id(App.getInstance().getDiscord_info().getId());
 
         sendPacket(packet, (pk) -> {
             heartbeat_pending = false;

@@ -58,21 +58,7 @@ public class RestAPI {
             pending_heartbeat = false;
             if (App.getInstance().featuredServer != null) return;
             System.out.println(9);
-            String network = pk.getNetwork();
-            String before_network = App.getInstance().network;
-
-            if (before_network == null || !before_network.equalsIgnoreCase(network)) {
-                App.network_session_created = Instant.now().toEpochMilli();
-                App.getInstance().network = network;
-            }
-            System.out.println(10);
-
-            String server = pk.getServer();
-            String before_server = App.getInstance().server;
-            if (before_server == null || !before_server.equalsIgnoreCase(server)) {
-                App.server_session_created = Instant.now().toEpochMilli();
-                App.getInstance().server = server;
-            }
+            App.getInstance().updateServer(pk.getNetwork(), pk.getServer());
             System.out.println(11);
 
             APIActivity new_activity = pk.getApi_activity();
