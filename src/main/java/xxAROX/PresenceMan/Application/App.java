@@ -89,9 +89,6 @@ public final class App {
         events = new Events(this);
 
         Runtime.getRuntime().addShutdownHook(new Thread(DiscordRPC::discordShutdown));
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (socket != null) socket.sendPacket(new ByeByePacket());
-        }));
         initDiscord();
 
         ThreadFactoryBuilder builder = ThreadFactoryBuilder.builder().format("Tick Executor - #%d").build();
@@ -205,14 +202,13 @@ public final class App {
             if (api_activity.getLarge_icon_text() != null && !api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(Utils.replaceParams(api_activity.getLarge_icon_text()));
         }
         App.getInstance().initDiscord(String.valueOf(api_activity.getClient_id()));
-        if (app.discord_info.ready) {
-            events.onDiscordActivityUpdate(api_activity);
-            DiscordRPC.discordUpdatePresence(api_activity.toDiscord());
-        }
-        else if (queue) {
-            APIActivity finalApi_activity = api_activity;
-            app.discord_info.registerHandler(() -> setActivity(finalApi_activity, false));
-        }
+        APIActivity finalApi_activity1 = api_activity;
+        App.getInstance().discord_info.registerHandler(() -> {
+            if (app.discord_info.ready) {
+                events.onDiscordActivityUpdate(finalApi_activity1);
+                DiscordRPC.discordUpdatePresence(finalApi_activity1.toDiscord());
+            } else if (queue) app.discord_info.registerHandler(() -> setActivity(finalApi_activity1, false));
+        });
     }
 
     public static Logger getLogger(){

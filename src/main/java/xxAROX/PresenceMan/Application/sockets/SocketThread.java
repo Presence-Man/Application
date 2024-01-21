@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class SocketThread implements Runnable {
-    @Getter private volatile String session_token = null;
+    @Getter private final AtomicReference<String> session_token = new AtomicReference<>(null);
     @Getter private static SocketThread instance;
     @Getter private InetSocketAddress backend_address;
     @Getter private volatile boolean heartbeat_pending = false;
@@ -78,28 +78,6 @@ public class SocketThread implements Runnable {
                 }
             }
         }
-        else if (connectionState.get().equals(State.CONNECTED) && session_token == null) {
-            heartbeat();
-        }
-    }
-
-    public synchronized void heartbeat(){
-        if (heartbeat_pending) return;
-        heartbeat_pending = true;
-        var xboxInfo = App.getInstance().getXboxUserInfo();
-        HeartbeatPacket packet = new HeartbeatPacket();
-        packet.setXuid(xboxInfo.getXuid());
-        packet.setGamertag(xboxInfo.getGamertag());
-        packet.setDiscord_user_id(App.getInstance().getDiscord_info().getId());
-
-        sendPacket(packet, (pk) -> {
-            heartbeat_pending = false;
-            System.out.println(pk);
-            if (pk.getToken() != null) {
-                session_token = pk.getToken();
-                App.getLogger().info("Successfully connected to backend!");
-            }
-        }, System.out::println);
     }
 
     @Override public void run() {
@@ -108,6 +86,7 @@ public class SocketThread implements Runnable {
                 String buffer = null;
                 try {
                     buffer = socket.read();
+                    System.out.println(buffer);
                 } catch (Exception e) {
                     App.getLogger().error("Error while reading packet: ", e);
                 }
@@ -127,7 +106,10 @@ public class SocketThread implements Runnable {
 
     public void shutdown(){
         if (connectionState.get().equals(State.SHUTDOWN)) return;
-        if (session_token != null) sendPacket(new ByeByePacket());
+        if (session_token.get() != null) {
+            System.out.println(session_token);
+            sendPacket(new ByeByePacket());
+        }
         connectionState.set(State.SHUTDOWN);
         socket.close();
     }
@@ -135,7 +117,7 @@ public class SocketThread implements Runnable {
     public <T extends Packet> boolean sendPacket(@NonNull T packet){
         if (connectionState.get().equals(State.SHUTDOWN) || connectionState.get().equals(State.DISCONNECTED)) return false;
         if (!connectionState.get().equals(State.CONNECTED) && packet instanceof HeartbeatPacket) return false;
-        packet.setToken(session_token);
+        if (session_token.get() != null) packet.setToken(session_token.get());
         if (packet instanceof HeartbeatPacket heartbeatPacket) {
             heartbeatPacket.setSent(System.currentTimeMillis());
         }
@@ -162,9 +144,6 @@ public class SocketThread implements Runnable {
                 if (on_error != null) on_error.accept(error);
             } else callback.accept((T) pk);
         });
-        if (packet instanceof HeartbeatPacket) {
-            App.getLogger().debug(Thread.currentThread().getName());
-        }
         return sendPacket(packet);
     }
     public <T extends CallbackPacket> boolean sendPacket(@NonNull T packet, @NonNull Consumer<T> callback){

@@ -36,7 +36,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,32 +45,37 @@ public class RestAPI {
         public static String skin = "/api/v1/images/skins/";
         public static String head = "/api/v1/images/heads/";
     }
-    public static String heartbeat(){
-        if (SocketThread.getInstance() != null && SocketThread.getInstance().getSession_token() == null) return null;
-        //if (pending_heartbeat) return null;
-        if (App.getInstance().socket == null) return null;
-        if (App.getInstance().xboxUserInfo == null) return null;
+    public static void heartbeat(){
+        var socket = SocketThread.getInstance();
+        if (socket.getConnectionState().get().equals(SocketThread.State.SHUTDOWN)) return;
+        if (socket.getConnectionState().get().equals(SocketThread.State.DISCONNECTED)) return;
+        if (socket.getConnectionState().get().equals(SocketThread.State.CONNECTING)) return;
+        if (socket.getSession_token() == null) return;
+        if (pending_heartbeat) return;
+        if (App.getInstance().socket == null) return;
+        if (App.getInstance().xboxUserInfo == null) return;
 
         pending_heartbeat = true;
-        System.out.println(App.getInstance().socket.sendPacket(new HeartbeatPacket(), (pk) -> {
-            System.out.println(8);
+        var packet = new HeartbeatPacket();
+        packet.setXuid(App.getInstance().xboxUserInfo.getXuid());
+        packet.setGamertag(App.getInstance().xboxUserInfo.getGamertag());
+        packet.setDiscord_user_id(App.getInstance().getDiscord_info().getId());
+        System.out.println(App.getInstance().socket.sendPacket(packet, (pk) -> {
+            System.out.println("Calling heartbeat callback");
+            if (SocketThread.getInstance().getSession_token().get() == null) SocketThread.getInstance().getSession_token().set(pk.getToken());
             pending_heartbeat = false;
             if (App.getInstance().featuredServer != null) return;
-            System.out.println(9);
             App.getInstance().updateServer(pk.getNetwork(), pk.getServer());
-            System.out.println(11);
 
             APIActivity new_activity = pk.getApi_activity();
             if (new_activity == null) new_activity = APIActivity.none();
             if (new_activity.equals(App.getInstance().getApi_activity())) return;
             App.setActivity(new_activity);
-            System.out.println(12);
         }, err -> {
             App.getInstance().network = null;
             App.getInstance().server = null;
             App.getLogger().error("Error on heartbeat: " + err);
         }));
-        return null;
     }
 
 

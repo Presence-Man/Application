@@ -45,7 +45,7 @@ public final class Socket {
             socket = _socket;
             return true;
         } catch (IOException e) {
-            App.getInstance().getLogger().error("Error while connecting to cloud: {}", e);
+            App.getLogger().error("Error while connecting to cloud: {}", e);
         }
         return false;
     }
