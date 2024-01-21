@@ -38,7 +38,6 @@ public final class CallbackPacketManager {
             if (!packet.getCallback_id().startsWith(PREFIX)) return packet;
             if (callbacks.containsKey(packet.getCallback_id())) {
                 callbacks.remove(packet.getCallback_id()).accept(packet);
-                App.getLogger().debug("Called!");
                 return null;
             }
         } catch (Exception e) {

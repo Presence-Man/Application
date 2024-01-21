@@ -127,7 +127,7 @@ public class WaterdogScheduler {
     }
 
     public void shutdown() {
-        App.getInstance().getLogger().debug("Scheduler shutdown initialized!");
+        App.getLogger().debug("Scheduler shutdown initialized!");
         this.threadedExecutor.shutdown();
 
         int count = 25;

@@ -59,7 +59,7 @@ public final class PacketPool {
             packet.decode(json);
             return packet;
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            App.getInstance().getLogger().error("Error while decoding packet: '" + payload + "'!");
+            App.getLogger().error("Error while decoding packet: '" + payload + "'!");
             return new UnknownPacket();
         }
     }

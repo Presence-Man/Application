@@ -116,7 +116,6 @@ public class SocketThread implements Runnable {
                     Packet packet = PacketPool.decode(buffer);
                     if (packet instanceof UnknownPacket) continue;
                     if (packet instanceof CallbackPacket callbackPacket && callbackPacket.getCallback_id() != null) {
-                        System.out.println(packet);
                         CallbackPacket cbp = CallbackPacketManager.handle(callbackPacket);
                         if (cbp != null) sendPacket(cbp);
                     }
