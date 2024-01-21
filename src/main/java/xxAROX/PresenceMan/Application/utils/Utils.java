@@ -17,5 +17,34 @@
 
 package xxAROX.PresenceMan.Application.utils;
 
+import xxAROX.PresenceMan.Application.App;
+import xxAROX.PresenceMan.Application.AppInfo;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class Utils {
+    private static Map<String, String> getDefaultParams() {
+        return new HashMap<>(){{
+            put("{App.name}", AppInfo.name);
+            put("{App.version}", AppInfo.getVersion());
+
+            if (App.getInstance().xboxUserInfo != null) {
+                put("{xuid}", App.getInstance().xboxUserInfo.getXuid());
+                put("{gamertag}", App.getInstance().xboxUserInfo.getGamertag());
+            }
+            put("{network}", App.getInstance().network != null ? App.getInstance().network : "null");
+            put("{server}", App.getInstance().server != null ? App.getInstance().server : "null");
+
+        }};
+    }
+
+    public static String replaceParams(String base){
+        return replaceParams(base, getDefaultParams());
+    }
+    public static String replaceParams(String base, Map<String, String> params){
+        if (!params.containsKey("{App.name}")) params.putAll(getDefaultParams());
+        for (Map.Entry<String, String> keyValueEntry : params.entrySet()) base = base.replace(keyValueEntry.getKey(), keyValueEntry.getValue());
+        return base;
+    }
 }

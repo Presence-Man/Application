@@ -72,7 +72,7 @@ public final class DiscordUserInfo {
             if (queue) {
                 APIActivity finalApi_activity = api_activity;
                 discordInitHandlers.add(core -> setActivity(finalApi_activity, false));
-            } else System.out.println("Discord is not initialized!");
+            } else App.getLogger().error("Discord is not initialized!");
         }
     }
 

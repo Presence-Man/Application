@@ -18,20 +18,35 @@
 package xxAROX.PresenceMan.Application;
 
 import lombok.SneakyThrows;
-import org.apache.logging.log4j.LogManager;
+import lombok.extern.log4j.Log4j;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.PropertyConfigurator;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Log4j
 public class Bootstrap {
     @SneakyThrows
     public static void main(String[] _args) {
-        new App();
+        List<String> args = Arrays.stream(_args).toList();
+        List<String> lowArgs = args.stream().map(String::toLowerCase).toList();
+
+        AppInfo.development = lowArgs.contains("dev") || lowArgs.contains("development");
+
+        Logger logger = initializeLogger();
+        new App(logger);
+    }
+
+    protected static Logger initializeLogger(){
+        PropertyConfigurator.configure(ClassLoader.getSystemResource("log4j.properties"));
+        var logger = Logger.getLogger(App.class);
+        logger.setLevel(AppInfo.development ? Level.DEBUG : Level.INFO);
+        return logger;
     }
 
     protected static void shutdownHook() {
-        LogManager.shutdown();
-        Runtime.getRuntime().halt(0); // force exit
     }
 }

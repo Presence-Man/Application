@@ -42,7 +42,7 @@ public class ReconnectingTask extends Task {
     @Override
     public void onRun(int currentTick) {
         FetchGatewayInformationTask.ping_backend();
-        if (!Gateway.broken) System.out.println("Reconnected to backend!");
+        if (!Gateway.broken) App.getLogger().info("Reconnected to backend!");
     }
 
     @Override

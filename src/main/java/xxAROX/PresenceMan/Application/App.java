@@ -22,8 +22,8 @@ import lombok.SneakyThrows;
 import lombok.ToString;
 import net.arikia.dev.drpc.DiscordEventHandlers;
 import net.arikia.dev.drpc.DiscordRPC;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.DiscordInfo;
 import xxAROX.PresenceMan.Application.entity.FeaturedServer;
@@ -37,6 +37,7 @@ import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.utils.CacheManager;
 import xxAROX.PresenceMan.Application.utils.ThreadFactoryBuilder;
 import xxAROX.PresenceMan.Application.utils.Tray;
+import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.swing.*;
 import java.time.Instant;
@@ -63,7 +64,7 @@ public final class App {
         return instance;
     }
 
-    private final Logger logger = LogManager.getLogger(AppInfo.name);
+    private Logger logger;
     public static AppUI ui;
     private WaterdogScheduler scheduler;
     private ScheduledExecutorService tickExecutor;
@@ -75,11 +76,12 @@ public final class App {
     public FeaturedServer featuredServer = null;
 
     @SneakyThrows
-    public App() {
+    public App(Logger logger) {
         if (instance != null) {
             System.exit(0);
             return;
         }
+        this.logger = logger;
         instance = this;
         Runtime.getRuntime().addShutdownHook(new Thread(DiscordRPC::discordShutdown));
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -91,7 +93,7 @@ public final class App {
         tickExecutor = Executors.newScheduledThreadPool(1, builder);
 
         scheduler = new WaterdogScheduler();
-        tickFuture = tickExecutor.scheduleAtFixedRate(this::tickProcessor, 50, 50, TimeUnit.MILLISECONDS);
+        tickFuture = tickExecutor.scheduleAtFixedRate(this::processTick, 50, 50, TimeUnit.MILLISECONDS);
 
         SwingUtilities.invokeLater(() -> ui = new AppUI());
         scheduler.scheduleAsync(new UpdateCheckTask());
@@ -99,29 +101,25 @@ public final class App {
 
         xboxUserInfo = CacheManager.loadXboxUserInfo();
         if (xboxUserInfo != null) discord_info.registerHandler(() -> App.getInstance().onLogin());
+        logger.info("App is in " + (AppInfo.development ? "development" : "production") + " mode");
 
-        while (ui == null) {
-            logger.info("Waiting for UI to be initialized..");
-            Thread.sleep(1000);
-        }
+        while (ui == null) {Thread.sleep(1000);}
         ui.setReady();
         new Tray();
-        scheduler.scheduleRepeating(RestAPI::heartbeat, 20 *5);
     }
 
-    private void tickProcessor() {
-        if (shutdown && !tickFuture.isCancelled()) tickFuture.cancel(false);
-        try {
-            onTick(++currentTick);
-        } catch (Exception e) {
-            logger.error("Error while ticking application!", e);
-        }
-    }
-
-    private void onTick(int currentTick) {
+    private void tick(int currentTick) {
         scheduler.scheduleAsync(DiscordRPC::discordRunCallbacks);
+        if (socket != null) socket.tick(currentTick);
+        if (currentTick %(20*5) == 0) RestAPI.heartbeat();
         if (App.ui != null) App.ui.general_tab.tick();
         scheduler.onTick(currentTick);
+    }
+
+    private void shutdownServices() {
+        tickExecutor.shutdown();
+        scheduler.shutdown();
+        socket.shutdown();
     }
 
     public void shutdown() {
@@ -129,36 +127,20 @@ public final class App {
         shutdown = true;
 
         try {
-            shutdown0();
+            Thread.sleep(500);
+            shutdownServices();
+            if (!tickFuture.isCancelled()) {
+                logger.info("Interrupting scheduler!");
+                tickFuture.cancel(true);
+            }
+            logger.info("Shutdown complete!");
         } catch (Exception e) {
-            logger.error("Unable to shutdown app gracefully", e);
+            logger.error("Unable to shutdown application gracefully", e);
         } finally {
             DiscordRPC.discordShutdown();
-            Bootstrap.shutdownHook();
+            LogManager.shutdown();
+            Runtime.getRuntime().halt(0); // force exit
         }
-    }
-    private void shutdown0() throws Exception {
-        Thread.sleep(500);
-
-        tickExecutor.shutdown();
-        scheduler.shutdown();
-
-        if (!tickFuture.isCancelled()) {
-            logger.info("Interrupting scheduler!");
-            tickFuture.cancel(true);
-        }
-        logger.info("Shutdown complete!");
-    }
-
-    public static String replace(String input){
-        return input
-                .replace("{network}", App.getInstance().network == null ? "null" : App.getInstance().network)
-                .replace("{server}", App.getInstance().server == null ? "null" : App.getInstance().server)
-                .replace("{xuid}", App.getInstance().xboxUserInfo.getXuid())
-                .replace("{gamertag}", App.getInstance().xboxUserInfo.getGamertag())
-                .replace("{App.name}", AppInfo.name)
-                .replace("{App.version}", AppInfo.getVersion())
-        ;
     }
 
     public void onLogin() {
@@ -192,7 +174,7 @@ public final class App {
                     discord_info.setDiscord_user_id(user.userId);
                     discord_info.ready = true;
                     discord_info.checkHandlers();
-                    System.out.println("Welcome @" + user.username + ", discord is ready!");
+                    logger.info("Welcome @" + user.username + ", discord is ready!");
                 })
                 .build()
         ;
@@ -210,16 +192,29 @@ public final class App {
         if (api_activity.equals(app.api_activity)) return;
         app.api_activity = api_activity;
         if (app.xboxUserInfo != null) {
-            if (api_activity.getState() != null) api_activity.setState(replace(api_activity.getState()));
-            if (api_activity.getDetails() != null) api_activity.setDetails(replace(api_activity.getDetails()));
+            if (api_activity.getState() != null) api_activity.setState(Utils.replaceParams(api_activity.getState()));
+            if (api_activity.getDetails() != null) api_activity.setDetails(Utils.replaceParams(api_activity.getDetails()));
             if (api_activity.getLarge_icon_key() == null || api_activity.getLarge_icon_key().isBlank()) api_activity.setLarge_icon_key("bedrock");
-            if (api_activity.getLarge_icon_text() != null && !api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(replace(api_activity.getLarge_icon_text()));
+            if (api_activity.getLarge_icon_text() != null && !api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(Utils.replaceParams(api_activity.getLarge_icon_text()));
         }
         App.getInstance().initDiscord(String.valueOf(api_activity.getClient_id()));
         if (app.discord_info.ready) DiscordRPC.discordUpdatePresence(api_activity.toDiscord());
         else if (queue) {
             APIActivity finalApi_activity = api_activity;
             app.discord_info.registerHandler(() -> setActivity(finalApi_activity, false));
+        }
+    }
+
+    public static Logger getLogger(){
+        return instance.logger;
+    }
+
+    private void processTick() {
+        if (shutdown && !tickFuture.isCancelled()) tickFuture.cancel(false);
+        try {
+            tick(++currentTick);
+        } catch (Exception e) {
+            logger.error("Error while ticking application!", e);
         }
     }
 }

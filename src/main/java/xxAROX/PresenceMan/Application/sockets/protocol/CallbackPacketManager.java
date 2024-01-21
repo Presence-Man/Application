@@ -38,11 +38,11 @@ public final class CallbackPacketManager {
             if (!packet.getCallback_id().startsWith(PREFIX)) return packet;
             if (callbacks.containsKey(packet.getCallback_id())) {
                 callbacks.remove(packet.getCallback_id()).accept(packet);
-                System.out.println("Called!");
+                App.getLogger().debug("Called!");
                 return null;
             }
         } catch (Exception e) {
-            App.getInstance().getLogger().error("Error while executing callback for a {} packet: {}", packet.getPacketType(), e.getMessage());
+            App.getLogger().error("Error while executing callback for a " + packet.getPacketType() + " packet: {}", e);
             return null;
         }
         return packet;

@@ -83,7 +83,7 @@ public class RestAPI {
         }, err -> {
             App.getInstance().network = null;
             App.getInstance().server = null;
-            System.out.println("Error on heartbeat: " + err);
+            App.getLogger().error("Error on heartbeat: " + err);
         }));
         return null;
     }

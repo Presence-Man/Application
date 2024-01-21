@@ -45,7 +45,7 @@ public final class Socket {
             socket = _socket;
             return true;
         } catch (IOException e) {
-            App.getInstance().getLogger().error("Error while connecting to cloud: {}", e.getMessage());
+            App.getInstance().getLogger().error("Error while connecting to cloud: {}", e);
         }
         return false;
     }
@@ -59,12 +59,11 @@ public final class Socket {
             try {
                 socket.receive(received);
             } catch (IOException e) {
-                e.printStackTrace();
+                App.getLogger().error("Error when receiving data: ", e);
             }
             buffer =  GzipCompressor.getInstance().decompress(received.getData()).trim();
         } catch (CompressorException e) {
-            System.out.println("Error while decompressing packet:");
-            e.printStackTrace();
+            App.getLogger().error("Error while decompressing packet: ", e);
         }
         return buffer;
     }

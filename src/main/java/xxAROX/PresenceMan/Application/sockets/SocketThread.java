@@ -52,31 +52,29 @@ public class SocketThread implements Runnable {
         try {
             instance = this;
             backend_address = new InetSocketAddress(Gateway.ip, Gateway.usual_port +1);
-            System.out.println("Backend identified as " + backend_address.getAddress().getHostAddress() + ":" + backend_address.getPort());
+            App.getLogger().info("Backend identified as " + backend_address.getAddress().getHostAddress() + ":" + backend_address.getPort());
             socket = new Socket(this);
-            App.getInstance().getScheduler().scheduleRepeating(this::tick, 1);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
+            App.getLogger().error("Error while creating socket: ", e);
         }
     }
 
-    private void tick() {
+    public void tick(int currentTick) {
         var xboxInfo = App.getInstance().getXboxUserInfo();
         if (xboxInfo == null) return;
-        if (connectionState.get().equals(State.DISCONNECTED) && App.getInstance().getCurrentTick() %(20*15) == 0) {
+        if (connectionState.get().equals(State.DISCONNECTED) && currentTick %(20*15) == 0) {
             if (tries_left.getAndDecrement() <= 0) {
-                System.out.println("Connection can't be established, shutting down..");
+                App.getLogger().error("Connection can't be established, shutting down..");
                 shutdown();
             } else {
                 connectionState.set(State.CONNECTING);
-                System.out.println(tries_left.get() +1 == default_tries ? "Connecting.." : "Reconnecting..");
+                App.getLogger().info(tries_left.get() +1 == default_tries ? "Connecting.." : "Reconnecting..");
                 if (socket.connect()) {
                     connectionState.set(State.CONNECTED);
                     tries_left.set(default_tries);
                 } else {
                     connectionState.set(State.DISCONNECTED);
-                    System.out.println(tries_left.get() +1 == default_tries ? "Failed to connect to backend!" :"Reconnecting failed!");
+                    App.getLogger().warn(tries_left.get() +1 == default_tries ? "Failed to connect to backend!" :"Reconnecting failed!");
                 }
             }
         }
@@ -99,7 +97,7 @@ public class SocketThread implements Runnable {
             System.out.println(pk);
             if (pk.getToken() != null) {
                 session_token = pk.getToken();
-                System.out.println("Successfully connected to backend!");
+                App.getLogger().info("Successfully connected to backend!");
             }
         }, System.out::println);
     }
@@ -111,11 +109,10 @@ public class SocketThread implements Runnable {
                 try {
                     buffer = socket.read();
                 } catch (Exception e) {
-                    System.out.println("Error while reading packet:");
-                    e.printStackTrace();
+                    App.getLogger().error("Error while reading packet: ", e);
                 }
                 if (buffer != null && !buffer.isEmpty()) {
-                    System.out.println("Reading: " + buffer);
+                    App.getLogger().info("Reading: " + buffer);
                     Packet packet = PacketPool.decode(buffer);
                     if (packet instanceof UnknownPacket) continue;
                     if (packet instanceof CallbackPacket callbackPacket && callbackPacket.getCallback_id() != null) {
@@ -126,7 +123,7 @@ public class SocketThread implements Runnable {
                 }
             }
         } while (!connectionState.get().equals(State.SHUTDOWN));
-        System.out.println("[SocketThread]: bye!");
+        App.getLogger().debug("[SocketThread]: Bye!");
     }
 
     public void shutdown(){
@@ -151,26 +148,23 @@ public class SocketThread implements Runnable {
                 socket.getSocket().send(pk);
                 return true;
             } catch (IOException e) {
-                System.out.println("Error while sending packet to backend:");
-                e.printStackTrace();
+                App.getLogger().error("Error while sending packet to backend: ", e);
             }
         } catch (IOException e) {
-            System.out.println("Error while sending packet to backend:");
-            e.printStackTrace();
+            App.getLogger().error("Error while sending packet to backend: ", e);
         }
-
         return false;
     }
     public <T extends CallbackPacket> boolean sendPacket(@NonNull T packet, @NonNull Consumer<T> callback, Consumer<String> on_error){
         CallbackPacketManager.add(packet, (pk) -> {
             if (pk.data != null && pk.data.has("error") && !pk.data.get("error").isJsonNull()) {
                 String error = pk.data.get("error").getAsString();
-                System.out.println("Error from backend: " + error);
+                App.getLogger().error("Error from backend: " + error);
                 if (on_error != null) on_error.accept(error);
             } else callback.accept((T) pk);
         });
         if (packet instanceof HeartbeatPacket) {
-            System.out.println(Thread.currentThread().getName());
+            App.getLogger().debug(Thread.currentThread().getName());
         }
         return sendPacket(packet);
     }

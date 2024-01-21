@@ -47,11 +47,10 @@ public class FetchGatewayInformationTask extends Task {
             Gateway.port = gateway.has("port") && !gateway.get("port").isJsonNull() ? gateway.get("port").getAsInt() : null;
             Gateway.usual_port = gateway.has("usual_port") && !gateway.get("usual_port").isJsonNull() ? gateway.get("usual_port").getAsInt() : 15151;
 
-            System.out.println("Got gateway information!");
+            App.getInstance().getLogger().info("Got gateway information!");
             ping_backend();
         } catch (IOException e) {
-            System.out.println("Error while fetching gateway information: ");
-            e.printStackTrace();
+            App.getInstance().getLogger().error("Error while fetching gateway information: ", e);
         }
     }
 
@@ -74,7 +73,7 @@ public class FetchGatewayInformationTask extends Task {
             App.getInstance().initSocket();
         } else {
             Gateway.broken = true;
-            System.out.println("Couldn't connect to backend, reconnecting..");
+            App.getInstance().getLogger().warn("Couldn't connect to backend, reconnecting..");
             ReconnectingTask.activate();
         }
     }
