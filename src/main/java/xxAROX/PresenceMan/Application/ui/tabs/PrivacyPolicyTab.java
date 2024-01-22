@@ -49,7 +49,7 @@ public class PrivacyPolicyTab extends AUITab {
             assert inputStream != null : "privacy_policy.html resource not found!";
             privacyPolicyPane.setText("<html>\n" + new String(inputStream.readAllBytes()) + "\n</html>");
         } catch (IOException e) {
-            App.getInstance().getLogger().error(e);
+            App.getLogger().error(e);
         }
         contentPane.add(scrollPane, BorderLayout.CENTER);
     }

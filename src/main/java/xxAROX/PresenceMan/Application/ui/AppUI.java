@@ -66,7 +66,7 @@ public class AppUI extends JFrame {
                     tab.add(contentPane);
                     last = tab;
                 } catch (IllegalAccessException e) {
-                    App.getInstance().getLogger().error(e);
+                    App.getLogger().error(e);
                 }
             }
             assert last != null;
@@ -103,7 +103,7 @@ public class AppUI extends JFrame {
             }
             FlatLaf.updateUI();
         } catch (Throwable t) {
-            App.getInstance().getLogger().error(t);
+            App.getLogger().error(t);
         }
     }
 

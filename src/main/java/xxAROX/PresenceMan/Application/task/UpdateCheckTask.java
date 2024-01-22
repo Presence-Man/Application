@@ -53,12 +53,12 @@ public class UpdateCheckTask implements Runnable {
                 Semver versionSemver = new Semver(AppInfo.getVersion());
                 Semver latestVersionSemver = new Semver(latestVersion);
                 updateAvailable = latestVersionSemver.isGreaterThan(versionSemver);
-                if (AppInfo.development || versionSemver.isGreaterThan(latestVersionSemver)) App.getInstance().getLogger().warn("You are running a dev version of PresenceMan");
+                if (AppInfo.development || versionSemver.isGreaterThan(latestVersionSemver)) App.getLogger().warn("You are running a dev version of PresenceMan");
             } catch (Throwable t) {
                 updateAvailable = !AppInfo.getVersion().equals(latestVersion);
             }
             if (updateAvailable) {
-                App.getInstance().getLogger().warn("You are running an outdated version of " + AppInfo.name + "! Latest version: " + latestVersion);
+                App.getLogger().warn("You are running an outdated version of " + AppInfo.name + "! Latest version: " + latestVersion);
                 String latest_url = "https://github.com/Presence-Man/releases/releases/download/latest/Presence-Man-App" + (AppInfo.development ? "-dev" : "") + ".jar";
                 SwingUtilities.invokeLater(() -> this.showUpdateQuestion(latest_url, latestVersion));
             }
@@ -86,13 +86,13 @@ public class UpdateCheckTask implements Runnable {
                         Runtime.getRuntime().exec(new String[]{System.getProperty("java.home") + "/bin/java", "-jar", f.getAbsolutePath()});
                         System.exit(0);
                     } catch (IOException e) {
-                        App.getInstance().getLogger().error("Could not start the new jar file", e);
+                        App.getLogger().error("Could not start the new jar file", e);
                         App.ui.showException(e);
                     }
                 }),
                 t -> {
                     if (t != null) {
-                        App.getInstance().getLogger().error("Could not download the latest version of " + AppInfo.name, t);
+                        App.getLogger().error("Could not download the latest version of " + AppInfo.name, t);
                         App.ui.showException(t);
                     }
                 }

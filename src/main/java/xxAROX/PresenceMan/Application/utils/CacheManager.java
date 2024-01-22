@@ -46,7 +46,7 @@ public final class CacheManager {
             json = GSON.fromJson(reader, JsonObject.class);
             reader.close();
         } catch (IOException e) {
-            App.getInstance().getLogger().error(e);
+            App.getLogger().error(e);
             App.ui.showException(e);
         }
     }
@@ -57,7 +57,7 @@ public final class CacheManager {
             GSON.toJson(json, writer);
             writer.close();
         } catch (IOException e) {
-            App.getInstance().getLogger().error(e);
+            App.getLogger().error(e);
             App.ui.showException(e);
         }
     }

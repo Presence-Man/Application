@@ -53,7 +53,6 @@ public class HeartbeatPacket extends CallbackPacket {
 
     @Override
     protected void decodeBody(JsonObject object) {
-        App.getLogger().debug(object);
         xuid = object.get("xuid").getAsString();
         discord_user_id = object.has("duid") && !object.get("duid").isJsonNull() ? object.get("duid").getAsString() : discord_user_id;
         gamertag = object.has("gamertag") && !object.get("gamertag").isJsonNull() ? object.get("gamertag").getAsString() : gamertag;

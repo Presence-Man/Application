@@ -42,7 +42,7 @@ public final class PacketPool {
             if (packets.containsKey(packet.getPacketType())) throw new RuntimeException("[" + clazz.getSimpleName() + "] " + packet.getPacketType() + " is already registered in " + packets.get(packet.getPacketType()).getSimpleName() + "!");
             packets.put(packet.getPacketType(), clazz);
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            App.getInstance().getLogger().error("Packet " + clazz.getSimpleName() + " is broken or has an non-empty constructor!");
+            App.getLogger().error("Packet " + clazz.getSimpleName() + " is broken or has an non-empty constructor!");
         }
     }
 

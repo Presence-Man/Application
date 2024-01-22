@@ -67,7 +67,7 @@ public final class Tray {
                 "Tripple right click to exit the application"
         );
         try {SystemTray.getSystemTray().add(tray_icon);visible = true;}
-        catch (AWTException e) {App.getInstance().getLogger().error(e);}
+        catch (AWTException e) {App.getLogger().error(e);}
     }
 
     public void hideFromTray() {

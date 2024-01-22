@@ -47,10 +47,10 @@ public class FetchGatewayInformationTask extends Task {
             Gateway.port = gateway.has("port") && !gateway.get("port").isJsonNull() ? gateway.get("port").getAsInt() : null;
             Gateway.usual_port = gateway.has("usual_port") && !gateway.get("usual_port").isJsonNull() ? gateway.get("usual_port").getAsInt() : 15151;
 
-            App.getInstance().getLogger().info("Got gateway information!");
+            App.getLogger().info("Got gateway information!");
             ping_backend();
         } catch (IOException e) {
-            App.getInstance().getLogger().error("Error while fetching gateway information: ", e);
+            App.getLogger().error("Error while fetching gateway information: ", e);
         }
     }
 
