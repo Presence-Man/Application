@@ -120,7 +120,7 @@ public final class App {
     private void shutdownServices() {
         tickExecutor.shutdown();
         scheduler.shutdown();
-        socket.shutdown();
+        if (socket != null) socket.shutdown();
     }
 
     public void updateServer(String new_network, String new_server) {

@@ -47,6 +47,7 @@ public class RestAPI {
     }
     public static void heartbeat(){
         var socket = SocketThread.getInstance();
+        if (socket == null) return;
         if (socket.getConnectionState().get().equals(SocketThread.State.SHUTDOWN)) return;
         if (socket.getConnectionState().get().equals(SocketThread.State.DISCONNECTED)) return;
         if (socket.getConnectionState().get().equals(SocketThread.State.CONNECTING)) return;

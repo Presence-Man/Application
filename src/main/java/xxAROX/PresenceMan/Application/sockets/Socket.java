@@ -50,9 +50,9 @@ public final class Socket {
         return false;
     }
     public String read() throws Exception {
-        if (socket == null) return "";
+        if (socket == null) return null;
         if (socket.isClosed() || !socket.isConnected()) throw new Exception("Socket is closed or not connected");
-        String buffer = "";
+        String buffer = null;
         try {
             byte[] bytes = new byte[65535];
             DatagramPacket received = new DatagramPacket(bytes, bytes.length);
@@ -61,11 +61,11 @@ public final class Socket {
             } catch (IOException e) {
                 App.getLogger().error("Error when receiving data: ", e);
             }
-            buffer =  GzipCompressor.getInstance().decompress(received.getData()).trim();
+            buffer = GzipCompressor.getInstance().decompress(received.getData()).trim();
         } catch (CompressorException e) {
             App.getLogger().error("Error while decompressing packet: ", e);
         }
-        return buffer;
+        return (buffer == null || buffer.isEmpty() ? null : buffer);
     }
 
     public void close(){

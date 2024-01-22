@@ -52,6 +52,7 @@ public class SocketThread implements Runnable {
         try {
             instance = this;
             backend_address = new InetSocketAddress(Gateway.ip, Gateway.usual_port +1);
+            backend_address = new InetSocketAddress("127.0.0.1", Gateway.usual_port +1);
             App.getLogger().info("Backend identified as " + backend_address.getAddress().getHostAddress() + ":" + backend_address.getPort());
             socket = new Socket(this);
         } catch (Exception e) {
