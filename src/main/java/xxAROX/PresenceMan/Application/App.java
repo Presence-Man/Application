@@ -32,7 +32,6 @@ import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 import xxAROX.PresenceMan.Application.events.IBaseListener;
 import xxAROX.PresenceMan.Application.scheduler.WaterdogScheduler;
 import xxAROX.PresenceMan.Application.sockets.SocketThread;
-import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.ByeByePacket;
 import xxAROX.PresenceMan.Application.task.FetchGatewayInformationTask;
 import xxAROX.PresenceMan.Application.task.UpdateCheckTask;
 import xxAROX.PresenceMan.Application.ui.AppUI;
@@ -112,7 +111,6 @@ public final class App {
     private void tick(int currentTick) {
         scheduler.scheduleAsync(DiscordRPC::discordRunCallbacks);
         if (socket != null) socket.tick(currentTick);
-        if (currentTick %(20*5) == 0) RestAPI.heartbeat();
         if (App.ui != null) App.ui.general_tab.tick();
         scheduler.onTick(currentTick);
     }

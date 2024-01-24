@@ -27,6 +27,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 public final class Socket {
+    private static final String UNKNOWN = " ".repeat(65534);
     private final SocketThread connection;
     @Getter private DatagramSocket socket = null;
 
@@ -38,14 +39,14 @@ public final class Socket {
         close();
         try {
             DatagramSocket _socket = new DatagramSocket();
-            _socket.connect(connection.getBackend_address().getAddress(), connection.getBackend_address().getPort());
             _socket.setReuseAddress(true);
             _socket.setReceiveBufferSize(65535);
             _socket.setSendBufferSize(65535);
             socket = _socket;
+            socket.connect(connection.getBackend_address().getAddress(), connection.getBackend_address().getPort());
             return true;
         } catch (IOException e) {
-            App.getLogger().error("Error while connecting to cloud: {}", e);
+            App.getLogger().error("Error while connecting to backend: {}", e);
         }
         return false;
     }
@@ -57,21 +58,23 @@ public final class Socket {
             byte[] bytes = new byte[65535];
             DatagramPacket received = new DatagramPacket(bytes, bytes.length);
             try {
-                socket.receive(received);
+                if (!socket.isClosed()) {
+                    socket.receive(received);
+                }
+            } catch (java.net.SocketException e) {
+                if (!e.getMessage().equals("Socket closed")) App.getLogger().error("Error when receiving packet: ", e);
             } catch (IOException e) {
-                App.getLogger().error("Error when receiving data: ", e);
+                App.getLogger().error("Error when receiving packet: ", e);
             }
             buffer = GzipCompressor.getInstance().decompress(received.getData()).trim();
-        } catch (CompressorException e) {
-            App.getLogger().error("Error while decompressing packet: ", e);
+        } catch (CompressorException ignore) {
         }
         return (buffer == null || buffer.isEmpty() ? null : buffer);
     }
 
     public void close(){
         if (socket != null) {
-            if (socket.isConnected()) socket.disconnect();
-            if (socket.isClosed()) socket.close();
+            if (!socket.isClosed()) socket.close();
             socket = null;
         }
     }

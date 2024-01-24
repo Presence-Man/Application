@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.NonNull;
 import xxAROX.PresenceMan.Application.App;
+import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.Gateway;
 import xxAROX.PresenceMan.Application.sockets.protocol.CallbackPacketManager;
 import xxAROX.PresenceMan.Application.sockets.protocol.PacketPool;
@@ -42,9 +43,12 @@ public class SocketThread implements Runnable {
     @Getter private final AtomicReference<String> session_token = new AtomicReference<>(null);
     @Getter private static SocketThread instance;
     @Getter private InetSocketAddress backend_address;
-    @Getter private volatile boolean heartbeat_pending = false;
     @Getter private Socket socket;
     @Getter private final AtomicReference<State> connectionState = new AtomicReference<>(State.DISCONNECTED);
+
+    @Getter private final AtomicInteger heartbeat_pending = new AtomicInteger(0);
+    @Getter private boolean heartbeats_need_a_token = false;
+
     private final Integer default_tries = 10;
     private final AtomicInteger tries_left = new AtomicInteger(default_tries);
 
@@ -59,6 +63,62 @@ public class SocketThread implements Runnable {
         }
     }
 
+    public void heartbeat(){
+        if (connectionState.get().equals(SocketThread.State.SHUTDOWN)) return;
+        if (connectionState.get().equals(SocketThread.State.DISCONNECTED)) return;
+        if (connectionState.get().equals(SocketThread.State.CONNECTING)) return;
+        if (session_token.get() == null && heartbeats_need_a_token) {
+            System.out.println("No session token");
+            return;
+        }
+        if (heartbeat_pending.get() == 5) {
+            System.out.println("Timed out");
+            resetConnection();
+            heartbeat_pending.set(0);
+            return;
+        }
+        if (App.getInstance().xboxUserInfo == null) return;
+
+        heartbeat_pending.getAndIncrement();
+
+        var packet = new HeartbeatPacket();
+        packet.setXuid(App.getInstance().xboxUserInfo.getXuid());
+        packet.setGamertag(App.getInstance().xboxUserInfo.getGamertag());
+        packet.setDiscord_user_id(App.getInstance().getDiscord_info().getId());
+        System.out.println("Sent heartbeat: " + App.getInstance().socket.sendPacket(packet, (pk) -> {
+            Gateway.connected = true;
+            if (!heartbeats_need_a_token && session_token.get() == null) {
+                session_token.set(pk.getToken());
+                heartbeats_need_a_token = true;
+            }
+            heartbeat_pending.getAndDecrement();
+            if (App.getInstance().featuredServer != null) return;
+            App.getInstance().updateServer(pk.getNetwork(), pk.getServer());
+
+            APIActivity new_activity = pk.getApi_activity();
+            if (new_activity == null) new_activity = APIActivity.none();
+            if (new_activity.equals(App.getInstance().getApi_activity())) return;
+            App.setActivity(new_activity);
+        }, err -> {
+            App.getInstance().network = null;
+            App.getInstance().server = null;
+            App.getLogger().error("Error on heartbeat: " + err);
+        }));
+    }
+
+    public void resetConnection(){
+        System.out.println(1);
+        session_token.set(null);
+        connectionState.set(State.CONNECTING);
+        System.out.println(2);
+        Gateway.connected = false;
+        System.out.println(3);
+        socket.close();
+        System.out.println(4);
+        connectionState.set(State.DISCONNECTED);
+        System.out.println(5);
+    }
+
     public void tick(int currentTick) {
         var xboxInfo = App.getInstance().getXboxUserInfo();
         if (xboxInfo == null) return;
@@ -71,6 +131,7 @@ public class SocketThread implements Runnable {
                 App.getLogger().info(tries_left.get() +1 == default_tries ? "Connecting.." : "Reconnecting..");
                 if (socket.connect()) {
                     connectionState.set(State.CONNECTED);
+                    App.getLogger().info(tries_left.get() +1 == default_tries ? "Connected!" : "Reconnected!");
                     tries_left.set(default_tries);
                 } else {
                     connectionState.set(State.DISCONNECTED);
@@ -78,6 +139,7 @@ public class SocketThread implements Runnable {
                 }
             }
         }
+        else if (currentTick %(20*5) == 0) heartbeat();
     }
 
     @Override public void run() {
@@ -86,7 +148,6 @@ public class SocketThread implements Runnable {
                 String buffer = null;
                 try {
                     buffer = socket.read();
-                    System.out.println(buffer);
                 } catch (Exception e) {
                     App.getLogger().error("Error while reading packet: ", e);
                 }

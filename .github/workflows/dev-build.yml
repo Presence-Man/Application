@@ -23,7 +23,7 @@ jobs:
         id: metadata
         run: |
           javac -d . src/main/java/xxAROX/PresenceMan/Application/AppInfo.java
-          echo "VERSION=$(java xxAROX.PresenceMan.Application.AppInfo)" >> $GITHUB_OUTPUT
+          echo "VERSION=$(java xxAROX.PresenceMan.Application.AppInfo development)" >> $GITHUB_OUTPUT
           echo ${{ steps.metadata.outputs.VERSION }}
 
       - name: Build with Maven
