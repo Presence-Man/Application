@@ -1,3 +1,15 @@
 {
-    "None": null
+    "None": null,
+    "The Hive": [
+        {
+            "name": "Hub",
+            "icon": "hive-hub",
+            "modes": []
+        },
+        {
+            "name": "Capture the Flag",
+            "icon": "hive-capture-the-flag",
+            "modes": [ "Regular" ]
+        }
+    ]
 }
