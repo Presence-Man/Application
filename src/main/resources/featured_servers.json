@@ -10,6 +10,102 @@
             "name": "Capture the Flag",
             "icon": "hive-capture-the-flag",
             "modes": [ "Regular" ]
+        },
+        {
+            "name": "Treasure Wars",
+            "icon": "hive-treasure-wars",
+            "modes": [
+                "Solos (No Teams)",
+                "Duos (Teams of 2)",
+                "Trios (Teams of 3)",
+                "Squads (Teams of 4)",
+                "MEGA (Teams of 12)"
+            ]
+        },
+        {
+            "name": "Just Build",
+            "icon": "hive-just-build",
+            "modes": [
+                "Solos (No Teams)",
+                "Solos (Double Build Time)",
+                "Duos (Teams of 2)",
+                "Duos (Double Build Time)"
+            ]
+        },
+        {
+            "name": "Hide and seek",
+            "icon": "hive-hide-and-seek",
+            "modes": [ "Regular" ]
+        },
+        {
+            "name": "Deathrun",
+            "icon": "hive-deathrun",
+            "modes": [ "Regular" ]
+        },
+        {
+            "name": "Murder",
+            "icon": "hive-murder",
+            "modes": [ "Regular" ]
+        },
+        {
+            "name": "Gravity",
+            "icon": "hive-gravity",
+            "modes": [ "Regular" ]
+        },
+        {
+            "name": "Block Party",
+            "icon": "hive-block-party",
+            "modes": [ "Regular" ]
+        },
+        {
+            "name": "Block Drop",
+            "icon": "hive-block-drop",
+            "modes": [ "Regular" ]
+        },
+        {
+            "name": "Ground Wars",
+            "icon": "hive-ground-wars",
+            "modes": [ "Regular" ]
+        },
+        {
+            "name": "Survival Games",
+            "icon": "hive-survival-games",
+            "modes": [
+                "Solos (No Teams)",
+                "Duos (Teams of 2)"
+            ]
+        },
+        {
+            "name": "The Bridge",
+            "icon": "hive-the-bridge",
+            "modes": [
+                "Solos (Skill-Based)",
+                "Duos (Teams of 2)"
+            ]
+        },
+        {
+            "name": "Skywars",
+            "icon": "hive-skywars",
+            "modes": [
+                "Solos (No Teams)",
+                "Duos (Teams of 2)",
+                "Trios (Teams of 3)",
+                "Trupps (Teams of 4)",
+                "MEGA LTM (Teams of 7)"
+            ]
+        },
+        {
+            "name": "Skywars Kits",
+            "icon": "hive-skywars-kits",
+            "modes": [
+                "Solos (No Teams)",
+                "Duos (Teams of 2)"
+            ]
+        },
+        {
+            "name": "Replay-Cinema",
+            "icon": "hive-replay-cinema",
+            "modes": []
         }
     ]
 }
