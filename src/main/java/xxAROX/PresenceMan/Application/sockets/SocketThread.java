@@ -64,15 +64,9 @@ public class SocketThread implements Runnable {
     }
 
     public void heartbeat(){
-        if (connectionState.get().equals(SocketThread.State.SHUTDOWN)) return;
-        if (connectionState.get().equals(SocketThread.State.DISCONNECTED)) return;
-        if (connectionState.get().equals(SocketThread.State.CONNECTING)) return;
-        if (session_token.get() == null && heartbeats_need_a_token) {
-            System.out.println("No session token");
-            return;
-        }
+        if (!connectionState.get().equals(SocketThread.State.CONNECTED)) return;
+        if (session_token.get() == null && heartbeats_need_a_token) return;
         if (heartbeat_pending.get() == 5) {
-            System.out.println("Timed out");
             resetConnection();
             heartbeat_pending.set(0);
             return;
@@ -85,7 +79,7 @@ public class SocketThread implements Runnable {
         packet.setXuid(App.getInstance().xboxUserInfo.getXuid());
         packet.setGamertag(App.getInstance().xboxUserInfo.getGamertag());
         packet.setDiscord_user_id(App.getInstance().getDiscord_info().getId());
-        System.out.println("Sent heartbeat: " + App.getInstance().socket.sendPacket(packet, (pk) -> {
+        App.getInstance().socket.sendPacket(packet, (pk) -> {
             Gateway.connected = true;
             if (!heartbeats_need_a_token && session_token.get() == null) {
                 session_token.set(pk.getToken());
@@ -103,26 +97,22 @@ public class SocketThread implements Runnable {
             App.getInstance().network = null;
             App.getInstance().server = null;
             App.getLogger().error("Error on heartbeat: " + err);
-        }));
+        });
     }
 
     public void resetConnection(){
-        System.out.println(1);
         session_token.set(null);
         connectionState.set(State.CONNECTING);
-        System.out.println(2);
         Gateway.connected = false;
-        System.out.println(3);
         socket.close();
-        System.out.println(4);
         connectionState.set(State.DISCONNECTED);
-        System.out.println(5);
+        socket.connect();
     }
 
     public void tick(int currentTick) {
         var xboxInfo = App.getInstance().getXboxUserInfo();
         if (xboxInfo == null) return;
-        if (connectionState.get().equals(State.DISCONNECTED) && currentTick %(20*15) == 0) {
+        if (connectionState.get().equals(State.DISCONNECTED) && currentTick %(20*5) == 0) {
             if (tries_left.getAndDecrement() <= 0) {
                 App.getLogger().error("Connection can't be established, shutting down..");
                 shutdown();
@@ -139,7 +129,7 @@ public class SocketThread implements Runnable {
                 }
             }
         }
-        else if (currentTick %(20*5) == 0) heartbeat();
+        if (currentTick %(20*4) == 0) heartbeat();
     }
 
     @Override public void run() {
@@ -152,7 +142,6 @@ public class SocketThread implements Runnable {
                     App.getLogger().error("Error while reading packet: ", e);
                 }
                 if (buffer != null && !buffer.isEmpty()) {
-                    App.getLogger().info("Reading: " + buffer);
                     Packet packet = PacketPool.decode(buffer);
                     if (packet instanceof UnknownPacket) continue;
                     if (packet instanceof CallbackPacket callbackPacket && callbackPacket.getCallback_id() != null) {
@@ -167,10 +156,7 @@ public class SocketThread implements Runnable {
 
     public void shutdown(){
         if (connectionState.get().equals(State.SHUTDOWN)) return;
-        if (session_token.get() != null) {
-            System.out.println(session_token);
-            sendPacket(new ByeByePacket());
-        }
+        if (session_token.get() != null && !session_token.get().equalsIgnoreCase("")) sendPacket(new ByeByePacket());
         connectionState.set(State.SHUTDOWN);
         socket.close();
     }

@@ -27,7 +27,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 public final class Socket {
-    private static final String UNKNOWN = " ".repeat(65534);
+    private static final String UNKNOWN = " ".repeat(1);
     private final SocketThread connection;
     @Getter private DatagramSocket socket = null;
 
@@ -36,6 +36,7 @@ public final class Socket {
     }
 
     public boolean connect(){
+        SocketThread.getInstance().getHeartbeat_pending().set(0);
         close();
         try {
             DatagramSocket _socket = new DatagramSocket();

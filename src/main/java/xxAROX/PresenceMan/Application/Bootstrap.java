@@ -19,9 +19,8 @@ package xxAROX.PresenceMan.Application;
 
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import java.util.Arrays;
@@ -45,8 +44,5 @@ public class Bootstrap {
         var logger = Logger.getLogger(App.class);
         logger.setLevel(AppInfo.development ? Level.DEBUG : Level.INFO);
         return logger;
-    }
-
-    protected static void shutdownHook() {
     }
 }

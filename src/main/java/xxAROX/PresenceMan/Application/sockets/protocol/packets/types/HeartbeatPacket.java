@@ -22,7 +22,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.CallbackPacket;
 
@@ -56,7 +55,7 @@ public class HeartbeatPacket extends CallbackPacket {
         xuid = object.get("xuid").getAsString();
         discord_user_id = object.has("duid") && !object.get("duid").isJsonNull() ? object.get("duid").getAsString() : discord_user_id;
         gamertag = object.has("gamertag") && !object.get("gamertag").isJsonNull() ? object.get("gamertag").getAsString() : gamertag;
-        api_activity = object.has("api_activity") && object.get("api_activity").isJsonObject() ? APIActivity.deserialize(object.getAsJsonObject("sent")) : api_activity;
+        api_activity = object.has("api_activity") && object.get("api_activity").isJsonObject() ? APIActivity.deserialize(object.getAsJsonObject("api_activity")) : api_activity;
         network = object.has("network") && !object.get("network").isJsonNull() ? object.get("network").getAsString() : network;
         server = object.has("server") && !object.get("server").isJsonNull() ? object.get("server").getAsString() : server;
         sent = object.has("sent") && !object.get("sent").isJsonNull() ? object.get("sent").getAsLong() : sent;
