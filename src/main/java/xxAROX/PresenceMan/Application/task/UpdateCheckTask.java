@@ -53,7 +53,7 @@ public class UpdateCheckTask implements Runnable {
                 Semver versionSemver = new Semver(AppInfo.getVersion());
                 Semver latestVersionSemver = new Semver(latestVersion);
                 updateAvailable = latestVersionSemver.isGreaterThan(versionSemver);
-                if (AppInfo.development || versionSemver.isGreaterThan(latestVersionSemver)) App.getLogger().warn("You are running a dev version of PresenceMan");
+                if (AppInfo.development/* || versionSemver.isGreaterThan(latestVersionSemver)*/) App.getLogger().warn("You are running a dev version of PresenceMan");
             } catch (Throwable t) {
                 updateAvailable = !AppInfo.getVersion().equals(latestVersion);
             }

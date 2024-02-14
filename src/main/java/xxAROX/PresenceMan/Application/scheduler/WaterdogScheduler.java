@@ -41,7 +41,6 @@ public class WaterdogScheduler {
     public WaterdogScheduler() {
         if (instance != null) throw new RuntimeException("Scheduler was already initialized!");
         instance = this;
-
         ThreadFactoryBuilder builder = ThreadFactoryBuilder.builder().format("Scheduler Executor - #%d").build();
         this.threadedExecutor = new ThreadPoolExecutor(Math.round(Runtime.getRuntime().availableProcessors() /2f), Integer.MAX_VALUE, 60, TimeUnit.SECONDS, new SynchronousQueue<>(), builder);
     }

@@ -17,9 +17,8 @@
 
 package xxAROX.PresenceMan.Application.ui.tabs;
 
+import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
-import net.raphimc.minecraftauth.util.MicrosoftConstants;
-import org.apache.http.impl.client.CloseableHttpClient;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 import xxAROX.PresenceMan.Application.ui.AUITab;
@@ -103,8 +102,8 @@ public class LoginTab extends AUITab {
 
     private void login(){
         handleLogin(msaDeviceCodeConsumer -> {
-            try (CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-                return new XboxUserInfo(XboxUserInfo.DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
+            try {
+                return new XboxUserInfo(XboxUserInfo.DEVICE_CODE_LOGIN.getFromInput(MinecraftAuth.createHttpClient(), new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
             } catch (Exception e) {
                 if (e instanceof InterruptedException) return null;
                 else if (e instanceof TimeoutException) {
