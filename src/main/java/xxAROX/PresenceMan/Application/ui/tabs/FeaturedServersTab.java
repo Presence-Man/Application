@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024. By Jan-Michael Sohn also known as @xxAROX.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package xxAROX.PresenceMan.Application.ui.tabs;
 
 import lombok.AllArgsConstructor;
@@ -151,8 +168,6 @@ public class FeaturedServersTab extends AUITab {
                 put(new __Server("Capture the Flag", "hive-capture-the-flag"), new ArrayList<>(){{
                     add(new __Server("Regular"));
                 }});
-                put(new __Server("Quest island", "hive-quest-island"), new ArrayList<>());
-                put(new __Server("Parkour", "hive-parkour"), new ArrayList<>());
                 put(new __Server("Hide and seek", "hive-hide-and-seek"), new ArrayList<>(){{
                     add(new __Server("Regular"));
                 }});

@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024. By Jan-Michael Sohn also known as @xxAROX.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package xxAROX.PresenceMan.Application.task;
 
 import com.vdurmont.semver4j.Semver;
@@ -36,12 +53,12 @@ public class UpdateCheckTask implements Runnable {
                 Semver versionSemver = new Semver(AppInfo.getVersion());
                 Semver latestVersionSemver = new Semver(latestVersion);
                 updateAvailable = latestVersionSemver.isGreaterThan(versionSemver);
-                if (AppInfo.development || versionSemver.isGreaterThan(latestVersionSemver)) App.getInstance().getLogger().warn("You are running a dev version of PresenceMan");
+                if (AppInfo.development || versionSemver.isGreaterThan(latestVersionSemver)) App.getLogger().warn("You are running a dev version of PresenceMan");
             } catch (Throwable t) {
                 updateAvailable = !AppInfo.getVersion().equals(latestVersion);
             }
             if (updateAvailable) {
-                App.getInstance().getLogger().warn("You are running an outdated version of " + AppInfo.name + "! Latest version: " + latestVersion);
+                App.getLogger().warn("You are running an outdated version of " + AppInfo.name + "! Latest version: " + latestVersion);
                 String latest_url = "https://github.com/Presence-Man/releases/releases/download/latest/Presence-Man-App" + (AppInfo.development ? "-dev" : "") + ".jar";
                 SwingUtilities.invokeLater(() -> this.showUpdateQuestion(latest_url, latestVersion));
             }
@@ -69,13 +86,13 @@ public class UpdateCheckTask implements Runnable {
                         Runtime.getRuntime().exec(new String[]{System.getProperty("java.home") + "/bin/java", "-jar", f.getAbsolutePath()});
                         System.exit(0);
                     } catch (IOException e) {
-                        App.getInstance().getLogger().error("Could not start the new jar file", e);
+                        App.getLogger().error("Could not start the new jar file", e);
                         App.ui.showException(e);
                     }
                 }),
                 t -> {
                     if (t != null) {
-                        App.getInstance().getLogger().error("Could not download the latest version of " + AppInfo.name, t);
+                        App.getLogger().error("Could not download the latest version of " + AppInfo.name, t);
                         App.ui.showException(t);
                     }
                 }
