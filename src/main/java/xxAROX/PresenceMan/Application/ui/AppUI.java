@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024. By Jan-Michael Sohn also known as @xxAROX.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package xxAROX.PresenceMan.Application.ui;
 
 import com.formdev.flatlaf.FlatLaf;
@@ -24,10 +41,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class AppUI extends JFrame {
+public class AppUI extends JDialog {
     public final JTabbedPane contentPane = new JTabbedPane();
     private final List<AUITab> tabs = new ArrayList<>();
-    private final Tray tray = new Tray();
 
     public final GeneralTab general_tab = new GeneralTab(this);
     public final LoginTab login_tab = new LoginTab(this);
@@ -49,7 +65,7 @@ public class AppUI extends JFrame {
                     tab.add(contentPane);
                     last = tab;
                 } catch (IllegalAccessException e) {
-                    App.getInstance().getLogger().error(e);
+                    App.getLogger().error(e);
                 }
             }
             assert last != null;
@@ -59,8 +75,7 @@ public class AppUI extends JFrame {
         ToolTipManager.sharedInstance().setDismissDelay(10_000);
         SwingUtilities.updateComponentTreeUI(this);
         setVisible(false);
-        setExtendedState(JFrame.ICONIFIED);
-        tray.showInTray();
+        Tray.showInTray();
     }
 
     private void setLookAndFeel() {
@@ -86,7 +101,7 @@ public class AppUI extends JFrame {
             }
             FlatLaf.updateUI();
         } catch (Throwable t) {
-            App.getInstance().getLogger().error(t);
+            App.getLogger().error(t);
         }
     }
 
@@ -98,7 +113,7 @@ public class AppUI extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 for (AUITab tab : tabs) tab.onClose();
-                tray.showInTray();
+                Tray.showInTray();
                 setVisible(false);
             }
         });

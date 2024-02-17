@@ -1,9 +1,7 @@
-name: "Release development"
-
+name: "Release stable"
 on:
   push:
-    branches: [ "development" ]
-
+    branches: [ "main" ]
 jobs:
   build:
     if: "!contains(github.event.head_commit.message, 'ci ignore')"
@@ -34,8 +32,8 @@ jobs:
       - name: Rename JAR
         run: |
           cd target/
-          cp Application-1.0-SNAPSHOT.jar Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}-dev.jar
-          cp Application-1.0-SNAPSHOT.jar Presence-Man-App-dev.jar
+          cp Application-1.0-SNAPSHOT.jar Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}.jar
+          cp Application-1.0-SNAPSHOT.jar Presence-Man-App.jar
           cd ../
 
       - name: "Create Release"
@@ -45,14 +43,15 @@ jobs:
           draft: false
           automatic_release_tag: "v${{ steps.metadata.outputs.VERSION }}"
           prerelease: false
-          title: "Development Release v${{ steps.metadata.outputs.VERSION }}"
-          files: "target/Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}-dev.jar"
+          title: "Release v${{ steps.metadata.outputs.VERSION }}"
+          files: "target/Presence-Man-App.jar"
 
-      - name: Release to public
-        uses: softprops/action-gh-release@v1
+      - name: "Create latest_version.txt"
+        run: "echo \"${{ steps.metadata.outputs.VERSION }}\" > latest_version.txt"
+
+      - name: "Update latest_version.txt"
+        uses: "test-room-7/action-update-file@v1"
         with:
-          tag_name: "latest"
-          name: "Latest releases"
-          repository: "Presence-Man/releases"
-          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-          files: "target/Presence-Man-App-dev.jar"
+          file-path: latest_version.txt
+          commit-msg: "Updated latest version to ${{ steps.metadata.outputs.VERSION }} - ci ignore"
+          github-token: ${{ secrets.GITHUB_TOKEN }}

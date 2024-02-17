@@ -1,6 +1,22 @@
+/*
+ * Copyright (c) 2024. By Jan-Michael Sohn also known as @xxAROX.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package xxAROX.PresenceMan.Application.scheduler;
 
-import io.netty.util.internal.PlatformDependent;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.utils.ThreadFactoryBuilder;
 import xxAROX.PresenceMan.Application.utils.exception.SchedulerException;
@@ -17,14 +33,13 @@ public class WaterdogScheduler {
 
     private final Map<Integer, TaskHandler<?>> taskHandlerMap = new ConcurrentHashMap<>();
     private final Map<Integer, LinkedList<TaskHandler<?>>> assignedTasks = new ConcurrentHashMap<>();
-    private final Queue<TaskHandler<?>> pendingTasks = PlatformDependent.newMpscQueue();
+    private final Queue<TaskHandler<?>> pendingTasks = new ConcurrentLinkedQueue<>();
 
     private final AtomicInteger currentId = new AtomicInteger();
 
     public WaterdogScheduler() {
         if (instance != null) throw new RuntimeException("Scheduler was already initialized!");
         instance = this;
-
         ThreadFactoryBuilder builder = ThreadFactoryBuilder.builder().format("Scheduler Executor - #%d").build();
         this.threadedExecutor = new ThreadPoolExecutor(Math.round(Runtime.getRuntime().availableProcessors() /2f), Integer.MAX_VALUE, 60, TimeUnit.SECONDS, new SynchronousQueue<>(), builder);
     }
@@ -110,7 +125,7 @@ public class WaterdogScheduler {
     }
 
     public void shutdown() {
-        App.getInstance().getLogger().debug("Scheduler shutdown initialized!");
+        App.getLogger().debug("Scheduler shutdown initialized!");
         this.threadedExecutor.shutdown();
 
         int count = 25;

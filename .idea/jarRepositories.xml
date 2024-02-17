@@ -12,6 +12,11 @@
       <option name="url" value="https://jitpack.io" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="ProjectRepo" />
+      <option name="name" value="ProjectRepo" />
+      <option name="url" value="file://C:\Users\JSohnB21109\OneDrive - Kreis Gütersloh (für Ems-Berufskolleg)\Dokumente\Development\Presence-Man\Application/lib" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="jcenter" />
       <option name="name" value="jcenter-bintray" />
       <option name="url" value="https://jcenter.bintray.com" />

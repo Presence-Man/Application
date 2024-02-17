@@ -1,12 +1,27 @@
+/*
+ * Copyright (c) 2024. By Jan-Michael Sohn also known as @xxAROX.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package xxAROX.PresenceMan.Application;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import de.jcm.discordgamesdk.GameSDKException;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.Gateway;
 import xxAROX.PresenceMan.Application.task.ReconnectingTask;
 
@@ -18,65 +33,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
 public class RestAPI {
     public static class Endpoints {
-        public static String heartbeat = "/api/v1/users/heartbeat";
         public static String skin = "/api/v1/images/skins/";
         public static String head = "/api/v1/images/heads/";
-    }
-    public static void heartbeat(){
-        if (App.getDiscord_core() == null || !App.getDiscord_core().isOpen()) return;
-        try {App.getDiscord_core().userManager().getCurrentUser();} catch (GameSDKException ignore) {return;}
-        if (App.getInstance().xboxUserInfo == null) return;
-
-        JsonObject body = new JsonObject();
-        body.addProperty("xuid", App.getInstance().xboxUserInfo.getXuid());
-        body.addProperty("gamertag", App.getInstance().xboxUserInfo.getGamertag());
-        body.addProperty("user_id", String.valueOf(App.getDiscord_core().userManager().getCurrentUser().getUserId()));
-
-        JsonObject response = request(Method.POST, RestAPI.Endpoints.heartbeat, new HashMap<>(), body);
-        Gateway.connected = response != null;
-        if (response == null) {
-            App.getInstance().network = null;
-            App.getInstance().server = null;
-            return;
-        }
-        if (App.getInstance().featuredServer != null) return;
-
-        String network = response.has("network") && !response.get("network").isJsonNull() ? response.get("network").getAsString() : null;
-        String before_network = App.getInstance().network;
-        if (before_network == null || !before_network.equalsIgnoreCase(network)) {
-            App.network_session_created = Instant.now().toEpochMilli();
-            App.getInstance().network = network;
-        }
-
-        String server = response.has("server") && !response.get("server").isJsonNull() ? response.get("server").getAsString() : null;
-        String before_server = App.getInstance().server;
-        if (before_server == null || !before_server.equalsIgnoreCase(server)) {
-            App.server_session_created = Instant.now().toEpochMilli();
-            App.getInstance().server = server;
-        }
-
-        APIActivity new_activity;
-        if (!response.has("api_activity") || response.get("api_activity").isJsonNull()) new_activity = null;
-        else if (response.get("api_activity").isJsonObject()) {
-            new_activity = APIActivity.deserialize(response.get("api_activity").getAsJsonObject());
-            System.out.println(APIActivity.deserialize(response.get("api_activity").getAsJsonObject()));
-        }
-        else if (response.get("api_activity").getAsString().equalsIgnoreCase("clear")) {
-            App.clearActivity();
-            return;
-        } else new_activity = null;
-        if (new_activity == null) new_activity = APIActivity.none();
-        if (new_activity.equals(App.getInstance().getApi_activity())) return;
-
-        if (response.has("success") && response.get("success").isJsonNull() || !response.get("success").getAsBoolean())
-            System.out.println("Error on heartbeat: " + response.get("status").getAsString() + ": " + response.get("message").getAsString());
-        else App.setActivity(new_activity);
     }
 
 
