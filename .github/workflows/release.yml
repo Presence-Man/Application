@@ -44,7 +44,7 @@ jobs:
           automatic_release_tag: "v${{ steps.metadata.outputs.VERSION }}"
           prerelease: false
           title: "Release v${{ steps.metadata.outputs.VERSION }}"
-          files: "target/Presence-Man-App.jar"
+          files: "target/Presence-Man-*.jar"
 
       - name: "Create latest_version.txt"
         run: "echo \"${{ steps.metadata.outputs.VERSION }}\" > latest_version.txt"
