@@ -22,6 +22,7 @@ import lombok.ToString;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.Bootstrap;
+import xxAROX.PresenceMan.Application.task.UpdateCheckTask;
 
 import javax.swing.*;
 import java.awt.*;
@@ -59,7 +60,6 @@ public final class Tray {
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     App.ui.setVisible(true);
-                    App.ui.setExtendedState(JFrame.NORMAL);
                     Tray.hideFromTray();
                 } else if (e.getButton() == MouseEvent.BUTTON3 && e.isPopupTrigger()) {
                     dialog.setSize(trayMenu.getPreferredSize());
@@ -80,6 +80,12 @@ public final class Tray {
             title.setEnabled(false);
 
             arr.add(title);
+        }
+
+        {
+            var exit = new JMenuItem("Check for update");
+            exit.addActionListener(e -> App.getInstance().getScheduler().scheduleAsync(new UpdateCheckTask()));
+            arr.add(exit);
         }
 
         {

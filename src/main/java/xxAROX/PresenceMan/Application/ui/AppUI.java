@@ -41,7 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class AppUI extends JFrame {
+public class AppUI extends JDialog {
     public final JTabbedPane contentPane = new JTabbedPane();
     private final List<AUITab> tabs = new ArrayList<>();
 
@@ -75,7 +75,6 @@ public class AppUI extends JFrame {
         ToolTipManager.sharedInstance().setDismissDelay(10_000);
         SwingUtilities.updateComponentTreeUI(this);
         setVisible(false);
-        setExtendedState(JFrame.ICONIFIED);
         Tray.showInTray();
     }
 
