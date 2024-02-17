@@ -21,12 +21,14 @@ import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 public class Bootstrap {
     @SneakyThrows
     public static void main(String[] _args) {
+        LOCK();
         List<String> args = Arrays.stream(_args).toList();
         List<String> lowArgs = args.stream().map(String::toLowerCase).toList();
 
@@ -34,6 +36,16 @@ public class Bootstrap {
 
         Logger logger = initializeLogger();
         new App(logger);
+    }
+
+    @SneakyThrows
+    protected static void LOCK() {
+        final File LOCK_FILE = new File(System.getProperty("user.home"), ".presence-man.lock");
+        if (LOCK_FILE.exists()) System.exit(0);
+        else {
+            LOCK_FILE.createNewFile();
+            LOCK_FILE.deleteOnExit();
+        }
     }
 
     protected static Logger initializeLogger(){

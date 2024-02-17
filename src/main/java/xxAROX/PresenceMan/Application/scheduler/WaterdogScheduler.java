@@ -17,7 +17,6 @@
 
 package xxAROX.PresenceMan.Application.scheduler;
 
-import io.netty.util.internal.PlatformDependent;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.utils.ThreadFactoryBuilder;
 import xxAROX.PresenceMan.Application.utils.exception.SchedulerException;
@@ -34,7 +33,7 @@ public class WaterdogScheduler {
 
     private final Map<Integer, TaskHandler<?>> taskHandlerMap = new ConcurrentHashMap<>();
     private final Map<Integer, LinkedList<TaskHandler<?>>> assignedTasks = new ConcurrentHashMap<>();
-    private final Queue<TaskHandler<?>> pendingTasks = PlatformDependent.newMpscQueue();
+    private final Queue<TaskHandler<?>> pendingTasks = new ConcurrentLinkedQueue<>();
 
     private final AtomicInteger currentId = new AtomicInteger();
 

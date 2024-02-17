@@ -44,7 +44,6 @@ import java.util.Objects;
 public class AppUI extends JFrame {
     public final JTabbedPane contentPane = new JTabbedPane();
     private final List<AUITab> tabs = new ArrayList<>();
-    private final Tray tray = new Tray();
 
     public final GeneralTab general_tab = new GeneralTab(this);
     public final LoginTab login_tab = new LoginTab(this);
@@ -77,7 +76,7 @@ public class AppUI extends JFrame {
         SwingUtilities.updateComponentTreeUI(this);
         setVisible(false);
         setExtendedState(JFrame.ICONIFIED);
-        tray.showInTray();
+        Tray.showInTray();
     }
 
     private void setLookAndFeel() {
@@ -115,7 +114,7 @@ public class AppUI extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 for (AUITab tab : tabs) tab.onClose();
-                tray.showInTray();
+                Tray.showInTray();
                 setVisible(false);
             }
         });

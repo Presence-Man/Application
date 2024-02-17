@@ -84,13 +84,6 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-transport-native-kqueue</artifactId>
-            <version>4.1.107.Final</version>
-            <classifier>osx-x86_64</classifier>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>it.unimi.dsi</groupId>
             <artifactId>fastutil</artifactId>
             <version>8.5.12</version>

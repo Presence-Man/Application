@@ -27,53 +27,93 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
  @ToString
 public final class Tray {
-     private boolean visible = false;
-     private final TrayIcon tray_icon;
+    private static TrayIcon tray = null;
+    private static boolean visible = false;
 
 
 
-    public Tray() {
-        tray_icon = new TrayIcon(new ImageIcon(Objects.requireNonNull(Bootstrap.class.getClassLoader().getResource(AppInfo.icon))).getImage(), AppInfo.name, null);
-        tray_icon.setImageAutoSize(true);
-        tray_icon.setToolTip(
-                "Double left click to open the application\n"+
-                "Tripple right click to exit the application"
-        );
-        tray_icon.addMouseListener(new MouseAdapter() {
+    public static TrayIcon build() {
+        return build(default_items());
+    }
+    public static TrayIcon build(List<JMenuItem> menuItems) {
+        if (tray != null) return tray;
+        JDialog dialog = new JDialog();
+        dialog.setUndecorated(true);
+        JPopupMenu trayMenu = new JPopupMenu() {@Override protected void firePopupMenuWillBecomeInvisible() {dialog.setVisible(false);super.firePopupMenuWillBecomeInvisible();}};
+        for (JMenuItem menuItem : menuItems) {
+            if (menuItem == null) trayMenu.addSeparator();
+            else trayMenu.add(menuItem);
+        }
+
+        var tray = new TrayIcon(new ImageIcon(Objects.requireNonNull(Bootstrap.class.getClassLoader().getResource(AppInfo.icon))).getImage(), AppInfo.name, null);
+        tray.setImageAutoSize(true);
+        tray.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.getClickCount() == 2 && e.getButton() == 1) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
                     App.ui.setVisible(true);
                     App.ui.setExtendedState(JFrame.NORMAL);
-                    hideFromTray();
-                } else if (e.getClickCount() == 3 && e.getButton() == 3) {
-                    App.getInstance().shutdown();
-                    System.exit(0);
+                    Tray.hideFromTray();
+                } else if (e.getButton() == MouseEvent.BUTTON3 && e.isPopupTrigger()) {
+                    dialog.setSize(trayMenu.getPreferredSize());
+                    dialog.setLocation(e.getX(), e.getY() - trayMenu.getHeight());
+                    dialog.setVisible(true);
+                    trayMenu.show(dialog, 0, 0);
                 }
             }
         });
+        return tray;
     }
 
-    public void showInTray() {
+    private static List<JMenuItem> default_items() {
+        List<JMenuItem> arr = new ArrayList<>();
+
+        {
+            var title = new JMenuItem(title());
+            title.setEnabled(false);
+
+            arr.add(title);
+        }
+
+        {
+            arr.add(null);
+        }
+
+        {
+            var exit = new JMenuItem("Exit");
+            exit.addActionListener(e -> {
+                if (!App.getInstance().isShutdown()) App.getInstance().shutdown();
+                System.exit(0);
+            });
+            arr.add(exit);
+        }
+        return arr;
+    }
+
+    private static String title() {
+        return AppInfo.name + " - v" + AppInfo.getVersion();
+    }
+
+    public static void showInTray() {
         if (visible) return;
         if (!SystemTray.isSupported()) return;
-        tray_icon.setToolTip(
-                "Double left click to open the application\n"+
-                "Tripple right click to exit the application"
-        );
-        try {SystemTray.getSystemTray().add(tray_icon);visible = true;}
+        tray = build();
+        tray.setToolTip(title());
+        try {SystemTray.getSystemTray().add(tray);visible = true;}
         catch (AWTException e) {App.getLogger().error(e);}
     }
 
-    public void hideFromTray() {
+    public static void hideFromTray() {
         if (!visible) return;
         if (!SystemTray.isSupported()) return;
-        SystemTray.getSystemTray().remove(tray_icon);
+        SystemTray.getSystemTray().remove(tray);
         visible = false;
     }
 }

@@ -47,6 +47,8 @@ public class UpdateCheckTask implements Runnable {
             while ((read = in.read(bytes)) != -1) builder.append(new String(bytes, 0, read));
             con.disconnect();
             String latestVersion = builder.toString().trim();
+            System.out.println("Latest version: " + latestVersion);
+            System.out.println("Current version: " + AppInfo.getVersion());
 
             boolean updateAvailable;
             try {
@@ -57,6 +59,7 @@ public class UpdateCheckTask implements Runnable {
             } catch (Throwable t) {
                 updateAvailable = !AppInfo.getVersion().equals(latestVersion);
             }
+            System.out.println("Update available: " + updateAvailable);
             if (updateAvailable) {
                 App.getLogger().warn("You are running an outdated version of " + AppInfo.name + "! Latest version: " + latestVersion);
                 String latest_url = "https://github.com/Presence-Man/Application/releases/download/" + (AppInfo.development ? "dev" : ("v"+latestVersion)) + "/Presence-Man-App.jar";
