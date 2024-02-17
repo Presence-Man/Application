@@ -83,8 +83,8 @@ public final class Tray {
         }
 
         {
-            var exit = new JMenuItem("Check for update");
-            exit.addActionListener(e -> App.getInstance().getScheduler().scheduleAsync(new UpdateCheckTask()));
+            var exit = new JMenuItem("Check for updates");
+            exit.addActionListener(e -> App.getInstance().getScheduler().scheduleAsync(new UpdateCheckTask(true)));
             arr.add(exit);
         }
 

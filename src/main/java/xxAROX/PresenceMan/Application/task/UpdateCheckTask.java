@@ -18,6 +18,8 @@
 package xxAROX.PresenceMan.Application.task;
 
 import com.vdurmont.semver4j.Semver;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.ui.popup.DownloadPopup;
@@ -29,7 +31,10 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+@AllArgsConstructor
+@NoArgsConstructor
 public class UpdateCheckTask implements Runnable {
+    private boolean show_up_to_date_dialog = false;
     @Override
     public void run() {
         try {
@@ -47,8 +52,6 @@ public class UpdateCheckTask implements Runnable {
             while ((read = in.read(bytes)) != -1) builder.append(new String(bytes, 0, read));
             con.disconnect();
             String latestVersion = builder.toString().trim();
-            System.out.println("Latest version: " + latestVersion);
-            System.out.println("Current version: " + AppInfo.getVersion());
 
             boolean updateAvailable;
             try {
@@ -59,11 +62,12 @@ public class UpdateCheckTask implements Runnable {
             } catch (Throwable t) {
                 updateAvailable = !AppInfo.getVersion().equals(latestVersion);
             }
-            System.out.println("Update available: " + updateAvailable);
             if (updateAvailable) {
                 App.getLogger().warn("You are running an outdated version of " + AppInfo.name + "! Latest version: " + latestVersion);
                 String latest_url = "https://github.com/Presence-Man/Application/releases/download/" + (AppInfo.development ? "dev" : ("v"+latestVersion)) + "/Presence-Man-App.jar";
                 SwingUtilities.invokeLater(() -> this.showUpdateQuestion(latest_url, latestVersion));
+            } else {
+                if (show_up_to_date_dialog) SwingUtilities.invokeLater(() -> App.ui.showInfo("Presence-Man is up to date!"));
             }
         } catch (Throwable ignored) {
         }
