@@ -46,13 +46,14 @@ jobs:
           automatic_release_tag: "v${{ steps.metadata.outputs.VERSION }}"
           prerelease: false
           title: "Development Release v${{ steps.metadata.outputs.VERSION }}"
-          files: "target/Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}-dev.jar"
+          files: "target/Presence-Man-App.jar"
 
-      - name: Release to public
-        uses: softprops/action-gh-release@v1
+      - name: "Create latest_version-dev.txt"
+        run: "echo \"${{ steps.metadata.outputs.VERSION }}\" > latest_version-dev.txt"
+
+      - name: "Update version-dev.txt"
+        uses: "test-room-7/action-update-file@v1"
         with:
-          tag_name: "latest"
-          name: "Latest releases"
-          repository: "Presence-Man/releases"
-          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-          files: "target/Presence-Man-App-dev.jar"
+          file-path: latest_version.txt
+          commit-msg: "Updated development version to ${{ steps.metadata.outputs.VERSION }} - ci ignore"
+          github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -33,7 +33,7 @@ public class UpdateCheckTask implements Runnable {
     @Override
     public void run() {
         try {
-            URL url = new URL("https://raw.githubusercontent.com/Presence-Man/releases/main/" + (AppInfo.development ? "dev-" : "") + "version-app.txt");
+            URL url = new URL("https://raw.githubusercontent.com/Presence-Man/Application/main/latest_version" + (AppInfo.development ? "-dev" : "") + ".txt");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("User-Agent", AppInfo.name + "/" + AppInfo.getVersion());
@@ -53,13 +53,13 @@ public class UpdateCheckTask implements Runnable {
                 Semver versionSemver = new Semver(AppInfo.getVersion());
                 Semver latestVersionSemver = new Semver(latestVersion);
                 updateAvailable = latestVersionSemver.isGreaterThan(versionSemver);
-                if (AppInfo.development/* || versionSemver.isGreaterThan(latestVersionSemver)*/) App.getLogger().warn("You are running a dev version of PresenceMan");
+                if (AppInfo.development || versionSemver.isGreaterThan(latestVersionSemver)) App.getLogger().warn("You are running a dev version of Presence-Man");
             } catch (Throwable t) {
                 updateAvailable = !AppInfo.getVersion().equals(latestVersion);
             }
             if (updateAvailable) {
                 App.getLogger().warn("You are running an outdated version of " + AppInfo.name + "! Latest version: " + latestVersion);
-                String latest_url = "https://github.com/Presence-Man/releases/releases/download/latest/Presence-Man-App" + (AppInfo.development ? "-dev" : "") + ".jar";
+                String latest_url = "https://github.com/Presence-Man/Application/releases/download/" + (AppInfo.development ? "dev" : ("v"+latestVersion)) + "/Presence-Man-App.jar";
                 SwingUtilities.invokeLater(() -> this.showUpdateQuestion(latest_url, latestVersion));
             }
         } catch (Throwable ignored) {

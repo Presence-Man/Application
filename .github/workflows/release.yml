@@ -46,28 +46,14 @@ jobs:
           automatic_release_tag: "v${{ steps.metadata.outputs.VERSION }}"
           prerelease: false
           title: "Release v${{ steps.metadata.outputs.VERSION }}"
-          files: "target/Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}.jar"
-
-      - name: "Create version-app.txt"
-        run: "echo \"${{ steps.metadata.outputs.VERSION }}\" >> version-app.txt"
-
-      - name: "Pushes latest version-app.txt file"
-        uses: dmnemec/copy_file_to_another_repo_action@main
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-        with:
-          source_file: 'version-app.txt'
-          destination_repo: 'Presence-Man/releases'
-          destination_folder: ''
-          user_email: 'arox.email.0@gmail.com'
-          user_name: 'xxAROX'
-          commit_message: 'Updated version'
-
-      - name: Release to public
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: "latest"
-          name: "Latest releases"
-          repository: "Presence-Man/releases"
-          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
           files: "target/Presence-Man-App.jar"
+
+      - name: "Create latest_version.txt"
+        run: "echo \"${{ steps.metadata.outputs.VERSION }}\" > latest_version.txt"
+
+      - name: "Update latest_version.txt"
+        uses: "test-room-7/action-update-file@v1"
+        with:
+          file-path: latest_version.txt
+          commit-msg: "Updated latest version to ${{ steps.metadata.outputs.VERSION }} - ci ignore"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
