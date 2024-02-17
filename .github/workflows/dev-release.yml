@@ -54,6 +54,6 @@ jobs:
       - name: "Update version-dev.txt"
         uses: "test-room-7/action-update-file@v1"
         with:
-          file-path: latest_version.txt
+          file-path: latest_version-dev.txt
           commit-msg: "Updated development version to ${{ steps.metadata.outputs.VERSION }} - ci ignore"
           github-token: ${{ secrets.GITHUB_TOKEN }}
