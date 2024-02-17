@@ -29,7 +29,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 public class FetchGatewayInformationTask extends Task {
-    private static final String URL = "https://raw.githubusercontent.com/Presence-Man/releases/main/gateway.json";
+    private static final String URL = "https://raw.githubusercontent.com/Presence-Man/Gateway/main/gateway.json";
 
     @Override
     public void onRun(int currentTick) {
