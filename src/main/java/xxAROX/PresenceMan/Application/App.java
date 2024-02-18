@@ -53,6 +53,7 @@ public final class App {
     @Getter static final long created = Instant.now().toEpochMilli();
     public static Long network_session_created = null;
     public static Long server_session_created = null;
+    public static String head_url = null;
 
     @Getter private DiscordInfo discord_info = new DiscordInfo();
 
@@ -198,6 +199,10 @@ public final class App {
             if (api_activity.getDetails() != null) api_activity.setDetails(Utils.replaceParams(api_activity.getDetails()));
             if (api_activity.getLarge_icon_key() == null || api_activity.getLarge_icon_key().isBlank()) api_activity.setLarge_icon_key("bedrock");
             if (api_activity.getLarge_icon_text() != null && !api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(Utils.replaceParams(api_activity.getLarge_icon_text()));
+            if (App.head_url != null) {
+                api_activity.setSmall_icon_key(App.head_url);
+                if (api_activity.getSmall_icon_text() == null) api_activity.setSmall_icon_text(app.xboxUserInfo.getGamertag());
+            }
         }
         App.getInstance().initDiscord(String.valueOf(api_activity.getClient_id()));
         APIActivity finalApi_activity1 = api_activity;

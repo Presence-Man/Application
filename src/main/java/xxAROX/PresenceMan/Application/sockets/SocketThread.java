@@ -80,15 +80,14 @@ public class SocketThread implements Runnable {
         packet.setGamertag(App.getInstance().xboxUserInfo.getGamertag());
         packet.setDiscord_user_id(App.getInstance().getDiscord_info().getId());
         App.getInstance().socket.sendPacket(packet, (pk) -> {
-            Gateway.connected = true;
             if (!heartbeats_need_a_token && session_token.get() == null) {
                 session_token.set(pk.getToken());
                 heartbeats_need_a_token = true;
             }
             heartbeat_pending.getAndDecrement();
+            App.head_url = pk.getHead_url();
             if (App.getInstance().featuredServer != null) return;
             App.getInstance().updateServer(pk.getNetwork(), pk.getServer());
-
             APIActivity new_activity = pk.getApi_activity();
             if (new_activity == null) new_activity = APIActivity.none();
             if (new_activity.equals(App.getInstance().getApi_activity())) return;
@@ -104,7 +103,6 @@ public class SocketThread implements Runnable {
         App.getLogger().info("Resetting connection..");
         connectionState.set(State.DISCONNECTED);
         session_token.set(null);
-        Gateway.connected = false;
         socket.close();
         socket.connect();
     }
@@ -122,10 +120,8 @@ public class SocketThread implements Runnable {
                 if (socket.connect()) {
                     connectionState.set(State.CONNECTED);
                     App.getLogger().info(tries_left.get() +1 == default_tries ? "Connected!" : "Reconnected!");
-                    Gateway.connected = true;
                     tries_left.set(default_tries);
                 } else {
-                    Gateway.connected = false;
                     connectionState.set(State.DISCONNECTED);
                     App.getLogger().warn(tries_left.get() +1 == default_tries ? "Failed to connect to backend!" :"Reconnecting failed!");
                 }

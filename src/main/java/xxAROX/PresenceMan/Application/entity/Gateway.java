@@ -24,7 +24,6 @@ public class Gateway {
     public static Integer port = 15151;
     public static Integer usual_port = 15151;
 
-    public static boolean connected = false;
     public static boolean broken = false;
     public static boolean broken_popup = false;
 

@@ -116,7 +116,6 @@ public class WaterdogScheduler {
         }
         if (taskHandler.isAsync()) threadedExecutor.execute(() -> taskHandler.onRun(currentTick));
         else taskHandler.onRun(currentTick);
-
         if (taskHandler.calculateNextTick(currentTick)) {
             pendingTasks.offer(taskHandler);
             return;

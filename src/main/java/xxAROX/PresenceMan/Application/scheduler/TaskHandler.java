@@ -20,6 +20,7 @@ package xxAROX.PresenceMan.Application.scheduler;
 import xxAROX.PresenceMan.Application.App;
 
 import javax.swing.*;
+import java.util.concurrent.CancellationException;
 
 public class TaskHandler<T extends Runnable> {
     private final int taskId;
@@ -45,7 +46,11 @@ public class TaskHandler<T extends Runnable> {
     public void onRun(int currentTick) {
         this.lastRunTick = currentTick;
         try {
-            this.task.run();
+            try {
+                this.task.run();
+            } catch (CancellationException e) {
+                cancel();
+            }
         } catch (Throwable t) {
             if (this.task instanceof Task) ((Task) this.task).onError(t);
             else if (App.ui != null) SwingUtilities.invokeLater(() -> App.ui.showException(t));

@@ -26,6 +26,8 @@ import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.entity.enums.APITimestamp;
 
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter @Setter @Accessors(chain = true)
 @AllArgsConstructor
@@ -149,6 +151,18 @@ public final class APIActivity {
         activity.setLarge_icon_key("bedrock");
         activity.setLarge_icon_text(AppInfo.name + " - " + AppInfo.getVersion());
         activity.setSmall_icon_text(app == null || app.xboxUserInfo == null ? activity.getSmall_icon_text()  : App.getInstance().xboxUserInfo.getGamertag());
+        activity.setSmall_icon_key(app == null || App.head_url == null ? activity.getSmall_icon_key()  : App.head_url);
+        if (App.head_url == null) {
+            AtomicInteger tries = new AtomicInteger(15);
+            App.getInstance().getScheduler().scheduleRepeating(() -> {
+                if (App.head_url != null) {
+                    App.setActivity(activity);
+                    throw new CancellationException();
+                }
+                tries.getAndDecrement();
+                if (tries.get() == 0) throw new CancellationException();
+            }, 20);
+        }
         return activity;
     }
 }

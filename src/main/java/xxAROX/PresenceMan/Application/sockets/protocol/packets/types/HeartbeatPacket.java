@@ -36,6 +36,7 @@ public class HeartbeatPacket extends CallbackPacket {
     private String network = null;
     private String server = null;
     private Long received = null;
+    private String head_url = null;
 
     @Override
     protected JsonObject encodeBody(JsonObject payload) {
@@ -47,6 +48,7 @@ public class HeartbeatPacket extends CallbackPacket {
         payload.addProperty("server", server);
         payload.addProperty("sent", sent);
         payload.addProperty("received", received);
+        payload.addProperty("head_url", head_url);
         return super.encodeBody(payload);
     }
 
@@ -60,6 +62,7 @@ public class HeartbeatPacket extends CallbackPacket {
         server = object.has("server") && !object.get("server").isJsonNull() ? object.get("server").getAsString() : server;
         sent = object.has("sent") && !object.get("sent").isJsonNull() ? object.get("sent").getAsLong() : sent;
         received = object.has("received") && !object.get("received").isJsonNull() ? object.get("received").getAsLong() : null;
+        head_url = object.has("head_url") && !object.get("head_url").isJsonNull() ? object.get("head_url").getAsString() : null;
         super.decodeBody(object);
     }
 
