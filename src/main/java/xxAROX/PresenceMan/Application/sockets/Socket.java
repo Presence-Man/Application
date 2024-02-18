@@ -57,7 +57,6 @@ public final class Socket {
             socket.receive(responsePacket);
             return new String(responsePacket.getData()).trim().equalsIgnoreCase("pong");
         } catch (SocketTimeoutException ignore) {
-            SocketThread.getInstance().getConnectionState().set(SocketThread.State.DISCONNECTED);
         } catch (Exception e) {
             App.getLogger().error("Error while connecting to backend: ", e);
         }
@@ -75,7 +74,6 @@ public final class Socket {
                     socket.receive(received);
                 }
             } catch (java.net.SocketTimeoutException ignore) {
-                SocketThread.getInstance().getConnectionState().set(SocketThread.State.DISCONNECTED);
             } catch (java.net.SocketException e) {
                 if (!e.getMessage().equals("Socket closed")) App.getLogger().error("Error when receiving packet: ", e);
             } catch (IOException e) {
