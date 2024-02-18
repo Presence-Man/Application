@@ -18,7 +18,7 @@
 package xxAROX.PresenceMan.Application.ui.tabs;
 
 import xxAROX.PresenceMan.Application.App;
-import xxAROX.PresenceMan.Application.entity.Gateway;
+import xxAROX.PresenceMan.Application.sockets.SocketThread;
 import xxAROX.PresenceMan.Application.ui.AUITab;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 
@@ -66,10 +66,12 @@ public class GeneralTab extends AUITab {
     private static String getConnectedMessage(){
         var activity = App.getInstance().getApi_activity();
         boolean connected = activity != null && App.getInstance().getNetwork() != null && App.getInstance().getServer() != null;
+        var connected_to_backend = SocketThread.getInstance() != null && SocketThread.getInstance().getConnectionState().get().equals(SocketThread.State.CONNECTED);
         return connected ?
                 CONNECTED
                     .replace("{server}", App.getInstance().getServer())
                     .replace("{network}", App.getInstance().getNetwork())
-                : (Gateway.connected ? HALF_CONNECTED : NOT_CONNECTED);
+                //: (Gateway.connected ? HALF_CONNECTED : NOT_CONNECTED);
+                : (connected_to_backend ? HALF_CONNECTED : NOT_CONNECTED);
     }
 }

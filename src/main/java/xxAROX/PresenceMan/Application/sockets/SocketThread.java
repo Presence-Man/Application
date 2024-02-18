@@ -101,11 +101,11 @@ public class SocketThread implements Runnable {
     }
 
     public void resetConnection(){
+        App.getLogger().info("Resetting connection..");
+        connectionState.set(State.DISCONNECTED);
         session_token.set(null);
-        connectionState.set(State.CONNECTING);
         Gateway.connected = false;
         socket.close();
-        connectionState.set(State.DISCONNECTED);
         socket.connect();
     }
 
@@ -122,14 +122,16 @@ public class SocketThread implements Runnable {
                 if (socket.connect()) {
                     connectionState.set(State.CONNECTED);
                     App.getLogger().info(tries_left.get() +1 == default_tries ? "Connected!" : "Reconnected!");
+                    Gateway.connected = true;
                     tries_left.set(default_tries);
                 } else {
+                    Gateway.connected = false;
                     connectionState.set(State.DISCONNECTED);
                     App.getLogger().warn(tries_left.get() +1 == default_tries ? "Failed to connect to backend!" :"Reconnecting failed!");
                 }
             }
         }
-        if (currentTick %(20*4) == 0) heartbeat();
+        if (currentTick %30 == 0) heartbeat();
     }
 
     @Override public void run() {

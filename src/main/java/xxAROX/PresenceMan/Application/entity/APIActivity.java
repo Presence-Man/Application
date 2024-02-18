@@ -148,8 +148,7 @@ public final class APIActivity {
         activity.setDetails("");
         activity.setLarge_icon_key("bedrock");
         activity.setLarge_icon_text(AppInfo.name + " - " + AppInfo.getVersion());
-        activity.setSmall_icon_text(app == null || app.xboxUserInfo == null ? ""  : App.getInstance().xboxUserInfo.getGamertag());
-        //activity.setSmall_icon_key(app == null || app.xboxUserInfo == null ? ""  : Gateway.getUrl() + RestAPI.Endpoints.head + App.getInstance().xboxUserInfo.getXuid() + "/" + (System.currentTimeMillis() /1000));
+        activity.setSmall_icon_text(app == null || app.xboxUserInfo == null ? activity.getSmall_icon_text()  : App.getInstance().xboxUserInfo.getGamertag());
         return activity;
     }
 }

@@ -25,6 +25,7 @@ import xxAROX.PresenceMan.Application.sockets.protocol.compressor.GzipCompressor
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketTimeoutException;
 
 public final class Socket {
     private static final String UNKNOWN = " ".repeat(1);
@@ -42,12 +43,23 @@ public final class Socket {
             DatagramSocket _socket = new DatagramSocket();
             _socket.setReuseAddress(true);
             _socket.setReceiveBufferSize(65535);
+            _socket.setSoTimeout(5000);
             _socket.setSendBufferSize(65535);
             socket = _socket;
             socket.connect(connection.getBackend_address().getAddress(), connection.getBackend_address().getPort());
-            return true;
-        } catch (IOException e) {
-            App.getLogger().error("Error while connecting to backend: {}", e);
+
+            byte[] requestData = "ping".getBytes();
+            DatagramPacket requestPacket = new DatagramPacket(requestData, requestData.length, connection.getBackend_address().getAddress(), connection.getBackend_address().getPort());
+            socket.send(requestPacket);
+
+            byte[] responseData = new byte[1024];
+            DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length);
+            socket.receive(responsePacket);
+            return new String(responsePacket.getData()).trim().equalsIgnoreCase("pong");
+        } catch (SocketTimeoutException ignore) {
+            SocketThread.getInstance().getConnectionState().set(SocketThread.State.DISCONNECTED);
+        } catch (Exception e) {
+            App.getLogger().error("Error while connecting to backend: ", e);
         }
         return false;
     }
@@ -62,6 +74,8 @@ public final class Socket {
                 if (!socket.isClosed()) {
                     socket.receive(received);
                 }
+            } catch (java.net.SocketTimeoutException ignore) {
+                SocketThread.getInstance().getConnectionState().set(SocketThread.State.DISCONNECTED);
             } catch (java.net.SocketException e) {
                 if (!e.getMessage().equals("Socket closed")) App.getLogger().error("Error when receiving packet: ", e);
             } catch (IOException e) {
