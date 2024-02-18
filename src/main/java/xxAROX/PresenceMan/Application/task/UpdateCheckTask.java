@@ -76,7 +76,7 @@ public class UpdateCheckTask implements Runnable {
     private void showUpdateQuestion(final String downloadUrl, final String latestVersion) {
         int chosen = JOptionPane.showConfirmDialog(
                 App.ui,
-                "You are running an outdated version of PresenceMan!\nCurrent version: " + AppInfo.getVersion() + "\nLatest version: " + latestVersion + "\n\nDo you want to update?",
+                "You are running an outdated version of Presence-Man!\nCurrent version: " + AppInfo.getVersion() + "\nLatest version: " + latestVersion + "\n\nDo you want to update?",
                 AppInfo.name + " update",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE

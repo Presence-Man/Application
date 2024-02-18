@@ -51,6 +51,7 @@ public class AppUI extends JDialog {
     public final FeaturedServersTab featured_servers_tab = new FeaturedServersTab(this);
 
     public AppUI() {
+        super((Dialog) null);
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> showException(e));
 
         this.setLookAndFeel();
