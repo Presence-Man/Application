@@ -17,7 +17,6 @@
 
 package xxAROX.PresenceMan.Application;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.ToString;
@@ -86,7 +85,7 @@ public final class App {
         }
         this.logger = logger;
         instance = this;
-        events = new Events(this);
+        events = new Events();
 
         Runtime.getRuntime().addShutdownHook(new Thread(DiscordRPC::discordShutdown));
         initDiscord();
@@ -227,10 +226,7 @@ public final class App {
         }
     }
 
-    @AllArgsConstructor
     public final class Events implements IBaseListener {
-        private App app;
-
         @Override
         public void onLogin(XboxUserInfo info) {
             xboxUserInfo = info;
@@ -240,6 +236,7 @@ public final class App {
         @Override
         public void onLogout() {
             xboxUserInfo = null;
+            head_url = null;
             CacheManager.storeXboxUserInfo(null);
             setActivity(APIActivity.none());
         }
