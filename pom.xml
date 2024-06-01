@@ -92,7 +92,7 @@
         <dependency>
             <groupId>com.github.RaphiMC</groupId>
             <artifactId>MinecraftAuth</artifactId>
-            <version>v4.0.0</version>
+            <version>4.0.2</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
