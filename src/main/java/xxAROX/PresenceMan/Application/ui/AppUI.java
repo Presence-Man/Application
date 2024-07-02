@@ -47,7 +47,6 @@ public class AppUI extends JDialog {
     public final GeneralTab general_tab = new GeneralTab(this);
     public final LoginTab login_tab = new LoginTab(this);
     public final PrivacyPolicyTab privacy_policy_tab = new PrivacyPolicyTab(this);
-    //public final FeaturedServersTab featured_servers_tab = new FeaturedServersTab(this);
 
     public AppUI() {
         super((Dialog) null);

@@ -91,7 +91,6 @@ public class SocketThread implements Runnable {
             }
             heartbeat_pending.getAndDecrement();
             App.head_url = pk.getHead_url();
-            if (App.getInstance().featuredServer != null) return;
             App.getInstance().updateServer(pk.getNetwork(), pk.getServer());
             APIActivity new_activity = pk.getApi_activity();
             if (new_activity == null) new_activity = APIActivity.none();

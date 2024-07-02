@@ -26,7 +26,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.DiscordInfo;
-import xxAROX.PresenceMan.Application.entity.FeaturedServer;
 import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 import xxAROX.PresenceMan.Application.events.IBaseListener;
 import xxAROX.PresenceMan.Application.scheduler.WaterdogScheduler;
@@ -75,8 +74,6 @@ public final class App {
     private int currentTick = 0;
     public APIActivity api_activity = null;
     public XboxUserInfo xboxUserInfo = null;
-    @Deprecated
-    public FeaturedServer featuredServer = null;
 
     @SneakyThrows
     public App(Logger logger) {
