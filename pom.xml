@@ -62,7 +62,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>1.18.32</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -90,15 +90,14 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.RaphiMC</groupId>
+            <groupId>net.raphimc</groupId>
             <artifactId>MinecraftAuth</artifactId>
-            <version>v4.0.0</version>
-            <scope>compile</scope>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.github.Dansoftowner</groupId>
             <artifactId>jSystemThemeDetector</artifactId>
-            <version>3.8</version>
+            <version>3.9.1</version>
             <scope>compile</scope>
         </dependency>
         <!--dependency>

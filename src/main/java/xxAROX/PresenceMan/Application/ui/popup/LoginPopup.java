@@ -18,11 +18,10 @@
 package xxAROX.PresenceMan.Application.ui.popup;
 
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
+import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 
 import javax.swing.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.function.Consumer;
@@ -58,21 +57,14 @@ public class LoginPopup extends JDialog {
     }
 
     private void initComponents() {
+        App.ui.openURL(deviceCode.getDirectVerificationUri());
+
         JPanel contentPane = new JPanel();
         contentPane.setLayout(null);
-        JLabel browserLabel = new JLabel("Please open the following URL in your browser:");
+
+        JLabel browserLabel = new JLabel("Please look at your browser!");
         browserLabel.setBounds(10, 10, 380, 20);
         contentPane.add(browserLabel);
-
-        JLabel urlLabel = new JLabel("<html><a href=\"\">" + deviceCode.getDirectVerificationUri() + "</a></html>");
-        urlLabel.setBounds(10, 30, 380, 20);
-        urlLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                parent.openURL(deviceCode.getDirectVerificationUri());
-            }
-        });
-        contentPane.add(urlLabel);
 
         JLabel closeInfo = new JLabel("The popup will close automatically after you have been logged in.");
         closeInfo.setBounds(10, 100, 380, 20);
