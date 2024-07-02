@@ -29,6 +29,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -77,20 +80,38 @@ public final class Tray {
     private static List<JMenuItem> default_items() {
         List<JMenuItem> arr = new ArrayList<>();
 
-        {
+        { // -- Title --
             var title = new JMenuItem(title());
             title.setEnabled(false);
             arr.add(title);
         }
 
-        {
+        { // -- Separator --
+            arr.add(null);
+        }
+
+        { // -- Report a bug --
+            if (Desktop.isDesktopSupported()) {
+                final String TEXT = "Report a bug";
+                var item = new JMenuItem(TEXT);
+                item.addActionListener(e -> {
+                    try {
+                        Desktop.getDesktop().browse(new URI("https://github.com/Presence-Man/Application/issues"));
+                    } catch (IOException | URISyntaxException ignore) {
+                    }
+                });
+                arr.add(item);
+            }
+        }
+
+        { // -- Check for updates --
             final String TEXT = "Check for updates";
             var item = new JMenuItem(TEXT);
             item.addActionListener(e -> App.getInstance().getScheduler().scheduleAsync(new UpdateCheckTask(true)));
             arr.add(item);
         }
 
-        {
+        { // -- Reconnect --
             final String RECONNECT = "Reconnect to backend";
             final String RECONNECTING = "Reconnecting..";
 
@@ -113,11 +134,11 @@ public final class Tray {
             arr.add(reconnect);
         }
 
-        {
+        { // -- Separator --
             arr.add(null);
         }
 
-        {
+        { // -- Exit --
             var exit = new JMenuItem("Quit " + AppInfo.name);
             exit.addActionListener(e -> {
                 if (!App.getInstance().isShutdown()) App.getInstance().shutdown();
