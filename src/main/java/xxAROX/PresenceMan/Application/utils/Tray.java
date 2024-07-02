@@ -29,9 +29,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -91,17 +88,12 @@ public final class Tray {
         }
 
         { // -- Report a bug --
-            if (Desktop.isDesktopSupported()) {
-                final String TEXT = "Report a bug";
-                var item = new JMenuItem(TEXT);
-                item.addActionListener(e -> {
-                    try {
-                        Desktop.getDesktop().browse(new URI("https://github.com/Presence-Man/Application/issues"));
-                    } catch (IOException | URISyntaxException ignore) {
-                    }
-                });
-                arr.add(item);
-            }
+            final String TEXT = "Report a bug";
+            var item = new JMenuItem(TEXT);
+            item.addActionListener(e -> {
+                App.ui.openURL("https://github.com/Presence-Man/Application/issues");
+            });
+            arr.add(item);
         }
 
         { // -- Check for updates --
