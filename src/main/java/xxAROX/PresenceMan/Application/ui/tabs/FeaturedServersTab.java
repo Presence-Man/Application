@@ -31,6 +31,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.*;
 
+@Deprecated
 public class FeaturedServersTab extends AUITab {
     private JComboBox<FeaturedServer> network;
     private JComboBox<__Server> game;

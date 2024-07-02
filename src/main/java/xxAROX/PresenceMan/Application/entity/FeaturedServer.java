@@ -29,6 +29,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Getter @Setter @Accessors(chain = true)
 @ToString
+@Deprecated
 public class FeaturedServer {
     private String name;
     private FeaturedServersTab.__Server game;

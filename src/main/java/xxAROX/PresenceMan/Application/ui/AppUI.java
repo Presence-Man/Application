@@ -24,7 +24,6 @@ import com.jthemedetecor.OsThemeDetector;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.Bootstrap;
-import xxAROX.PresenceMan.Application.ui.tabs.FeaturedServersTab;
 import xxAROX.PresenceMan.Application.ui.tabs.GeneralTab;
 import xxAROX.PresenceMan.Application.ui.tabs.LoginTab;
 import xxAROX.PresenceMan.Application.ui.tabs.PrivacyPolicyTab;
@@ -48,7 +47,7 @@ public class AppUI extends JDialog {
     public final GeneralTab general_tab = new GeneralTab(this);
     public final LoginTab login_tab = new LoginTab(this);
     public final PrivacyPolicyTab privacy_policy_tab = new PrivacyPolicyTab(this);
-    public final FeaturedServersTab featured_servers_tab = new FeaturedServersTab(this);
+    //public final FeaturedServersTab featured_servers_tab = new FeaturedServersTab(this);
 
     public AppUI() {
         super((Dialog) null);

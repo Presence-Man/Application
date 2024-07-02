@@ -63,7 +63,11 @@ public class SocketThread implements Runnable {
         }
     }
 
-    public void heartbeat(){
+    public void heartbeat() {
+        heartbeat(null);
+    }
+
+    public void heartbeat(Consumer<HeartbeatPacket> consumer){
         if (!connectionState.get().equals(SocketThread.State.CONNECTED)) return;
         if (session_token.get() == null && heartbeats_need_a_token) return;
         if (heartbeat_pending.get() == 5) {
@@ -80,6 +84,7 @@ public class SocketThread implements Runnable {
         packet.setGamertag(App.getInstance().xboxUserInfo.getGamertag());
         packet.setDiscord_user_id(App.getInstance().getDiscord_info().getId());
         App.getInstance().socket.sendPacket(packet, (pk) -> {
+            if (consumer != null) consumer.accept(pk);
             if (!heartbeats_need_a_token && session_token.get() == null) {
                 session_token.set(pk.getToken());
                 heartbeats_need_a_token = true;
@@ -93,6 +98,7 @@ public class SocketThread implements Runnable {
             if (new_activity.equals(App.getInstance().getApi_activity())) return;
             App.setActivity(new_activity);
         }, err -> {
+            App.head_url = null;
             App.getInstance().network = null;
             App.getInstance().server = null;
             App.getLogger().error("Error on heartbeat: " + err);
@@ -102,6 +108,7 @@ public class SocketThread implements Runnable {
     public void resetConnection(){
         App.getLogger().info("Resetting connection..");
         connectionState.set(State.DISCONNECTED);
+        heartbeats_need_a_token = false;
         session_token.set(null);
         socket.close();
         socket.connect();
@@ -121,6 +128,7 @@ public class SocketThread implements Runnable {
                     connectionState.set(State.CONNECTED);
                     App.getLogger().info(tries_left.get() +1 == default_tries ? "Connected!" : "Reconnected!");
                     tries_left.set(default_tries);
+                    heartbeat();
                 } else {
                     connectionState.set(State.DISCONNECTED);
                     App.getLogger().warn(tries_left.get() +1 == default_tries ? "Failed to connect to backend!" :"Reconnecting failed!");

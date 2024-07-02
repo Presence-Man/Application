@@ -22,6 +22,7 @@ import lombok.ToString;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.Bootstrap;
+import xxAROX.PresenceMan.Application.sockets.SocketThread;
 import xxAROX.PresenceMan.Application.task.UpdateCheckTask;
 
 import javax.swing.*;
@@ -31,6 +32,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
 
 @Getter
  @ToString
@@ -78,14 +80,37 @@ public final class Tray {
         {
             var title = new JMenuItem(title());
             title.setEnabled(false);
-
             arr.add(title);
         }
 
         {
-            var exit = new JMenuItem("Check for updates");
-            exit.addActionListener(e -> App.getInstance().getScheduler().scheduleAsync(new UpdateCheckTask(true)));
-            arr.add(exit);
+            final String TEXT = "Check for updates";
+            var item = new JMenuItem(TEXT);
+            item.addActionListener(e -> App.getInstance().getScheduler().scheduleAsync(new UpdateCheckTask(true)));
+            arr.add(item);
+        }
+
+        {
+            final String RECONNECT = "Reconnect to backend";
+            final String RECONNECTING = "Reconnecting..";
+
+            var reconnect = new JMenuItem(RECONNECT);
+            reconnect.addActionListener(e -> {
+                reconnect.setEnabled(false);
+                reconnect.setText(RECONNECTING);
+                if (SocketThread.getInstance() != null) {
+                    SocketThread.getInstance().resetConnection();
+                    App.getInstance().getScheduler().scheduleRepeating(() -> {
+                        if (SocketThread.getInstance() != null && SocketThread.getInstance().getConnectionState().get().equals(SocketThread.State.CONNECTED)) {
+                            reconnect.setText(RECONNECT);
+                            reconnect.setEnabled(true);
+                            App.getInstance().getScheduler().scheduleDelayed(() -> SocketThread.getInstance().heartbeat(), 20 * 5);
+                            throw new CancellationException();
+                        }
+                    }, 30);
+                }
+            });
+            arr.add(reconnect);
         }
 
         {

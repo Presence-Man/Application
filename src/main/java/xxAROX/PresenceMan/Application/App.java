@@ -75,6 +75,7 @@ public final class App {
     private int currentTick = 0;
     public APIActivity api_activity = null;
     public XboxUserInfo xboxUserInfo = null;
+    @Deprecated
     public FeaturedServer featuredServer = null;
 
     @SneakyThrows

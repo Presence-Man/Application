@@ -37,6 +37,11 @@ public final class Socket {
     }
 
     public boolean connect(){
+        if (socket != null) {
+            if (socket.isConnected()) socket.disconnect();
+            if (!socket.isClosed()) socket.close();
+            socket = null;
+        }
         SocketThread.getInstance().getHeartbeat_pending().set(0);
         close();
         try {
