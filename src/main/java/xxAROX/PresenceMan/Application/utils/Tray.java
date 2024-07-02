@@ -118,7 +118,7 @@ public final class Tray {
         }
 
         {
-            var exit = new JMenuItem("Exit");
+            var exit = new JMenuItem("Quit " + AppInfo.name);
             exit.addActionListener(e -> {
                 if (!App.getInstance().isShutdown()) App.getInstance().shutdown();
                 System.exit(0);
