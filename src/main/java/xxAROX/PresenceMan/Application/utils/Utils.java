@@ -17,9 +17,12 @@
 
 package xxAROX.PresenceMan.Application.utils;
 
+import org.apache.logging.log4j.Logger;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,5 +49,31 @@ public class Utils {
         if (!params.containsKey("{App.name}")) params.putAll(getDefaultParams());
         for (Map.Entry<String, String> keyValueEntry : params.entrySet()) base = base.replace(keyValueEntry.getKey(), keyValueEntry.getValue());
         return base;
+    }
+
+    public static class SingleInstanceUtils {
+        private static final String LOCK_FILE = System.getProperty("user.home") + "/.presence-man.lock";
+
+        public static boolean hook(Logger logger) {
+            if (isAppAlreadyRunning(logger)) return false;
+            Runtime.getRuntime().addShutdownHook(new Thread(SingleInstanceUtils::releaseLock));
+            return true;
+        }
+        private static boolean isAppAlreadyRunning(Logger logger) {
+            try {
+                File file = new File(LOCK_FILE);
+                if (file.exists()) return true;
+                if (!file.createNewFile()) return true;
+                file.deleteOnExit();
+            } catch (IOException e) {
+                logger.error(e);
+                return true;
+            }
+            return false;
+        }
+        private static void releaseLock() {
+            File file = new File(LOCK_FILE);
+            if (file.exists()) file.delete();
+        }
     }
 }

@@ -20,13 +20,12 @@ package xxAROX.PresenceMan.Application;
 import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import xxAROX.PresenceMan.Application.utils.Utils;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 public class Bootstrap {
-    private static final File LOCK_FILE = new File(System.getProperty("user.home"), ".presence-man.lock");;
     @SneakyThrows
     public static void main(String[] _args) {
         //LOCK();
@@ -36,17 +35,8 @@ public class Bootstrap {
         AppInfo.development = lowArgs.contains("dev") || lowArgs.contains("development");
 
         Logger logger = initializeLogger();
-        new App(logger);
-    }
-
-    @SneakyThrows
-    protected static void LOCK() {
-        if (LOCK_FILE.exists()) System.exit(0);
-        else {
-            LOCK_FILE.deleteOnExit();
-            LOCK_FILE.createNewFile();
-            Runtime.getRuntime().addShutdownHook(new Thread(LOCK_FILE::delete));
-        }
+        if (Utils.SingleInstanceUtils.hook(logger)) new App(logger);
+        else System.exit(1);
     }
 
     protected static Logger initializeLogger(){
