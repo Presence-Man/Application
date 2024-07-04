@@ -95,7 +95,7 @@ public final class App {
         tickFuture = tickExecutor.scheduleAtFixedRate(this::processTick, 50, 50, TimeUnit.MILLISECONDS);
 
         SwingUtilities.invokeLater(() -> ui = new AppUI());
-        scheduler.scheduleAsync(new UpdateCheckTask());
+        if (CacheManager.Settings.ENABLE_AUTO_UPDATE) scheduler.scheduleAsync(new UpdateCheckTask());
         App.getInstance().getScheduler().scheduleAsync(new FetchGatewayInformationTask());
 
         xboxUserInfo = CacheManager.loadXboxUserInfo();

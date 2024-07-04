@@ -18,7 +18,10 @@
 package xxAROX.PresenceMan.Application.utils;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import lombok.NonNull;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 
@@ -29,8 +32,9 @@ import java.io.IOException;
 
 public final class CacheManager {
     private static final Gson GSON = new Gson();
-    private static final File CACHE_FILE = new File(".presence-man-cache.json");
+    private static final File CACHE_FILE = new File(System.getProperty("user.home")).toPath().resolve(".presence-man-cache.json").toFile();
     private static JsonObject json = new JsonObject();
+    public static JsonObject settings = new JsonObject();
 
     static {
         load();
@@ -44,6 +48,8 @@ public final class CacheManager {
             }
             FileReader reader = new FileReader(CACHE_FILE);
             json = GSON.fromJson(reader, JsonObject.class);
+            settings = json.has("settings") && json.get("settings").isJsonObject() ? json.get("settings").getAsJsonObject() : new JsonObject();
+            Settings.load();
             reader.close();
         } catch (IOException e) {
             App.getLogger().error(e);
@@ -54,6 +60,8 @@ public final class CacheManager {
     public static void save() {
         try {
             FileWriter writer = new FileWriter(CACHE_FILE);
+            Settings.save();
+            json.add("settings", settings);
             GSON.toJson(json, writer);
             writer.close();
         } catch (IOException e) {
@@ -72,5 +80,26 @@ public final class CacheManager {
         json.addProperty("xuid", xboxUserInfo == null ? null : xboxUserInfo.getXuid());
         json.addProperty("gamertag", xboxUserInfo == null ? null : xboxUserInfo.getGamertag());
         save();
+    }
+
+    @NonNull
+    public static JsonElement setting(String key){
+        return settings.has(key) ? settings.get(key) : new JsonNull();
+    }
+
+    public static class Settings {
+        public static boolean START_MINIMIZED = false;
+        public static boolean ENABLE_AUTO_UPDATE = true;
+
+        protected static void load() {
+            if (!settings.has("start-minimized")) settings.addProperty("start-minimized", START_MINIMIZED);
+            START_MINIMIZED = settings.get("start-minimized").getAsBoolean();
+            if (!settings.has("enable-auto-update")) settings.addProperty("enable-auto-update", ENABLE_AUTO_UPDATE);
+            ENABLE_AUTO_UPDATE = settings.get("enable-auto-update").getAsBoolean();
+        }
+        protected static void save() {
+            settings.addProperty("start-minimized", START_MINIMIZED);
+            settings.addProperty("enable-auto-update", ENABLE_AUTO_UPDATE);
+        }
     }
 }

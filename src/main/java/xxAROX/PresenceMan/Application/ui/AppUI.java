@@ -27,6 +27,8 @@ import xxAROX.PresenceMan.Application.Bootstrap;
 import xxAROX.PresenceMan.Application.ui.tabs.GeneralTab;
 import xxAROX.PresenceMan.Application.ui.tabs.LoginTab;
 import xxAROX.PresenceMan.Application.ui.tabs.PrivacyPolicyTab;
+import xxAROX.PresenceMan.Application.ui.tabs.SettingsTab;
+import xxAROX.PresenceMan.Application.utils.CacheManager;
 import xxAROX.PresenceMan.Application.utils.Tray;
 
 import javax.swing.*;
@@ -47,6 +49,7 @@ public class AppUI extends JDialog {
     public final GeneralTab general_tab = new GeneralTab(this);
     public final LoginTab login_tab = new LoginTab(this);
     public final PrivacyPolicyTab privacy_policy_tab = new PrivacyPolicyTab(this);
+    public final SettingsTab settings_tab = new SettingsTab(this);
 
     public AppUI() {
         super((Dialog) null);
@@ -74,7 +77,8 @@ public class AppUI extends JDialog {
         ToolTipManager.sharedInstance().setDismissDelay(10_000);
         SwingUtilities.updateComponentTreeUI(this);
         setVisible(false);
-        Tray.showInTray();
+        if (CacheManager.Settings.START_MINIMIZED) Tray.showInTray();
+        else setVisible(true);
     }
 
     private void setLookAndFeel() {
