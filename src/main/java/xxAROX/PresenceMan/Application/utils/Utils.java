@@ -21,12 +21,17 @@ import org.apache.logging.log4j.Logger;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class Utils {
     private static Map<String, String> getDefaultParams() {
@@ -77,6 +82,45 @@ public class Utils {
                 logger.error("Unable to create and/or lock file: " + LOCK_FILE, e);
             }
             return false;
+        }
+    }
+
+    public static class UIUtils {
+        public static JButton addButton(JPanel panel, GridBagConstraints constraints, int gridy, String text, Consumer<JButton> handler) {
+            JButton button = new JButton(text);
+            button.addActionListener(event -> handler.accept(button));
+            constraints.gridx = 0;
+            constraints.gridy = gridy;
+            constraints.gridwidth = 2;
+            panel.add(button, constraints);
+            return button;
+        }
+
+        public static JCheckBox addCheckbox(JPanel panel, GridBagConstraints constraints, int gridy, String text, boolean default_value, Consumer<Boolean> handler) {
+            JCheckBox checkBox = new JCheckBox(text, default_value);
+            checkBox.addItemListener(event -> {
+                boolean value = event.getStateChange() == ItemEvent.SELECTED;
+                handler.accept(value);
+            });
+            constraints.gridx = 0;
+            constraints.gridy = gridy;
+            constraints.gridwidth = 2;
+            panel.add(checkBox, constraints);
+            return checkBox;
+        }
+
+        public static JSlider addSlider(JPanel panel, GridBagConstraints constraints, int gridy, String label, int min, int max, int initial, Consumer<Integer> handler) {
+            JLabel sliderLabel = new JLabel(label + ":");
+            constraints.gridx = 0;
+            constraints.gridy = gridy;
+            constraints.gridwidth = 1;
+            panel.add(sliderLabel, constraints);
+
+            JSlider slider = new JSlider(min, max, initial);
+            slider.addChangeListener((ChangeEvent e) -> handler.accept(((JSlider) e.getSource()).getValue()));
+            constraints.gridx = 1;
+            panel.add(slider, constraints);
+            return slider;
         }
     }
 }

@@ -25,7 +25,6 @@ import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.Bootstrap;
 import xxAROX.PresenceMan.Application.ui.tabs.GeneralTab;
-import xxAROX.PresenceMan.Application.ui.tabs.LoginTab;
 import xxAROX.PresenceMan.Application.ui.tabs.PrivacyPolicyTab;
 import xxAROX.PresenceMan.Application.ui.tabs.SettingsTab;
 import xxAROX.PresenceMan.Application.utils.CacheManager;
@@ -47,9 +46,8 @@ public class AppUI extends JDialog {
     private final List<AUITab> tabs = new ArrayList<>();
 
     public final GeneralTab general_tab = new GeneralTab(this);
-    public final LoginTab login_tab = new LoginTab(this);
-    public final PrivacyPolicyTab privacy_policy_tab = new PrivacyPolicyTab(this);
     public final SettingsTab settings_tab = new SettingsTab(this);
+    public final PrivacyPolicyTab privacy_policy_tab = new PrivacyPolicyTab(this);
 
     public AppUI() {
         super((Dialog) null);
