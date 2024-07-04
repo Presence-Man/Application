@@ -35,8 +35,11 @@ public class Bootstrap {
         AppInfo.development = lowArgs.contains("dev") || lowArgs.contains("development");
 
         Logger logger = initializeLogger();
-        if (Utils.SingleInstanceUtils.hook(logger)) new App(logger);
-        else System.exit(1);
+        if (Utils.SingleInstanceUtils.lockInstance(logger)) new App(logger);
+        else {
+            logger.error("Application is already running, shutting down this one..");
+            System.exit(1);
+        }
     }
 
     protected static Logger initializeLogger(){

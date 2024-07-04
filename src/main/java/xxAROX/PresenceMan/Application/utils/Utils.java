@@ -23,6 +23,8 @@ import xxAROX.PresenceMan.Application.AppInfo;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileLock;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,26 +56,27 @@ public class Utils {
     public static class SingleInstanceUtils {
         private static final String LOCK_FILE = System.getProperty("user.home") + "/.presence-man.lock";
 
-        public static boolean hook(Logger logger) {
-            if (isAppAlreadyRunning(logger)) return false;
-            Runtime.getRuntime().addShutdownHook(new Thread(SingleInstanceUtils::releaseLock));
-            return true;
-        }
-        private static boolean isAppAlreadyRunning(Logger logger) {
+        public static boolean lockInstance(Logger logger) {
             try {
                 File file = new File(LOCK_FILE);
-                if (file.exists()) return true;
-                if (!file.createNewFile()) return true;
-                file.deleteOnExit();
-            } catch (IOException e) {
-                logger.error(e);
-                return true;
+                RandomAccessFile ac_file = new RandomAccessFile(file, "rw");
+                FileLock file_lock = ac_file.getChannel().tryLock();
+                if (file_lock != null) {
+                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                        try {
+                            file_lock.release();
+                            ac_file.close();
+                            file.delete();
+                        } catch (IOException e) {
+                            logger.error("Unable to remove lock file: " + LOCK_FILE, e);
+                        }
+                    }));
+                    return true;
+                }
+            } catch (Exception e) {
+                logger.error("Unable to create and/or lock file: " + LOCK_FILE, e);
             }
             return false;
-        }
-        private static void releaseLock() {
-            File file = new File(LOCK_FILE);
-            if (file.exists()) file.delete();
         }
     }
 }
