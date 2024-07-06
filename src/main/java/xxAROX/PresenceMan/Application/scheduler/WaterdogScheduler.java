@@ -131,8 +131,7 @@ public class WaterdogScheduler {
         while (!threadedExecutor.isTerminated() && count-- > 0) {
             try {
                 threadedExecutor.awaitTermination(100, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                // Ignore
+            } catch (InterruptedException ignore) {
             }
         }
     }

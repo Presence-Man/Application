@@ -17,11 +17,11 @@
 
 package xxAROX.PresenceMan.Application.task;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.entity.Gateway;
 import xxAROX.PresenceMan.Application.scheduler.Task;
+import xxAROX.PresenceMan.Application.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class FetchGatewayInformationTask extends Task {
             StringBuilder content = new StringBuilder();
             while ((inputLine = in.readLine()) != null) content.append(inputLine);
             in.close();
-            JsonObject gateway = new Gson().fromJson(content.toString(), JsonObject.class);
+            JsonObject gateway = Utils.GSON.fromJson(content.toString(), JsonObject.class);
 
             Gateway.protocol = gateway.get("protocol").getAsString();
             Gateway.ip = gateway.get("ip").getAsString();
@@ -49,12 +49,13 @@ public class FetchGatewayInformationTask extends Task {
 
             App.getLogger().info("Got gateway information!");
             ping_backend();
+
         } catch (IOException e) {
             App.getLogger().error("Error while fetching gateway information: ", e);
         }
     }
 
-    public static void ping_backend() {
+    public static boolean ping_backend() {
         boolean result = false;
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(new URL(Gateway.getUrl()).openStream()));
@@ -75,6 +76,7 @@ public class FetchGatewayInformationTask extends Task {
             Gateway.broken = true;
             ReconnectingTask.activate();
         }
+        return result;
     }
 
     @Override

@@ -135,6 +135,7 @@ public class AppUI extends JDialog {
         try {
             Desktop.getDesktop().browse(new URI(url));
         } catch (Throwable t) {
+            App.getLogger().error(t);
             this.showInfo("Couldn't open the link :(\nHere it is for you: " + url);
         }
     }

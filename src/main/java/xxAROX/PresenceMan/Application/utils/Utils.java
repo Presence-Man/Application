@@ -17,6 +17,7 @@
 
 package xxAROX.PresenceMan.Application.utils;
 
+import com.google.gson.Gson;
 import org.apache.logging.log4j.Logger;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
@@ -34,6 +35,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class Utils {
+    public static final Gson GSON = new Gson();
+
     private static Map<String, String> getDefaultParams() {
         return new HashMap<>(){{
             put("{App.name}", AppInfo.name);
