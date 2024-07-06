@@ -17,13 +17,13 @@
 
 package xxAROX.PresenceMan.Application.sockets.protocol;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.Packet;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.ByeByePacket;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.HeartbeatPacket;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.UnknownPacket;
+import xxAROX.PresenceMan.Application.utils.Utils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -48,7 +48,7 @@ public final class PacketPool {
 
     public static Packet decode(String payload) {
         try {
-            JsonObject json = new Gson()
+            JsonObject json = Utils.GSON
                     .newBuilder()
                     .setLenient()
                     .create().fromJson(payload, JsonObject.class);

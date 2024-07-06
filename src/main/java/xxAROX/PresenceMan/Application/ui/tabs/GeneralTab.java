@@ -80,7 +80,7 @@ public class GeneralTab extends AUITab {
             constraints.gridx = 1;
             constraints.gridy = 3;
             constraints.gridwidth = 1;
-            constraints.anchor = GridBagConstraints.SOUTHEAST; // Align to the bottom right
+            constraints.anchor = GridBagConstraints.SOUTHEAST;
             constraints.fill = GridBagConstraints.NONE;
             constraints.weightx = 0;
             constraints.weighty = 1.0; // Push to the bottom

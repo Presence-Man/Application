@@ -94,11 +94,12 @@ public final class App {
         scheduler = new WaterdogScheduler();
         tickFuture = tickExecutor.scheduleAtFixedRate(this::processTick, 50, 50, TimeUnit.MILLISECONDS);
 
-        SwingUtilities.invokeLater(() -> ui = new AppUI());
         if (CacheManager.Settings.ENABLE_AUTO_UPDATE) scheduler.scheduleAsync(new UpdateCheckTask());
         App.getInstance().getScheduler().scheduleAsync(new FetchGatewayInformationTask());
 
+        SwingUtilities.invokeLater(() -> ui = new AppUI());
         xboxUserInfo = CacheManager.loadXboxUserInfo();
+
         logger.info("App is in " + (AppInfo.development ? "development" : "production") + " mode");
 
         while (ui == null) {Thread.sleep(1000);}
@@ -241,7 +242,7 @@ public final class App {
 
         @Override
         public void onDiscordReady(DiscordInfo info) {
-            logger.info("Welcome @" + info.getUsername() + ", discord is ready!");
+            logger.debug("Welcome @" + info.getUsername() + ", discord-rpc is ready!");
             setActivity(APIActivity.none());
         }
     }

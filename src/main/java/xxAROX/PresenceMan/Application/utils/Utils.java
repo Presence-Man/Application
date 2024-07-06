@@ -17,9 +17,11 @@
 
 package xxAROX.PresenceMan.Application.utils;
 
+import com.google.gson.Gson;
 import org.apache.logging.log4j.Logger;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
+import xxAROX.WebRequester.WebRequester;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -31,9 +33,12 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 public class Utils {
+    public static final Gson GSON = new Gson();
+
     private static Map<String, String> getDefaultParams() {
         return new HashMap<>(){{
             put("{App.name}", AppInfo.name);
@@ -121,6 +126,30 @@ public class Utils {
             constraints.gridx = 1;
             panel.add(slider, constraints);
             return slider;
+        }
+    }
+
+    public static class WebUtils {
+        public static WebRequester.Result get(String url) {return get(url, new HashMap<>());}
+        public static WebRequester.Result get(String url, Map<String, String> headers) {
+            WebRequester.init(GSON, App.getInstance().getTickExecutor());
+            try {
+                return WebRequester.get(url, headers).get();
+            } catch (ExecutionException | InterruptedException e) {
+                App.getLogger().error("Error while executing GET request: ", e);
+            }
+            return null;
+        }
+        public static WebRequester.Result post(String url) {return post(url, new HashMap<>(), new HashMap<>());}
+        public static WebRequester.Result post(String url, Map<String, String> headers) {return post(url, headers, new HashMap<>());}
+        public static WebRequester.Result post(String url, Map<String, String> headers, Map<String, String> body) {
+            WebRequester.init(GSON, App.getInstance().getTickExecutor());
+            try {
+                return WebRequester.post(url, headers, body).get();
+            } catch (ExecutionException | InterruptedException e) {
+                App.getLogger().error("Error while executing POST request: ", e);
+            }
+            return null;
         }
     }
 }

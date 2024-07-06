@@ -56,6 +56,10 @@ public class WaterdogScheduler {
         return this.addTask(task, 0, 0, async);
     }
 
+    public <T extends Runnable> TaskHandler<T> schedule(T task) {
+        return this.addTask(task, 0, 0, false);
+    }
+
     public <T extends Runnable> TaskHandler<T> scheduleDelayed(T task, int delay) {
         return this.scheduleDelayed(task, delay, false);
     }
@@ -131,8 +135,7 @@ public class WaterdogScheduler {
         while (!threadedExecutor.isTerminated() && count-- > 0) {
             try {
                 threadedExecutor.awaitTermination(100, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                // Ignore
+            } catch (InterruptedException ignore) {
             }
         }
     }

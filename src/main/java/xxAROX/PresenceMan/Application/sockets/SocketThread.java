@@ -17,7 +17,6 @@
 
 package xxAROX.PresenceMan.Application.sockets;
 
-import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.NonNull;
 import xxAROX.PresenceMan.Application.App;
@@ -31,6 +30,7 @@ import xxAROX.PresenceMan.Application.sockets.protocol.packets.Packet;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.ByeByePacket;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.HeartbeatPacket;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.UnknownPacket;
+import xxAROX.PresenceMan.Application.utils.Utils;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -56,7 +56,7 @@ public class SocketThread implements Runnable {
         try {
             instance = this;
             backend_address = new InetSocketAddress(Gateway.ip, Gateway.usual_port +1);
-            App.getLogger().info("Backend identified as " + backend_address.getAddress().getHostAddress() + ":" + backend_address.getPort());
+            App.getLogger().info("Backend socket located at " + backend_address.getAddress().getHostAddress() + ":" + backend_address.getPort());
             socket = new Socket(this);
         } catch (Exception e) {
             App.getLogger().error("Error while creating socket: ", e);
@@ -175,7 +175,7 @@ public class SocketThread implements Runnable {
         }
 
         try {
-            byte[] compressed = GzipCompressor.getInstance().compress(new Gson().toJson(packet.encode()));
+            byte[] compressed = GzipCompressor.getInstance().compress(Utils.GSON.toJson(packet.encode()));
             DatagramPacket pk = new DatagramPacket(compressed, compressed.length, backend_address.getAddress(), backend_address.getPort());
             try {
                 socket.getSocket().send(pk);

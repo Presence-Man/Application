@@ -25,6 +25,7 @@ import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.Bootstrap;
 import xxAROX.PresenceMan.Application.ui.tabs.GeneralTab;
+import xxAROX.PresenceMan.Application.ui.tabs.PartnersTab;
 import xxAROX.PresenceMan.Application.ui.tabs.PrivacyPolicyTab;
 import xxAROX.PresenceMan.Application.ui.tabs.SettingsTab;
 import xxAROX.PresenceMan.Application.utils.CacheManager;
@@ -47,6 +48,7 @@ public class AppUI extends JDialog {
 
     public final GeneralTab general_tab = new GeneralTab(this);
     public final SettingsTab settings_tab = new SettingsTab(this);
+    public final PartnersTab partners_tab = new PartnersTab(this);
     public final PrivacyPolicyTab privacy_policy_tab = new PrivacyPolicyTab(this);
 
     public AppUI() {
@@ -133,6 +135,7 @@ public class AppUI extends JDialog {
         try {
             Desktop.getDesktop().browse(new URI(url));
         } catch (Throwable t) {
+            App.getLogger().error(t);
             this.showInfo("Couldn't open the link :(\nHere it is for you: " + url);
         }
     }

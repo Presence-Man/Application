@@ -17,7 +17,6 @@
 
 package xxAROX.PresenceMan.Application.utils;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
@@ -31,7 +30,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public final class CacheManager {
-    private static final Gson GSON = new Gson();
     private static final File CACHE_FILE = new File(System.getProperty("user.home")).toPath().resolve(".presence-man-cache.json").toFile();
     private static JsonObject json = new JsonObject();
     public static JsonObject settings = new JsonObject();
@@ -47,7 +45,7 @@ public final class CacheManager {
                 save();
             }
             FileReader reader = new FileReader(CACHE_FILE);
-            json = GSON.fromJson(reader, JsonObject.class);
+            json = Utils.GSON.fromJson(reader, JsonObject.class);
             settings = json.has("settings") && json.get("settings").isJsonObject() ? json.get("settings").getAsJsonObject() : new JsonObject();
             Settings.load();
             reader.close();
@@ -62,7 +60,7 @@ public final class CacheManager {
             FileWriter writer = new FileWriter(CACHE_FILE);
             Settings.save();
             json.add("settings", settings);
-            GSON.toJson(json, writer);
+            Utils.GSON.toJson(json, writer);
             writer.close();
         } catch (IOException e) {
             App.getLogger().error(e);
