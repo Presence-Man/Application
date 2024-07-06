@@ -35,21 +35,19 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 public class AppUI extends JDialog {
     public final JTabbedPane contentPane = new JTabbedPane();
-    private final List<AUITab> tabs = new ArrayList<>();
+    public final List<AUITab> tabs = new ArrayList<>();
 
-    public final GeneralTab general_tab = new GeneralTab(this);
-    public final SettingsTab settings_tab = new SettingsTab(this);
-    public final PartnersTab partners_tab = new PartnersTab(this);
-    public final PrivacyPolicyTab privacy_policy_tab = new PrivacyPolicyTab(this);
+    public final GeneralTab general_tab;
+    public final SettingsTab settings_tab;
+    public final PartnersTab partners_tab;
+    public final PrivacyPolicyTab privacy_policy_tab;
 
     public AppUI() {
         super((Dialog) null);
@@ -57,24 +55,30 @@ public class AppUI extends JDialog {
 
         this.setLookAndFeel();
         this.initWindow();
-        {
-            contentPane.setLayout(new GridBagLayout());
-            AUITab last = null;
-            for (Field field : Arrays.stream(this.getClass().getFields()).filter(field -> AUITab.class.isAssignableFrom(field.getType())).toList()) {
-                try {
-                    var tab = (AUITab) field.get(this);
-                    tabs.add(tab);
-                    tab.add(contentPane);
-                    last = tab;
-                } catch (IllegalAccessException e) {
-                    App.getLogger().error(e);
-                }
-            }
-            assert last != null;
-            contentPane.setEnabledAt(contentPane.indexOfTab(last.getName()), false);
-        }
+
+        contentPane.setLayout(new GridBagLayout());
+
+        general_tab = new GeneralTab(this);
+        tabs.add(general_tab);
+        general_tab.add(contentPane);
+
+        settings_tab = new SettingsTab(this);
+        tabs.add(settings_tab);
+        settings_tab.add(contentPane);
+
+        partners_tab = new PartnersTab(this);
+        tabs.add(partners_tab);
+        partners_tab.add(contentPane);
+
+        privacy_policy_tab = new PrivacyPolicyTab(this);
+        tabs.add(privacy_policy_tab);
+        privacy_policy_tab.add(contentPane);
+
+        contentPane.setEnabledAt(contentPane.indexOfTab(general_tab.getName()), false);
+
         ToolTipManager.sharedInstance().setInitialDelay(100);
         ToolTipManager.sharedInstance().setDismissDelay(10_000);
+
         SwingUtilities.updateComponentTreeUI(this);
         setVisible(false);
         if (CacheManager.Settings.START_MINIMIZED) Tray.showInTray();
