@@ -35,11 +35,9 @@ import java.util.function.Function;
 
 public class GeneralTab extends AUITab {
     private static final String NOT_CONNECTED = "Not connected";
-    private static final String HALF_CONNECTED = "Connected to Presence-Man backend!";
+    private static final String HALF_CONNECTED = "Connected to Presence-Man!";
     private static final String CONNECTED = "Connected to {server} on {network}";
-
-    JLabel label_loggedin_status;
-    JLabel label_connection_status;
+    JPanel contentPane;
 
     public GeneralTab(AppUI frame) {
         super(frame, "Home");
@@ -47,6 +45,10 @@ public class GeneralTab extends AUITab {
 
     @Override
     protected void init(JPanel contentPane) {
+        contentPane.removeAll();
+        this.contentPane = contentPane;
+        boolean logged_in = App.getInstance().getXboxUserInfo() != null;
+
         contentPane.setLayout(new GridBagLayout());
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         GridBagConstraints constraints = new GridBagConstraints();
@@ -57,42 +59,113 @@ public class GeneralTab extends AUITab {
         constraints.weightx = 0.5;
         constraints.weighty = 0.5;
 
-        label_loggedin_status = new JLabel(getLoggedInMessage(), SwingConstants.CENTER);
-        label_loggedin_status.setVisible(true);
-        label_loggedin_status.setFocusable(false);
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        constraints.gridwidth = 1;
-        constraints.weighty = 0;
-        contentPane.add(label_loggedin_status, constraints);
+        if(!logged_in) {
+            JLabel pleaseLogIn = new JLabel("Please log in with XBOX", SwingConstants.CENTER);
+            pleaseLogIn.setVisible(true);
+            pleaseLogIn.setFocusable(false);
+            pleaseLogIn.setFont(new Font("Arial", Font.BOLD, 20));
 
-        label_connection_status = new JLabel(getConnectedMessage(), SwingConstants.CENTER);
-        label_connection_status.setVisible(true);
-        label_connection_status.setFocusable(false);
-        constraints.gridx = 0;
-        constraints.gridy = 1;
-        constraints.gridwidth = 0;
-        contentPane.add(label_connection_status, constraints);
+            constraints.gridx = 0;          // Column 0
+            constraints.gridy = 0;          // Row 0 (top)
+            constraints.gridwidth = 1;      // Span 1 column
+            constraints.gridheight = 1;     // Span 1 row
+            constraints.weightx = 1.0;      // Expand horizontally
+            constraints.weighty = 0.0;      // Do not expand vertically
+            constraints.anchor = GridBagConstraints.CENTER;   // Anchor to the top
+            constraints.fill = GridBagConstraints.CENTER; // Fill horizontally
 
-        // -- LOGIN / LOGOUT --
-        {
-            boolean logged_in = App.getInstance().getXboxUserInfo() != null;
-            constraints.gridx = 1;
-            constraints.gridy = 3;
-            constraints.gridwidth = 1;
-            constraints.anchor = GridBagConstraints.SOUTHEAST;
-            constraints.fill = GridBagConstraints.NONE;
-            constraints.weightx = 0;
-            constraints.weighty = 1.0; // Push to the bottom
-            login_state_button = Utils.UIUtils.addButton(contentPane, constraints, 2, logged_in ? LOGOUT_TEXT : LOGIN_TEXT, (button) -> {
-                if (App.getInstance().getXboxUserInfo() != null) logout();
-                else login();
+
+
+            contentPane.add(pleaseLogIn, constraints);
+
+            login_state_button = Utils.UIUtils.addButton(contentPane, constraints, 2, "Login with XBOX", (button) -> {
+                login();
             });
             login_state_button.setFocusPainted(false);
             login_state_button.setForeground(new Color(0, 0, 0));
             login_state_button.setFocusable(false);
-            login_state_button.setBackground(logged_in ? LOGOUT_COLOR : LOGIN_COLOR);
+            login_state_button.setBackground(LOGIN_COLOR);
 
+            //add info cursive text to bottom of the page
+            JLabel info = new JLabel("Data will be stored locally. It is only used to verify you.", SwingConstants.CENTER);
+            info.setVisible(true);
+            info.setFocusable(false);
+            info.setFont(new Font("Arial", Font.ITALIC, 12));
+
+            constraints.gridx = 0;          // Column 0
+            constraints.gridy = 3;          // Row 0 (top)
+            constraints.gridwidth = 1;      // Span 1 column
+            constraints.gridheight = 1;     // Span 1 row
+            constraints.weightx = 1.0;      // Expand horizontally
+            constraints.weighty = 0.0;      // Do not expand vertically
+            constraints.fill = GridBagConstraints.CENTER; // Fill horizontally
+
+            contentPane.add(info, constraints);
+
+        } else {
+            var xboxInfo = App.getInstance().getXboxUserInfo();
+
+            //show image left to name in 50x50px
+            JLabel image = new JLabel();
+            image.setIcon(new ImageIcon(xboxInfo.getProfileImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)));
+            image.setVisible(true);
+            image.setFocusable(false);
+
+            constraints.anchor = GridBagConstraints.CENTER;   // Anchor to the top
+            //display 70px left to the name
+            constraints.gridx = 0;          // Column 0
+            constraints.gridy = 0;          // Row 0 (top)
+            constraints.gridwidth = 1;      // Span 1 column
+            constraints.gridheight = 1;     // Span 1 row
+            constraints.weightx = 0.0;      // Do not expand horizontally
+            constraints.weighty = 0.0;      // Do not expand vertically
+            constraints.fill = GridBagConstraints.CENTER; // Fill horizontally
+            //add 70px offset to the left
+            int offsetLeft = xboxInfo.getGamertag().length() * 10 + 40;
+            constraints.insets = new Insets(0, 0, 0, offsetLeft);
+
+
+            contentPane.add(image, constraints);
+
+
+            JLabel name = new JLabel(xboxInfo.getGamertag(), SwingConstants.CENTER);
+            name.setVisible(true);
+            name.setFocusable(false);
+            name.setFont(new Font("Arial", Font.BOLD, 20));
+
+            constraints.gridx = 0;          // Column 0
+            constraints.gridy = 0;          // Row 0 (top)
+            constraints.gridwidth = 1;      // Span 1 column
+            constraints.gridheight = 1;     // Span 1 row
+            constraints.weightx = 1.0;      // Expand horizontally
+            constraints.weighty = 0.0;      // Do not expand vertically
+            constraints.anchor = GridBagConstraints.CENTER;   // Anchor to the top
+            constraints.fill = GridBagConstraints.CENTER; // Fill horizontally
+            constraints.insets = new Insets(5, 5, 5, 5);
+
+            contentPane.add(name, constraints);
+
+
+
+            // -- LOGIN / LOGOUT --
+            {
+                constraints.gridx = 1;
+                constraints.gridy = 3;
+                constraints.gridwidth = 1;
+                constraints.anchor = GridBagConstraints.SOUTHEAST;
+                constraints.fill = GridBagConstraints.NONE;
+                constraints.weightx = 0;
+                constraints.weighty = 1.0; // Push to the bottom
+                login_state_button = Utils.UIUtils.addButton(contentPane, constraints, 2, logged_in ? LOGOUT_TEXT : LOGIN_TEXT, (button) -> {
+                    if (App.getInstance().getXboxUserInfo() != null) logout();
+                    else login();
+                });
+                login_state_button.setFocusPainted(false);
+                login_state_button.setForeground(new Color(0, 0, 0));
+                login_state_button.setFocusable(false);
+                login_state_button.setBackground(logged_in ? LOGOUT_COLOR : LOGIN_COLOR);
+
+            }
         }
     }
 
@@ -105,14 +178,7 @@ public class GeneralTab extends AUITab {
     }
 
     public void tick(int currentTick) {
-        {
-            var text = getLoggedInMessage();
-            if (!label_loggedin_status.getText().equals(text)) label_loggedin_status.setText(text);
-        }
-        {
-            var text = getConnectedMessage();
-            if (!label_connection_status.getText().equals(text)) label_connection_status.setText(text);
-        }
+        if(currentTick % 1000 == 0) init(contentPane);
     }
 
     private String getLoggedInMessage() {
@@ -162,7 +228,7 @@ public class GeneralTab extends AUITab {
                 else if (e instanceof TimeoutException) {
                     SwingUtilities.invokeLater(() -> {
                         closeLoginPopup();
-                        frame.showError("The login request timed out.\nPlease login within 60 seconds.");
+                        frame.showError("The login request timed out.\nPlease try again in 60 seconds.");
                     });
                 } else {
                     App.getLogger().error(e);
@@ -172,9 +238,10 @@ public class GeneralTab extends AUITab {
             return null;
         });
     }
-    private void logout(){
+    public void logout(){
         App.getEvents().onLogout();
         reloadStateButton();
+        init(contentPane);
     }
     private void handleLogin(Function<Consumer<StepMsaDeviceCode.MsaDeviceCode>, XboxUserInfo> requestHandler) {
         this.addThread = new Thread(() -> {
@@ -186,7 +253,7 @@ public class GeneralTab extends AUITab {
                 if (xboxUserInfo == null) {
                     SwingUtilities.invokeLater(() -> {
                         closeLoginPopup();
-                        this.frame.showError("Login failed, please try again!");
+                        this.frame.showError("Login failed, please try again later!");
                     });
                 } else {
                     SwingUtilities.invokeLater(() -> {
@@ -194,13 +261,14 @@ public class GeneralTab extends AUITab {
                         App.getEvents().onLogin(xboxUserInfo);
                         reloadStateButton();
                         frame.showInfo("Logged in as " + xboxUserInfo.getGamertag() + "!");
+                        init(contentPane);
                     });
                 }
             } catch (Throwable t) {
                 if (t instanceof TimeoutException) {
                     SwingUtilities.invokeLater(() -> {
                         closeLoginPopup();
-                        frame.showError("The login request timed out.\nPlease login within 60 seconds.");
+                        frame.showError("The login request timed out.\nPlease try again in 60 seconds.");
                     });
                     return;
                 }

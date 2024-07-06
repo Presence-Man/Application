@@ -41,6 +41,7 @@ public final class DownloadPopup extends JDialog {
 
     private JProgressBar progressBar;
     private Thread downloadThread;
+    private String newVersion;
 
     public DownloadPopup(AppUI parent, String url, File file, Runnable finishListener, Consumer<Throwable> stopConsumer) {
         super(parent, true);
@@ -49,6 +50,9 @@ public final class DownloadPopup extends JDialog {
         this.file = file;
         this.finishListener = finishListener;
         this.stopConsumer = stopConsumer;
+
+        String[] split = url.split("/");
+        this.newVersion = split[split.length - 2];
 
         this.initWindow();
         this.initComponents();
@@ -63,7 +67,7 @@ public final class DownloadPopup extends JDialog {
                 DownloadPopup.this.close(false);
             }
         });
-        this.setTitle("Downloading...");
+        this.setTitle("Updating from " + AppInfo.getVersion() + " to " + newVersion);
         this.setSize(400, 110);
         this.setResizable(false);
         this.setLocationRelativeTo(this.parent);

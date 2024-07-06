@@ -46,7 +46,6 @@ public class PartnersTab extends AUITab {
 
     public PartnersTab(AppUI frame) {
         super(frame, "Partners");
-        System.out.println("PartnersTab - " + Thread.currentThread().getName());
     }
     @Override
     protected void init(JPanel contentPane) {
@@ -80,7 +79,7 @@ public class PartnersTab extends AUITab {
 
     @Override
     public void tick(int currentTick) {
-        if (currentTick %20*5 == 0) reloadPartners();
+
     }
 
     private void reloadPartners() {

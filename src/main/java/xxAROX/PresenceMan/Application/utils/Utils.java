@@ -101,6 +101,16 @@ public class Utils {
             return button;
         }
 
+        public static JButton addButton(JPanel panel, GridBagConstraints constraints, int gridy, String text, Consumer<JButton> handler, Icon i) {
+            JButton button = new JButton(text, i);
+            button.addActionListener(event -> handler.accept(button));
+            constraints.gridx = 0;
+            constraints.gridy = gridy;
+            constraints.gridwidth = 2;
+            panel.add(button, constraints);
+            return button;
+        }
+
         public static JCheckBox addCheckbox(JPanel panel, GridBagConstraints constraints, int gridy, String text, boolean default_value, Consumer<Boolean> handler) {
             JCheckBox checkBox = new JCheckBox(text, default_value);
             checkBox.addItemListener(event -> {

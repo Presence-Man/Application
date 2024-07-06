@@ -62,7 +62,7 @@ public final class Tray {
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     App.ui.setVisible(true);
-                    Tray.hideFromTray();
+                    //Tray.hideFromTray();
                 } else if (e.getButton() == MouseEvent.BUTTON3 && e.isPopupTrigger()) {
                     dialog.setSize(trayMenu.getPreferredSize());
                     dialog.setLocation(e.getX(), e.getY() - trayMenu.getHeight());
