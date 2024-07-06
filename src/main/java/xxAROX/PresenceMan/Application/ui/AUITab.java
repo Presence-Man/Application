@@ -52,6 +52,8 @@ public abstract class AUITab {
     public void tick(int currentTick) {
     }
 
+    public void update() {}
+
     public void setReady() {
     }
 

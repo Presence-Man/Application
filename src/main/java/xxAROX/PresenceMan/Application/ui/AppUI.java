@@ -78,6 +78,11 @@ public class AppUI extends JDialog {
 
 
         contentPane.setEnabledAt(contentPane.indexOfTab(general_tab.getName()), false);
+        //trigger function on tab change
+        contentPane.addChangeListener(e -> {
+            AUITab tab = tabs.get(contentPane.getSelectedIndex());
+            tab.update();
+        });
 
         ToolTipManager.sharedInstance().setInitialDelay(100);
         ToolTipManager.sharedInstance().setDismissDelay(10_000);
@@ -86,6 +91,8 @@ public class AppUI extends JDialog {
         setVisible(false);
         if (!CacheManager.Settings.START_MINIMIZED) setVisible(true);
         Tray.showInTray();
+
+        general_tab.update();
     }
 
     private void setLookAndFeel() {

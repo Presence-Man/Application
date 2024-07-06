@@ -37,7 +37,8 @@ public class GeneralTab extends AUITab {
     private static final String NOT_CONNECTED = "Not connected";
     private static final String HALF_CONNECTED = "Connected to Presence-Man!";
     private static final String CONNECTED = "Connected to {server} on {network}";
-    JPanel contentPane;
+
+    JLabel baStatus = new JLabel();
 
     public GeneralTab(AppUI frame) {
         super(frame, "Home");
@@ -46,7 +47,6 @@ public class GeneralTab extends AUITab {
     @Override
     protected void init(JPanel contentPane) {
         contentPane.removeAll();
-        this.contentPane = contentPane;
         boolean logged_in = App.getInstance().getXboxUserInfo() != null;
 
         contentPane.setLayout(new GridBagLayout());
@@ -145,6 +145,66 @@ public class GeneralTab extends AUITab {
 
             contentPane.add(name, constraints);
 
+            constraints.anchor = GridBagConstraints.WEST;
+
+            //Discord Status (/Username) - 2nd row, italic
+            JLabel discordStatus = new JLabel("Discord Status: " + (App.getInstance().getDiscord_info().ready ? "Connected" : "Disconnected"), SwingConstants.CENTER);
+            discordStatus.setVisible(true);
+            discordStatus.setFocusable(false);
+            discordStatus.setFont(new Font("Arial", Font.ITALIC, 12));
+
+            constraints.gridx = 0;          // Column 0
+            constraints.gridy = 1;          // Row 0 (top)
+            constraints.gridwidth = 1;      // Span 1 column
+            constraints.gridheight = 1;     // Span 1 row
+            constraints.weightx = 1.0;      // Expand horizontally
+            constraints.weighty = 0.0;      // Do not expand vertically
+            constraints.fill = GridBagConstraints.CENTER; // Fill horizontally
+            constraints.insets = new Insets(5, 5, 5, 100);
+
+            contentPane.add(discordStatus, constraints);
+
+            JLabel dcUser = new JLabel("Discord User: @" + App.getInstance().getDiscord_info().getUsername(), SwingConstants.CENTER);
+            dcUser.setVisible(true);
+            dcUser.setFocusable(false);
+            dcUser.setFont(new Font("Arial", Font.ITALIC, 12));
+
+            constraints.gridx = 0;          // Column 0
+            constraints.gridy = 1;          // Row 0 (top)
+            constraints.gridwidth = 1;      // Span 1 column
+            constraints.gridheight = 1;     // Span 1 row
+            constraints.weightx = 1.0;      // Expand horizontally
+            constraints.weighty = 0.0;      // Do not expand vertically
+            constraints.fill = GridBagConstraints.CENTER; // Fill horizontally
+            constraints.insets = new Insets(5, 5, 30, 100);
+
+            contentPane.add(dcUser, constraints);
+
+            //Backend status
+
+            constraints.anchor = GridBagConstraints.EAST;
+
+            String status = "Loading...";
+
+            baStatus = new JLabel();
+            baStatus.setText("Status: " + status);
+            baStatus.setHorizontalAlignment(SwingConstants.CENTER);
+            baStatus.setVisible(true);
+            baStatus.setFocusable(false);
+            baStatus.setFont(new Font("Arial", Font.ITALIC, 12));
+
+            constraints.gridx = 0;          // Column 0
+            constraints.gridy = 1;          // Row 0 (top)
+            constraints.gridwidth = 1;      // Span 1 column
+            constraints.gridheight = 1;     // Span 1 row
+            constraints.weightx = 1.0;      // Expand horizontally
+            constraints.weighty = 0.0;      // Do not expand vertically
+            constraints.fill = GridBagConstraints.CENTER; // Fill horizontally
+            constraints.insets = new Insets(5, 100, 5, 5);
+
+            contentPane.add(baStatus, constraints);
+
+
 
 
             // -- LOGIN / LOGOUT --
@@ -177,8 +237,23 @@ public class GeneralTab extends AUITab {
     public void onClose() {
     }
 
+    public void update() {
+        init(contentPane);
+    }
+
+    @Override
     public void tick(int currentTick) {
-        if(currentTick % 1000 == 0) init(contentPane);
+        String status;
+
+        try {
+            status = (App.getInstance().getSocket().getConnectionState().get().toString());
+            //only first letter uppercase
+            status = status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase();
+        } catch (Exception e) {
+            status = "Not connected";
+        }
+
+        if(baStatus != null) baStatus.setText("Status: " + status);
     }
 
     private String getLoggedInMessage() {

@@ -49,6 +49,7 @@ public class PartnersTab extends AUITab {
     }
     @Override
     protected void init(JPanel contentPane) {
+        contentPane.removeAll();
         reloadPartners();
 
         contentPane.setLayout(new BorderLayout());
@@ -104,37 +105,9 @@ public class PartnersTab extends AUITab {
         contentPane.repaint();
     }
 
-    @SneakyThrows
-    private List<PartnerItem> fetchPartners() {
-        var fallback_icon = Objects.requireNonNull(Bootstrap.class.getClassLoader().getResource(AppInfo.icon));
-        if (partnerItems == null) partnerItems = new ArrayList<>();
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(new URL(Gateway.getUrl() + "/api/v1/partners").openStream()));
-            String inputLine;
-            StringBuilder content = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) content.append(inputLine);
-            in.close();
-            JsonArray partners = Utils.GSON.fromJson(content.toString(), JsonArray.class);
-            ArrayList<PartnerItem> list = new ArrayList<>();
-            partners.asList().stream().map(JsonElement::getAsJsonObject).forEach(obj -> {
-                try {
-                    list.add(new PartnerItem(
-                            obj.get("title").getAsString(),
-                            obj.get("about_text").getAsString(),
-                            obj.get("domain").getAsString(),
-                            obj.get("image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("image").getAsString())),
-                            obj.get("banner_image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("banner_image").getAsString())),
-                            obj.get("enabled").getAsBoolean(),
-                            obj.get("url").isJsonNull() ? null : obj.get("url").getAsString()
-                        ));
-                } catch (MalformedURLException ignore) {
-                }
-            });
-            return list;
-        } catch (IOException e) {
-            App.getLogger().error("Error while fetching partners: ", e);
-        }
-        return new ArrayList<>();
+    @Override
+    public void update() {
+        init(contentPane);
     }
 
     public static class PartnerItem extends JPanel {
