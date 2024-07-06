@@ -35,7 +35,6 @@ import xxAROX.PresenceMan.Application.task.UpdateCheckTask;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.utils.CacheManager;
 import xxAROX.PresenceMan.Application.utils.ThreadFactoryBuilder;
-import xxAROX.PresenceMan.Application.utils.Tray;
 import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.swing.*;
@@ -89,28 +88,29 @@ public final class App {
         initDiscord();
 
         ThreadFactoryBuilder builder = ThreadFactoryBuilder.builder().format("Tick Executor - #%d").build();
-        tickExecutor = Executors.newScheduledThreadPool(1, builder);
+        tickExecutor = Executors.newScheduledThreadPool(10, builder);
 
         scheduler = new WaterdogScheduler();
         tickFuture = tickExecutor.scheduleAtFixedRate(this::processTick, 50, 50, TimeUnit.MILLISECONDS);
 
-        SwingUtilities.invokeLater(() -> ui = new AppUI());
-        xboxUserInfo = CacheManager.loadXboxUserInfo();
-
         if (CacheManager.Settings.ENABLE_AUTO_UPDATE) scheduler.scheduleAsync(new UpdateCheckTask());
         App.getInstance().getScheduler().scheduleAsync(new FetchGatewayInformationTask());
 
+        SwingUtilities.invokeLater(() -> ui = new AppUI());
+        xboxUserInfo = CacheManager.loadXboxUserInfo();
+
         logger.info("App is in " + (AppInfo.development ? "development" : "production") + " mode");
 
-        while (ui == null) {Thread.sleep(1000);}
+        while (ui == null) {
+            Thread.sleep(1000);
+        }
         ui.setReady();
-        new Tray();
     }
 
     private void tick(int currentTick) {
         scheduler.scheduleAsync(DiscordRPC::discordRunCallbacks);
         if (socket != null) socket.tick(currentTick);
-        if (App.ui != null) App.ui.general_tab.tick();
+        if (App.ui != null) App.ui.tabs.forEach(t -> t.tick(currentTick));
         scheduler.onTick(currentTick);
     }
 
@@ -242,7 +242,7 @@ public final class App {
 
         @Override
         public void onDiscordReady(DiscordInfo info) {
-            logger.info("Welcome @" + info.getUsername() + ", discord is ready!");
+            logger.debug("Welcome @" + info.getUsername() + ", discord-rpc is ready!");
             setActivity(APIActivity.none());
         }
     }

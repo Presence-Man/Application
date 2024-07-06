@@ -40,32 +40,23 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 public class PartnersTab extends AUITab {
-    private List<PartnerItem> partnerItems;
+    private List<PartnerItem> partnerItems = new ArrayList<>();
 
     public PartnersTab(AppUI frame) {
         super(frame, "Partners");
+        System.out.println("PartnersTab - " + Thread.currentThread().getName());
     }
     @Override
     protected void init(JPanel contentPane) {
-        try { // TODO: find a way to refresh this, and the JPanel with it (async)
-            Future<List<PartnerItem>> partners = App.getInstance().getTickExecutor().submit(() -> {
-                while (Objects.equals(Gateway.address, "127.0.0.1")) {}
-                return fetchPartners();
-            });
-            while (!partners.isDone()) {}
-            partnerItems = partners.get();
-        } catch (InterruptedException | ExecutionException ignore) {
-        }
+        reloadPartners();
 
         contentPane.setLayout(new BorderLayout());
         var border_size = 0;
         contentPane.setBorder(BorderFactory.createEmptyBorder(border_size, border_size, border_size, border_size));
 
-        if (partnerItems.stream().filter(PartnerItem::isEnabled).toList().size() == 0) {
+        if (partnerItems.size() == 0 || partnerItems.stream().filter(PartnerItem::isEnabled).toList().size() == 0) {
             JLabel noPartnersLabel = new JLabel("No partnerships yet!", SwingConstants.CENTER);
             noPartnersLabel.setForeground(new Color(0xED4245));
             contentPane.add(noPartnersLabel, BorderLayout.CENTER);
@@ -85,6 +76,33 @@ public class PartnersTab extends AUITab {
             for (PartnerItem item : partnerItems.stream().filter(Component::isEnabled).toList()) base.add(item);
             contentPane.add(scrollPane, BorderLayout.CENTER);
         }
+    }
+
+    @Override
+    public void tick(int currentTick) {
+        if (currentTick %20*5 == 0) reloadPartners();
+    }
+
+    private void reloadPartners() {
+        if (partnerItems != null) partnerItems.clear();
+        else partnerItems = new ArrayList<>();
+        var result = Utils.WebUtils.get("https://presence-man.com/api/v1/partners");
+        Utils.GSON.fromJson(result.getBody(), JsonArray.class).asList().stream().map(JsonElement::getAsJsonObject).forEach(obj -> {
+            try {
+                partnerItems.add(new PartnerItem(
+                        obj.get("title").getAsString(),
+                        obj.get("about_text").getAsString(),
+                        obj.get("domain").getAsString(),
+                        obj.get("image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("image").getAsString())),
+                        obj.get("banner_image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("banner_image").getAsString())),
+                        obj.get("enabled").getAsBoolean(),
+                        obj.get("url").isJsonNull() ? null : obj.get("url").getAsString()
+                ));
+            } catch (MalformedURLException ignore) {
+            }
+        });
+        contentPane.validate();
+        contentPane.repaint();
     }
 
     @SneakyThrows

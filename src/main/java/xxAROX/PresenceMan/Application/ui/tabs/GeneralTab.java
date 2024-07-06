@@ -104,7 +104,7 @@ public class GeneralTab extends AUITab {
     public void onClose() {
     }
 
-    public void tick() {
+    public void tick(int currentTick) {
         {
             var text = getLoggedInMessage();
             if (!label_loggedin_status.getText().equals(text)) label_loggedin_status.setText(text);
