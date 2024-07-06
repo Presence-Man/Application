@@ -42,21 +42,21 @@ import java.util.List;
 import java.util.Objects;
 
 public class PartnersTab extends AUITab {
-    private volatile List<PartnerItem> partnerItems = new ArrayList<>();
+    private List<PartnerItem> partnerItems = new ArrayList<>();
 
     public PartnersTab(AppUI frame) {
         super(frame, "Partners");
+        System.out.println("PartnersTab - " + Thread.currentThread().getName());
     }
     @Override
     protected void init(JPanel contentPane) {
         reloadPartners();
-        App.getInstance().getScheduler().scheduleRepeating(this::reloadPartners, 20*5);
 
         contentPane.setLayout(new BorderLayout());
         var border_size = 0;
         contentPane.setBorder(BorderFactory.createEmptyBorder(border_size, border_size, border_size, border_size));
 
-        if (partnerItems.stream().filter(PartnerItem::isEnabled).toList().size() == 0) {
+        if (partnerItems.size() == 0 || partnerItems.stream().filter(PartnerItem::isEnabled).toList().size() == 0) {
             JLabel noPartnersLabel = new JLabel("No partnerships yet!", SwingConstants.CENTER);
             noPartnersLabel.setForeground(new Color(0xED4245));
             contentPane.add(noPartnersLabel, BorderLayout.CENTER);
@@ -78,7 +78,12 @@ public class PartnersTab extends AUITab {
         }
     }
 
-    private synchronized void reloadPartners() {
+    @Override
+    public void tick(int currentTick) {
+        if (currentTick %20*5 == 0) reloadPartners();
+    }
+
+    private void reloadPartners() {
         if (partnerItems != null) partnerItems.clear();
         else partnerItems = new ArrayList<>();
         var result = Utils.WebUtils.get("https://presence-man.com/api/v1/partners");
@@ -96,7 +101,8 @@ public class PartnersTab extends AUITab {
             } catch (MalformedURLException ignore) {
             }
         });
-        System.out.println(partnerItems);
+        contentPane.validate();
+        contentPane.repaint();
     }
 
     @SneakyThrows
