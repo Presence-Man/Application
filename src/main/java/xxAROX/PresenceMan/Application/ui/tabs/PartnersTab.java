@@ -51,7 +51,7 @@ public class PartnersTab extends AUITab {
     }
     @Override
     protected void init(JPanel contentPane) {
-        try {
+        try { // TODO: find a way to refresh this, and the JPanel with it (async)
             Future<List<PartnerItem>> partners = App.getInstance().getTickExecutor().submit(() -> {
                 while (Objects.equals(Gateway.address, "127.0.0.1")) {}
                 return fetchPartners();
@@ -65,19 +65,26 @@ public class PartnersTab extends AUITab {
         var border_size = 0;
         contentPane.setBorder(BorderFactory.createEmptyBorder(border_size, border_size, border_size, border_size));
 
-        JPanel base = new JPanel();
-        int itemCount = partnerItems.size();
-        if (itemCount == 1) base.setLayout(new GridBagLayout());
-        else if (itemCount == 2) base.setLayout(new GridBagLayout());
-        else base.setLayout(new GridLayout(0, 3, 10, 10));
+        if (partnerItems.stream().filter(PartnerItem::isEnabled).toList().size() == 0) {
+            JLabel noPartnersLabel = new JLabel("No partnerships yet!", SwingConstants.CENTER);
+            noPartnersLabel.setForeground(new Color(0xED4245));
+            contentPane.add(noPartnersLabel, BorderLayout.CENTER);
+            contentPane.repaint();
+        } else {
+            JPanel base = new JPanel();
+            int itemCount = partnerItems.size();
+            if (itemCount == 1) base.setLayout(new GridBagLayout());
+            else if (itemCount == 2) base.setLayout(new GridBagLayout());
+            else base.setLayout(new GridLayout(0, 3, 10, 10));
 
-        JScrollPane scrollPane = new JScrollPane(base);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(13);
-        scrollPane.setPreferredSize(new Dimension(400, 300));
+            JScrollPane scrollPane = new JScrollPane(base);
+            scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+            scrollPane.getVerticalScrollBar().setUnitIncrement(13);
+            scrollPane.setPreferredSize(new Dimension(400, 300));
 
-        for (PartnerItem item : partnerItems.stream().filter(Component::isEnabled).toList()) base.add(item);
-        contentPane.add(scrollPane, BorderLayout.CENTER);
+            for (PartnerItem item : partnerItems.stream().filter(Component::isEnabled).toList()) base.add(item);
+            contentPane.add(scrollPane, BorderLayout.CENTER);
+        }
     }
 
     @SneakyThrows
@@ -167,5 +174,8 @@ public class PartnersTab extends AUITab {
             });
             add(button, BorderLayout.CENTER);
         }
+
+        @Override
+        public boolean isEnabled() {return enabled;}
     }
 }
