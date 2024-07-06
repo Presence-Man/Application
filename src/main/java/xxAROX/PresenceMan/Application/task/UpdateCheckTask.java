@@ -23,13 +23,11 @@ import lombok.NoArgsConstructor;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.ui.popup.DownloadPopup;
+import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -38,20 +36,7 @@ public class UpdateCheckTask implements Runnable {
     @Override
     public void run() {
         try {
-            URL url = new URL("https://raw.githubusercontent.com/Presence-Man/Application/main/latest_version" + (AppInfo.development ? "-dev" : "") + ".txt");
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            con.setRequestProperty("User-Agent", AppInfo.name + "/" + AppInfo.getVersion());
-            con.setConnectTimeout(5000);
-            con.setReadTimeout(5000);
-
-            InputStream in = con.getInputStream();
-            byte[] bytes = new byte[1024];
-            int read;
-            StringBuilder builder = new StringBuilder();
-            while ((read = in.read(bytes)) != -1) builder.append(new String(bytes, 0, read));
-            con.disconnect();
-            String latestVersion = builder.toString().trim();
+            String latestVersion = Utils.WebUtils.get("https://raw.githubusercontent.com/Presence-Man/Application/main/latest_version" + (AppInfo.development ? "-dev" : "") + ".txt").getBody().trim();
 
             boolean updateAvailable;
             try {

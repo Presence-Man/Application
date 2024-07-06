@@ -56,6 +56,10 @@ public class WaterdogScheduler {
         return this.addTask(task, 0, 0, async);
     }
 
+    public <T extends Runnable> TaskHandler<T> schedule(T task) {
+        return this.addTask(task, 0, 0, false);
+    }
+
     public <T extends Runnable> TaskHandler<T> scheduleDelayed(T task, int delay) {
         return this.scheduleDelayed(task, delay, false);
     }

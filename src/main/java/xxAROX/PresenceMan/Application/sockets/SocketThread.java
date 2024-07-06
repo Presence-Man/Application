@@ -56,7 +56,7 @@ public class SocketThread implements Runnable {
         try {
             instance = this;
             backend_address = new InetSocketAddress(Gateway.ip, Gateway.usual_port +1);
-            App.getLogger().info("Backend identified as " + backend_address.getAddress().getHostAddress() + ":" + backend_address.getPort());
+            App.getLogger().info("Backend socket located at " + backend_address.getAddress().getHostAddress() + ":" + backend_address.getPort());
             socket = new Socket(this);
         } catch (Exception e) {
             App.getLogger().error("Error while creating socket: ", e);
