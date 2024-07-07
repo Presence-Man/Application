@@ -46,15 +46,24 @@ public class SettingsTab extends AUITab {
         constraints.ipady = 10;
         int gridy = 0;
 
+        //title
+        JLabel title = new JLabel("General settings");
+        title.setFont(new Font(title.getFont().getName(), Font.BOLD, 20));
+        constraints.gridx = 0;
+        constraints.gridy = gridy++;
+        contentPane.add(title, constraints);
 
+        //display checkboxes under the title, one left one right
         Utils.UIUtils.addCheckbox(contentPane, constraints, gridy++, "Start minimized", CacheManager.Settings.START_MINIMIZED, (n) -> {
             changed.set(CacheManager.Settings.START_MINIMIZED != n);
             CacheManager.Settings.START_MINIMIZED = n;
         });
+
         Utils.UIUtils.addCheckbox(contentPane, constraints, gridy++, "Enable auto-update", CacheManager.Settings.ENABLE_AUTO_UPDATE, (n) -> {
             changed.set(CacheManager.Settings.ENABLE_AUTO_UPDATE != n);
             CacheManager.Settings.ENABLE_AUTO_UPDATE = n;
         });
+
 
         // Save button
         JButton saveButton = new JButton("Save settings");

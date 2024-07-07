@@ -43,6 +43,9 @@ import java.util.Objects;
 
 public class PartnersTab extends AUITab {
     private List<PartnerItem> partnerItems = new ArrayList<>();
+    boolean loaded = false;
+    JPanel base = new JPanel();
+    JScrollPane scrollPane = new JScrollPane(base);
 
     public PartnersTab(AppUI frame) {
         super(frame, "Partners");
@@ -50,31 +53,51 @@ public class PartnersTab extends AUITab {
     @Override
     protected void init(JPanel contentPane) {
         contentPane.removeAll();
-        reloadPartners();
 
-        contentPane.setLayout(new BorderLayout());
-        var border_size = 0;
-        contentPane.setBorder(BorderFactory.createEmptyBorder(border_size, border_size, border_size, border_size));
+        if(!loaded) {
+            base = new JPanel();
+            scrollPane = new JScrollPane(base);
 
-        if (partnerItems.size() == 0 || partnerItems.stream().filter(PartnerItem::isEnabled).toList().size() == 0) {
-            JLabel noPartnersLabel = new JLabel("No partnerships yet!", SwingConstants.CENTER);
-            noPartnersLabel.setForeground(new Color(0xED4245));
-            contentPane.add(noPartnersLabel, BorderLayout.CENTER);
-            contentPane.repaint();
-        } else {
-            JPanel base = new JPanel();
-            int itemCount = partnerItems.size();
-            if (itemCount == 1) base.setLayout(new GridBagLayout());
-            else if (itemCount == 2) base.setLayout(new GridBagLayout());
-            else base.setLayout(new GridLayout(0, 3, 10, 10));
-
-            JScrollPane scrollPane = new JScrollPane(base);
             scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
             scrollPane.getVerticalScrollBar().setUnitIncrement(13);
             scrollPane.setPreferredSize(new Dimension(400, 300));
 
-            for (PartnerItem item : partnerItems.stream().filter(Component::isEnabled).toList()) base.add(item);
-            contentPane.add(scrollPane, BorderLayout.CENTER);
+            JLabel loading = new JLabel("Loading...", SwingConstants.CENTER);
+            loading.setFont(new Font(loading.getFont().getName(), Font.BOLD, 20));
+            contentPane.add(loading, BorderLayout.CENTER);
+            contentPane.repaint();
+
+            new Thread(() -> {
+                reloadPartners();
+                loaded = true;
+
+                int itemCount = partnerItems.size();
+                if (itemCount == 1) base.setLayout(new GridBagLayout());
+                else if (itemCount == 2) base.setLayout(new GridBagLayout());
+                else base.setLayout(new GridLayout(0, 3, 10, 10));
+
+
+                for (PartnerItem item : partnerItems.stream().filter(Component::isEnabled).toList()) base.add(item);
+
+                init(contentPane);
+            }).start();
+        } else {
+            scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+            scrollPane.getVerticalScrollBar().setUnitIncrement(13);
+            scrollPane.setPreferredSize(new Dimension(400, 300));
+
+            contentPane.setLayout(new BorderLayout());
+            var border_size = 0;
+            contentPane.setBorder(BorderFactory.createEmptyBorder(border_size, border_size, border_size, border_size));
+
+            if (partnerItems.size() == 0 || partnerItems.stream().filter(PartnerItem::isEnabled).toList().size() == 0) {
+                JLabel noPartnersLabel = new JLabel("No partnerships yet!", SwingConstants.CENTER);
+                noPartnersLabel.setForeground(new Color(0xED4245));
+                contentPane.add(noPartnersLabel, BorderLayout.CENTER);
+                contentPane.repaint();
+            } else {
+                contentPane.add(scrollPane, BorderLayout.CENTER);
+            }
         }
     }
 
@@ -107,6 +130,7 @@ public class PartnersTab extends AUITab {
 
     @Override
     public void update() {
+        loaded = false;
         init(contentPane);
     }
 
@@ -147,11 +171,12 @@ public class PartnersTab extends AUITab {
             this.enabled = enabled;
             this.url = url;
 
-            if (icon != null) icon = new ImageIcon(icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH));
+            if (icon != null) icon = new ImageIcon(icon.getImage().getScaledInstance(icon.getIconWidth() / 4, icon.getIconHeight() / 4, Image.SCALE_SMOOTH));
 
             setLayout(new GridLayout());
 
             JButton button = new JButton(title);
+            button.setPreferredSize(new Dimension(150,170));
             button.setIcon(icon);
             button.setHorizontalTextPosition(SwingConstants.CENTER);
             button.setVerticalTextPosition(SwingConstants.BOTTOM);

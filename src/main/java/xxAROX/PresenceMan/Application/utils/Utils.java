@@ -119,7 +119,7 @@ public class Utils {
             });
             constraints.gridx = 0;
             constraints.gridy = gridy;
-            constraints.gridwidth = 2;
+            constraints.gridwidth = 1;
             panel.add(checkBox, constraints);
             return checkBox;
         }

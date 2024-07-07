@@ -55,7 +55,8 @@ public class PartnerPopup extends JDialog {
         topPanel.add(Box.createVerticalStrut(10), BorderLayout.NORTH);
 
         if (partner.banner_icon != null) {
-            JLabel banner = new JLabel(new ImageIcon(partner.banner_icon.getImage().getScaledInstance(340, 125, Image.SCALE_SMOOTH)));
+            JLabel banner = new JLabel(new ImageIcon(partner.banner_icon.getImage().getScaledInstance(340,125,Image.SCALE_SMOOTH)));
+            banner.setPreferredSize(new Dimension(340,125));
             topPanel.add(banner, BorderLayout.CENTER);
             topPanel.add(Box.createVerticalStrut(10), BorderLayout.NORTH);
         } else if (partner.icon != null) {

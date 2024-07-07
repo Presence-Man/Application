@@ -39,6 +39,7 @@ import java.awt.*;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -65,13 +66,14 @@ public final class XboxUserInfo {
     }
 
     public Image getProfileImage() {
-        var fallback_icon = Objects.requireNonNull(Bootstrap.class.getClassLoader().getResource(AppInfo.icon));
-        Image img;
+        Image img = null;
         try {
             img = ImageIO.read(new URL("https://presence-man.com/api/v1/images/heads/" + xuid));
         } catch (Exception e) {
             App.getLogger().error("Error while fetching head: ", e);
-            img = new ImageIcon(fallback_icon).getImage();
+            try {
+                img = ImageIO.read(new URL("https://minecraftfaces.com/wp-content/bigfaces/big-steve-face.png"));
+            } catch (IOException ignored) {}
         }
 
         return img;

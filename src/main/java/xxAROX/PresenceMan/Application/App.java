@@ -51,6 +51,7 @@ public final class App {
     public static Long network_session_created = null;
     public static Long server_session_created = null;
     public static String head_url = null;
+    public static Integer network_id = null;
 
     @Getter private DiscordInfo discord_info = new DiscordInfo();
 
@@ -180,6 +181,7 @@ public final class App {
                 })
                 .build()
         ;
+
         DiscordRPC.discordInitialize(discord_info.getCurrent_application_id(), handlers, false);
         DiscordRPC.discordRegister(discord_info.getCurrent_application_id(), "");
     }
@@ -210,6 +212,8 @@ public final class App {
                 DiscordRPC.discordUpdatePresence(finalApi_activity1.toDiscord());
             } else if (queue) app.discord_info.registerHandler(() -> setActivity(finalApi_activity1, false));
         });
+
+        if(ui != null) ui.general_tab.update(api_activity);
     }
 
     public static Logger getLogger(){

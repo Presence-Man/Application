@@ -20,6 +20,7 @@ package xxAROX.PresenceMan.Application.ui.tabs;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 import xxAROX.PresenceMan.Application.App;
+import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 import xxAROX.PresenceMan.Application.sockets.SocketThread;
 import xxAROX.PresenceMan.Application.ui.AUITab;
@@ -27,8 +28,13 @@ import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.ui.popup.LoginPopup;
 import xxAROX.PresenceMan.Application.utils.Utils;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -39,6 +45,8 @@ public class GeneralTab extends AUITab {
     private static final String CONNECTED = "Connected to {server} on {network}";
 
     JLabel baStatus = new JLabel();
+
+    JPanel server = new JPanel();
 
     public GeneralTab(AppUI frame) {
         super(frame, "Home");
@@ -164,7 +172,9 @@ public class GeneralTab extends AUITab {
 
             contentPane.add(discordStatus, constraints);
 
-            JLabel dcUser = new JLabel("Discord User: @" + App.getInstance().getDiscord_info().getUsername(), SwingConstants.CENTER);
+            String username = App.getInstance().getDiscord_info().getUsername() != null ? "@" + App.getInstance().getDiscord_info().getUsername() : "Not connected";
+
+            JLabel dcUser = new JLabel("Discord User: " + username, SwingConstants.CENTER);
             dcUser.setVisible(true);
             dcUser.setFocusable(false);
             dcUser.setFont(new Font("Arial", Font.ITALIC, 12));
@@ -179,6 +189,25 @@ public class GeneralTab extends AUITab {
             constraints.insets = new Insets(5, 5, 30, 100);
 
             contentPane.add(dcUser, constraints);
+
+            if(App.getInstance().getDiscord_info().getUsername() == null) {
+                //add reconnect button below
+                JButton reconnect = new JButton("Reconnect");
+                reconnect.addActionListener(e -> {
+                    App.getInstance().initDiscord();
+                    init(contentPane);
+                });
+                constraints.gridx = 0;          // Column 0
+                constraints.gridy = 1;          // Row 0 (top)
+                constraints.gridwidth = 1;      // Span 1 column
+                constraints.gridheight = 1;     // Span 1 row
+                constraints.weightx = 1.0;      // Expand horizontally
+                constraints.weighty = 0.0;      // Do not expand vertically
+                constraints.fill = GridBagConstraints.CENTER; // Fill horizontally
+                constraints.insets = new Insets(70, 5, 5, 25);
+
+                contentPane.add(reconnect, constraints);
+            }
 
             //Backend status
 
@@ -204,6 +233,81 @@ public class GeneralTab extends AUITab {
 
             contentPane.add(baStatus, constraints);
 
+            //server
+            GridBagConstraints serverConst = new GridBagConstraints();
+            serverConst.fill = GridBagConstraints.HORIZONTAL;
+            serverConst.insets = new Insets(5, 5, 5, 5);
+            serverConst.ipadx = 20;
+            serverConst.ipady = 10;
+            serverConst.weightx = 0.5;
+            serverConst.weighty = 0.5;
+
+
+
+            server = new JPanel();
+            server.setSize(500, 100);
+            server.setLayout(new GridLayout(2, 1));
+            server.setBorder(BorderFactory.createTitledBorder("Server Info"));
+
+            JLabel serverName = new JLabel("Not connected", SwingConstants.CENTER);
+            serverName.setForeground(Color.RED);
+            serverName.setVisible(true);
+            serverName.setFocusable(false);
+            serverName.setFont(new Font("Arial", Font.ITALIC, 12));
+            server.add(serverName, serverConst);
+
+            //add details below
+
+            serverConst.anchor = GridBagConstraints.CENTER;
+            serverConst.gridx = 0;          // Column 0
+            serverConst.gridy = 1;          // Row 0 (top)
+            serverConst.gridwidth = 1;      // Span 1 column
+            serverConst.gridheight = 1;     // Span 1 row
+            serverConst.weightx = 1.0;      // Expand horizontally
+            serverConst.weighty = 1.0;      // Do not expand vertically
+            serverConst.fill = GridBagConstraints.CENTER; // Fill horizontally
+            serverConst.insets = new Insets(5, 5, 5, 5);
+
+            JLabel serverDetails = new JLabel("", SwingConstants.CENTER);
+            serverDetails.setVisible(true);
+            serverDetails.setFocusable(false);
+            serverDetails.setFont(new Font("Arial", Font.ITALIC, 12));
+            server.add(serverDetails, serverConst);
+
+            serverConst.anchor = GridBagConstraints.CENTER;
+            serverConst.gridx = 0;          // Column 0
+            serverConst.gridy = 1;          // Row 0 (top)
+            serverConst.gridwidth = 1;      // Span 1 column
+            serverConst.gridheight = 1;     // Span 1 row
+            serverConst.weightx = 1.0;      // Expand horizontally
+            serverConst.weighty = 1.0;      // Do not expand vertically
+            serverConst.fill = GridBagConstraints.CENTER; // Fill horizontally
+            serverConst.insets = new Insets(5,5,5,5);
+
+            JLabel serverBanner = new JLabel();
+            serverBanner.setSize(500,1);
+            try {
+                serverBanner.setIcon(new ImageIcon(ImageIO.read(new URL("https://cdn.pycmc.eu/empty-banner.png")).getScaledInstance(500,1, 4)));
+                serverBanner.setVisible(false);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            server.add(serverBanner, serverConst);
+
+
+            //add server to contentPane in the bottom half
+            constraints.gridx = 0;          // Column 0
+            constraints.gridy = 2;          // Row 0 (top)
+            constraints.gridwidth = 1;      // Span 1 column
+            constraints.gridheight = 1;     // Span 1 row
+            constraints.weightx = 1.0;      // Expand horizontally
+            constraints.weighty = 1.0;      // Do not expand vertically
+            constraints.fill = GridBagConstraints.CENTER; // Fill horizontally
+            constraints.anchor = GridBagConstraints.CENTER;   // Anchor to the top
+            constraints.insets = new Insets(5, 5, 5, 5);
+
+            contentPane.add(server, constraints);
 
 
 
@@ -216,29 +320,41 @@ public class GeneralTab extends AUITab {
                 constraints.fill = GridBagConstraints.NONE;
                 constraints.weightx = 0;
                 constraints.weighty = 1.0; // Push to the bottom
-                login_state_button = Utils.UIUtils.addButton(contentPane, constraints, 2, logged_in ? LOGOUT_TEXT : LOGIN_TEXT, (button) -> {
-                    if (App.getInstance().getXboxUserInfo() != null) logout();
-                    else login();
+                login_state_button = Utils.UIUtils.addButton(contentPane, constraints, 2, LOGOUT_TEXT, (button) -> {
+                    logout();
                 });
                 login_state_button.setFocusPainted(false);
                 login_state_button.setForeground(new Color(0, 0, 0));
                 login_state_button.setFocusable(false);
-                login_state_button.setBackground(logged_in ? LOGOUT_COLOR : LOGIN_COLOR);
+                login_state_button.setBackground(LOGOUT_COLOR);
 
             }
         }
     }
 
-    @Override
-    public void setReady() {
-    }
-
-    @Override
-    public void onClose() {
-    }
-
     public void update() {
         init(contentPane);
+    }
+
+    public void update(APIActivity activity) {
+        if(server == null) return;
+        boolean connected = App.getInstance().getNetwork() != null && App.getInstance().getServer() != null;
+
+        if(!connected) {
+            ((JLabel) server.getComponent(0)).setText("Not connected to any server");
+            ((JLabel) server.getComponent(0)).setForeground(Color.RED);
+
+            ((JLabel) server.getComponent(1)).setText("");
+        } else {
+            ((JLabel) server.getComponent(0)).setText("Connected to " + App.getInstance().getNetwork());
+            ((JLabel) server.getComponent(0)).setForeground(Color.GREEN);
+
+            ((JLabel) server.getComponent(1)).setText("Server: " + App.getInstance().getServer());
+            //next line on overflow
+            ((JLabel) server.getComponent(1)).setHorizontalAlignment(SwingConstants.LEFT);
+
+        }
+
     }
 
     @Override
@@ -254,12 +370,6 @@ public class GeneralTab extends AUITab {
         }
 
         if(baStatus != null) baStatus.setText("Status: " + status);
-    }
-
-    private String getLoggedInMessage() {
-        var xboxInfo = App.getInstance().getXboxUserInfo();
-        boolean logged_in = xboxInfo != null;
-        return logged_in ? "Logged in as " + xboxInfo.getGamertag() : "Not logged into Xbox account.";
     }
 
     private static String getConnectedMessage(){
