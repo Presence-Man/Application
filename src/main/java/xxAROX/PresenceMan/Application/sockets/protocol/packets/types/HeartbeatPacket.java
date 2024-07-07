@@ -58,7 +58,7 @@ public class HeartbeatPacket extends CallbackPacket {
     protected void decodeBody(JsonObject object) {
         xuid = object.get("xuid").getAsString();
         discord_user_id = object.has("duid") && !object.get("duid").isJsonNull() ? object.get("duid").getAsString() : discord_user_id;
-        network_id = object.get("network_id").getAsInt();
+        network_id = object.has("duid") && !object.get("duid").isJsonNull() ? object.get("network_id").getAsInt() : null;
         gamertag = object.has("gamertag") && !object.get("gamertag").isJsonNull() ? object.get("gamertag").getAsString() : gamertag;
         api_activity = object.has("api_activity") && object.get("api_activity").isJsonObject() ? APIActivity.deserialize(object.getAsJsonObject("api_activity")) : api_activity;
         network = object.has("network") && !object.get("network").isJsonNull() ? object.get("network").getAsString() : network;
