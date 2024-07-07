@@ -21,6 +21,7 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
+import xxAROX.PresenceMan.Application.entity.Gateway;
 import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
 import xxAROX.PresenceMan.Application.sockets.SocketThread;
 import xxAROX.PresenceMan.Application.ui.AUITab;
@@ -111,6 +112,7 @@ public class GeneralTab extends AUITab {
             contentPane.add(info, constraints);
 
         } else {
+            // SECTION: "logged in"
             var xboxInfo = App.getInstance().getXboxUserInfo();
 
             //show image left to name in 50x50px
@@ -134,6 +136,9 @@ public class GeneralTab extends AUITab {
 
 
             contentPane.add(image, constraints);
+
+
+            // ICON.GAMERTAG
 
 
             JLabel name = new JLabel(xboxInfo.getGamertag(), SwingConstants.CENTER);
@@ -287,7 +292,7 @@ public class GeneralTab extends AUITab {
             JLabel serverBanner = new JLabel();
             serverBanner.setSize(500,1);
             try {
-                serverBanner.setIcon(new ImageIcon(ImageIO.read(new URL("https://cdn.pycmc.eu/empty-banner.png")).getScaledInstance(500,1, 4)));
+                serverBanner.setIcon(new ImageIcon(ImageIO.read(new URL(Gateway.getUrl() + "/home/images/empty-banner.png")).getScaledInstance(500,1, 4)));
                 serverBanner.setVisible(false);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -341,7 +346,7 @@ public class GeneralTab extends AUITab {
         boolean connected = App.getInstance().getNetwork() != null && App.getInstance().getServer() != null;
 
         if(!connected) {
-            ((JLabel) server.getComponent(0)).setText("Not connected to any server");
+            ((JLabel) server.getComponent(0)).setText("Not connected to a server");
             ((JLabel) server.getComponent(0)).setForeground(Color.RED);
 
             ((JLabel) server.getComponent(1)).setText("");
