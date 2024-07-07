@@ -34,8 +34,8 @@ jobs:
       - name: Rename JAR
         run: |
           cd target/
-          cp Application-1.0-SNAPSHOT.jar Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}-dev.jar
-          cp Application-1.0-SNAPSHOT.jar Presence-Man-App-dev.jar
+          cp Application-1.0-SNAPSHOT.jar Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}-alpha.jar
+          cp Application-1.0-SNAPSHOT.jar Presence-Man-App-alpha.jar
           cd ../
 
       - name: "Create Release"
@@ -43,7 +43,7 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           draft: true
-          automatic_release_tag: "v${{ steps.metadata.outputs.VERSION }}"
+          automatic_release_tag: "v${{ steps.metadata.outputs.VERSION }}-alpha"
           prerelease: false
           title: "Alpha Release v${{ steps.metadata.outputs.VERSION }}"
-          files: "target/Presence-Man-App-dev.jar"
+          files: "target/Presence-Man-App-alpha.jar"
