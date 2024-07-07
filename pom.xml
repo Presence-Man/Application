@@ -112,6 +112,12 @@
             <version>1.6.2</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.xxAROX</groupId>
+            <artifactId>WebRequester</artifactId>
+            <version>latest</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

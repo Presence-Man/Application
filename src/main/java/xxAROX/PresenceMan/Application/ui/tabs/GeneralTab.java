@@ -32,9 +32,7 @@ import xxAROX.PresenceMan.Application.utils.Utils;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -72,7 +70,7 @@ public class GeneralTab extends AUITab {
             JLabel pleaseLogIn = new JLabel("Please log in with XBOX", SwingConstants.CENTER);
             pleaseLogIn.setVisible(true);
             pleaseLogIn.setFocusable(false);
-            pleaseLogIn.setFont(new Font("Arial", Font.BOLD, 20));
+            pleaseLogIn.setFont(new Font("Arial", Font.BOLD, 20)); // NOTE: maybe change this to another
 
             constraints.gridx = 0;          // Column 0
             constraints.gridy = 0;          // Row 0 (top)
@@ -338,7 +336,7 @@ public class GeneralTab extends AUITab {
     }
 
     public void update() {
-        init(contentPane);
+        init(contentPane); // Way to fix #60
     }
 
     public void update(APIActivity activity) {
@@ -354,7 +352,7 @@ public class GeneralTab extends AUITab {
             ((JLabel) server.getComponent(0)).setText("Connected to " + App.getInstance().getNetwork());
             ((JLabel) server.getComponent(0)).setForeground(Color.GREEN);
 
-            ((JLabel) server.getComponent(1)).setText("Server: " + App.getInstance().getServer());
+            ((JLabel) server.getComponent(1)).setText("Server: " + App.getInstance().getServer()); // TODO: more left
             //next line on overflow
             ((JLabel) server.getComponent(1)).setHorizontalAlignment(SwingConstants.LEFT);
 
