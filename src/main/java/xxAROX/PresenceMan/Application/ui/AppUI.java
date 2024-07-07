@@ -19,8 +19,6 @@ package xxAROX.PresenceMan.Application.ui;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneDarkIJTheme;
-import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneLightIJTheme;
-import com.jthemedetecor.OsThemeDetector;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.Bootstrap;
@@ -30,7 +28,6 @@ import xxAROX.PresenceMan.Application.ui.tabs.PrivacyPolicyTab;
 import xxAROX.PresenceMan.Application.ui.tabs.SettingsTab;
 import xxAROX.PresenceMan.Application.utils.CacheManager;
 import xxAROX.PresenceMan.Application.utils.Tray;
-import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;

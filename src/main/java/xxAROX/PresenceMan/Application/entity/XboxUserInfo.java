@@ -17,8 +17,6 @@
 
 package xxAROX.PresenceMan.Application.entity;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
@@ -27,24 +25,11 @@ import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
 import net.raphimc.minecraftauth.util.MicrosoftConstants;
 import xxAROX.PresenceMan.Application.App;
-import xxAROX.PresenceMan.Application.AppInfo;
-import xxAROX.PresenceMan.Application.Bootstrap;
-import xxAROX.PresenceMan.Application.ui.tabs.PartnersTab;
-import xxAROX.PresenceMan.Application.utils.Utils;
-import xxAROX.WebRequester.WebRequester;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Objects;
 
 @Getter
 @AllArgsConstructor

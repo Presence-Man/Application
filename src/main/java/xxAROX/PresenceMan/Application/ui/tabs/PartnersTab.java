@@ -20,11 +20,7 @@ package xxAROX.PresenceMan.Application.ui.tabs;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import lombok.SneakyThrows;
 import xxAROX.PresenceMan.Application.App;
-import xxAROX.PresenceMan.Application.AppInfo;
-import xxAROX.PresenceMan.Application.Bootstrap;
-import xxAROX.PresenceMan.Application.entity.Gateway;
 import xxAROX.PresenceMan.Application.ui.AUITab;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.ui.popup.PartnerPopup;
@@ -32,14 +28,10 @@ import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class PartnersTab extends AUITab {
     private List<PartnerItem> partnerItems = new ArrayList<>();
