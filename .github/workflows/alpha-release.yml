@@ -1,0 +1,59 @@
+name: "Release development"
+
+on:
+  push:
+    branches: [ "rework", "alpha" ]
+
+jobs:
+  build:
+    if: "!contains(github.event.head_commit.message, 'ci ignore')"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: "Get version"
+        id: metadata
+        run: |
+          javac -d . src/main/java/xxAROX/PresenceMan/Application/AppInfo.java
+          echo "VERSION=$(java xxAROX.PresenceMan.Application.AppInfo development)" >> $GITHUB_OUTPUT
+          echo ${{ steps.metadata.outputs.VERSION }}
+
+      - name: Build with Maven
+        run: |
+          mvn install:install-file -Dfile=./lib/discord-game-sdk4j-0.5.5.jar -DgroupId=discord-game-sdk4j -DartifactId=discord-game-sdk -Dversion=0.5.5 -Dpackaging=jar
+          mvn -B package --file pom.xml
+
+      - name: Rename JAR
+        run: |
+          cd target/
+          cp Application-1.0-SNAPSHOT.jar Presence-Man-App-v${{ steps.metadata.outputs.VERSION }}-dev.jar
+          cp Application-1.0-SNAPSHOT.jar Presence-Man-App-dev.jar
+          cd ../
+
+      - name: "Create Release"
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          draft: false
+          automatic_release_tag: "v${{ steps.metadata.outputs.VERSION }}"
+          prerelease: false
+          title: "Development Release v${{ steps.metadata.outputs.VERSION }}"
+          files: "target/Presence-Man-App-dev.jar"
+
+      - name: "Create latest_version-dev.txt"
+        run: "echo \"${{ steps.metadata.outputs.VERSION }}\" > latest_version-dev.txt"
+
+      - name: "Update version-dev.txt"
+        uses: "test-room-7/action-update-file@v1"
+        with:
+          file-path: latest_version-dev.txt
+          commit-msg: "Updated development version to ${{ steps.metadata.outputs.VERSION }} - ci ignore"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
