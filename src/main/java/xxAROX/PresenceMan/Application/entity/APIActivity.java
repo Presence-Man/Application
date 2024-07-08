@@ -96,7 +96,7 @@ public final class APIActivity {
         activity.setStartTimestamps(start.getValue());
 
         if (end != null) activity.setEndTimestamp(end);
-        if (large_icon_key != null) activity.setBigImage(large_icon_key, large_icon_text);
+        if (large_icon_key != null) activity.setBigImage((!Long.toString(client_id).equals(Long.toString(AppInfo.discord_application_id)) ? Gateway.getUrl()+"/i/" + client_id + "/" + large_icon_key : large_icon_key), large_icon_text);
         if (small_icon_key != null) activity.setSmallImage(small_icon_key, small_icon_text);
         if (party_player_count != null) activity.setParty("display", party_player_count, party_max_player_count);
         return activity.build();
