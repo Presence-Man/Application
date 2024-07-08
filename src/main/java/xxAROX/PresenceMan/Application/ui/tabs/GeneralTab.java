@@ -288,9 +288,10 @@ public class GeneralTab extends AUITab {
             serverConst.insets = new Insets(5,5,5,5);
 
             JLabel serverBanner = new JLabel();
-            serverBanner.setSize(500,1);
+            //serverBanner.setSize(500,1);
             try {
-                serverBanner.setIcon(new ImageIcon(ImageIO.read(new URL(Gateway.getUrl() + "/home/images/empty-banner.png")).getScaledInstance(500,1, 4)));
+                serverBanner.setIcon(new ImageIcon(ImageIO.read(new URL(Gateway.getUrl() + "/images/empty-banner.png"))));
+                //serverBanner.setIcon(new ImageIcon(ImageIO.read(new URL(Gateway.getUrl() + "/images/transparent-banner.png")).getScaledInstance(500,1, 4)));
                 serverBanner.setVisible(false);
             } catch (IOException e) {
                 throw new RuntimeException(e);

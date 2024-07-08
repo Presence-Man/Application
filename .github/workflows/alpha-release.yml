@@ -2,7 +2,7 @@ name: "Release development"
 
 on:
   push:
-    branches: [ "rework", "alpha" ]
+    branches: [ "rework", "rework-port-outdated-rpc", "alpha" ]
 
 jobs:
   build:

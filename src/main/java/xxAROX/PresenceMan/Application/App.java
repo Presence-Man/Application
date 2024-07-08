@@ -182,7 +182,9 @@ public final class App {
                 .build()
         ;
 
-        DiscordRPC.discordInitialize(discord_info.getCurrent_application_id(), handlers, true);
+        System.out.println(application_id);
+        DiscordRPC.discordInitialize(application_id, handlers, true);
+        DiscordRPC.discordRegister(application_id, null);
     }
 
     public static void setActivity(APIActivity api_activity) {
@@ -196,15 +198,17 @@ public final class App {
         if (app.xboxUserInfo != null) {
             if (api_activity.getState() != null) api_activity.setState(Utils.replaceParams(api_activity.getState()));
             if (api_activity.getDetails() != null) api_activity.setDetails(Utils.replaceParams(api_activity.getDetails()));
-            if (api_activity.getLarge_icon_key() == null || api_activity.getLarge_icon_key().isBlank()) api_activity.setLarge_icon_key("bedrock");
+            if (api_activity.getLarge_icon_key() == null || api_activity.getLarge_icon_key().isBlank()) {
+                api_activity.setLarge_icon_key("bedrock");
+                // TODO: bypass
+            }
             if (api_activity.getLarge_icon_text() != null && !api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(Utils.replaceParams(api_activity.getLarge_icon_text()));
             if (App.head_url != null) {
                 api_activity.setSmall_icon_key(App.head_url);
                 if (api_activity.getSmall_icon_text() == null) api_activity.setSmall_icon_text(app.xboxUserInfo.getGamertag());
             }
         }
-        //App.getInstance().initDiscord(String.valueOf(api_activity.getClient_id()));
-        App.getInstance().discord_info.setCurrent_application_id(String.valueOf(api_activity.getClient_id()));
+        App.getInstance().initDiscord(String.valueOf(api_activity.getClient_id()));
         APIActivity finalApi_activity1 = api_activity;
         App.getInstance().discord_info.registerHandler(() -> {
             if (app.discord_info.ready) {
