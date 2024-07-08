@@ -182,8 +182,7 @@ public final class App {
                 .build()
         ;
 
-        DiscordRPC.discordInitialize(discord_info.getCurrent_application_id(), handlers, false);
-        DiscordRPC.discordRegister(discord_info.getCurrent_application_id(), "");
+        DiscordRPC.discordInitialize(discord_info.getCurrent_application_id(), handlers, true);
     }
 
     public static void setActivity(APIActivity api_activity) {
@@ -204,7 +203,8 @@ public final class App {
                 if (api_activity.getSmall_icon_text() == null) api_activity.setSmall_icon_text(app.xboxUserInfo.getGamertag());
             }
         }
-        App.getInstance().initDiscord(String.valueOf(api_activity.getClient_id()));
+        //App.getInstance().initDiscord(String.valueOf(api_activity.getClient_id()));
+        App.getInstance().discord_info.setCurrent_application_id(String.valueOf(api_activity.getClient_id()));
         APIActivity finalApi_activity1 = api_activity;
         App.getInstance().discord_info.registerHandler(() -> {
             if (app.discord_info.ready) {
