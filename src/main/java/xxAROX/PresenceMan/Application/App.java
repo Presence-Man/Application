@@ -17,6 +17,7 @@
 
 package xxAROX.PresenceMan.Application;
 
+import com.jagrosh.discordipc.IPCClient;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.ToString;
@@ -52,6 +53,7 @@ public final class App {
     public static Long server_session_created = null;
     public static String head_url = null;
     public static Integer network_id = null;
+    @Deprecated private IPCClient client = new IPCClient(AppInfo.discord_application_id);
 
     @Getter private DiscordInfo discord_info = new DiscordInfo();
 
@@ -211,8 +213,10 @@ public final class App {
         APIActivity finalApi_activity1 = api_activity;
         App.getInstance().discord_info.registerHandler(() -> {
             if (app.discord_info.ready) {
-                events.onDiscordActivityUpdate(finalApi_activity1);
+                events.onDiscordActivityUpdate(finalApi_activity1); // TEMPORARY
+                //App.getInstance().client.sendRichPresence(APIActivity.toRichPresence(finalApi_activity1.toDiscord()));
                 DiscordRPC.discordUpdatePresence(finalApi_activity1.toDiscord());
+
             } else if (queue) app.discord_info.registerHandler(() -> setActivity(finalApi_activity1, false));
         });
 

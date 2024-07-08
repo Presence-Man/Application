@@ -18,6 +18,7 @@
 package xxAROX.PresenceMan.Application.entity;
 
 import com.google.gson.JsonObject;
+import com.jagrosh.discordipc.entities.RichPresence;
 import lombok.*;
 import lombok.experimental.Accessors;
 import net.arikia.dev.drpc.DiscordRichPresence;
@@ -25,6 +26,8 @@ import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.entity.enums.APITimestamp;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -100,6 +103,23 @@ public final class APIActivity {
         if (small_icon_key != null) activity.setSmallImage(small_icon_key, small_icon_text);
         if (party_player_count != null) activity.setParty("display", party_player_count, party_max_player_count);
         return activity.build();
+    }
+
+    public static RichPresence toRichPresence(DiscordRichPresence drpc) {
+        RichPresence.Builder builder = new RichPresence.Builder();
+        return builder
+                .setState(drpc.state)
+                .setDetails(drpc.details)
+                .setStartTimestamp(Instant.ofEpochMilli(drpc.startTimestamp).atOffset(ZoneOffset.UTC))
+                .setEndTimestamp(Instant.ofEpochMilli(drpc.endTimestamp).atOffset(ZoneOffset.UTC))
+                .setLargeImage(drpc.largeImageKey, drpc.largeImageText)
+                .setSmallImage(drpc.smallImageKey, drpc.smallImageText)
+                .setParty(drpc.partyId, drpc.partySize, drpc.partyMax)
+                .setMatchSecret(drpc.matchSecret)
+                .setJoinSecret(drpc.joinSecret)
+                .setSpectateSecret(drpc.spectateSecret)
+                .build()
+        ;
     }
 
     @Override
