@@ -23,7 +23,6 @@ public class test {
 
         try {
             WebRequester.Result result = future.get();
-            System.out.println(result.getBody());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

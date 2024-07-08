@@ -182,7 +182,6 @@ public final class App {
                 .build()
         ;
 
-        System.out.println(application_id);
         DiscordRPC.discordInitialize(application_id, handlers, true);
         DiscordRPC.discordRegister(application_id, null);
     }
