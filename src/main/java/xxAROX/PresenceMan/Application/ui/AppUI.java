@@ -24,7 +24,6 @@ import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.Bootstrap;
 import xxAROX.PresenceMan.Application.ui.tabs.GeneralTab;
 import xxAROX.PresenceMan.Application.ui.tabs.PartnersTab;
-import xxAROX.PresenceMan.Application.ui.tabs.PrivacyPolicyTab;
 import xxAROX.PresenceMan.Application.ui.tabs.SettingsTab;
 import xxAROX.PresenceMan.Application.utils.CacheManager;
 import xxAROX.PresenceMan.Application.utils.Tray;
@@ -45,7 +44,6 @@ public class AppUI extends JDialog {
     public final GeneralTab general_tab;
     public final SettingsTab settings_tab;
     public final PartnersTab partners_tab;
-    public final PrivacyPolicyTab privacy_policy_tab;
 
     public AppUI() {
         super((Dialog) null);
@@ -68,10 +66,6 @@ public class AppUI extends JDialog {
         partners_tab = new PartnersTab(this);
         tabs.add(partners_tab);
         partners_tab.add(contentPane);
-
-        privacy_policy_tab = new PrivacyPolicyTab(this);
-        tabs.add(privacy_policy_tab);
-        privacy_policy_tab.add(contentPane);
 
 
         contentPane.setEnabledAt(contentPane.indexOfTab(general_tab.getName()), false);

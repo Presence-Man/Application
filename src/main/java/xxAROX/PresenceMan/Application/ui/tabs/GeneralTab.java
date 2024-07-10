@@ -345,12 +345,12 @@ public class GeneralTab extends AUITab {
         boolean connected = App.getInstance().network_info.network != null && App.getInstance().network_info.server != null;
 
         if(!connected) {
-            ((JLabel) server.getComponent(0)).setText("Not connected to a server");
+            ((JLabel) server.getComponent(0)).setText(NOT_CONNECTED);
             ((JLabel) server.getComponent(0)).setForeground(Color.RED);
 
             ((JLabel) server.getComponent(1)).setText("");
         } else {
-            ((JLabel) server.getComponent(0)).setText("Connected to " + App.getInstance().network_info.network);
+            ((JLabel) server.getComponent(0)).setText(Utils.replaceParams(CONNECTED));
             ((JLabel) server.getComponent(0)).setForeground(Color.GREEN);
 
             ((JLabel) server.getComponent(1)).setText("Server: " + App.getInstance().network_info.server); // TODO: more left
