@@ -41,7 +41,6 @@ import java.util.function.Function;
 
 public class GeneralTab extends AUITab {
     JLabel backend_status = new JLabel();
-
     JPanel server_info = new JPanel();
 
     public GeneralTab(AppUI frame) {
@@ -242,9 +241,9 @@ public class GeneralTab extends AUITab {
             server_info = new JPanel();
             server_info.setSize(500, 100);
             server_info.setLayout(new GridLayout(2, 1));
-            server_info.setBorder(BorderFactory.createTitledBorder("Server Info"));
+            server_info.setBorder(BorderFactory.createTitledBorder(Lang.get("ui.tab.home.server_info.title")));
 
-            JLabel serverName = new JLabel("Not connected", SwingConstants.CENTER);
+            JLabel serverName = new JLabel(Lang.get("ui.tab.home.server_info.network.nop"), SwingConstants.CENTER);
             serverName.setForeground(Color.RED);
             serverName.setVisible(true);
             serverName.setFocusable(false);
