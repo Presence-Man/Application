@@ -48,8 +48,8 @@ public class Utils {
                 put("{xuid}", App.getInstance().xboxUserInfo.getXuid());
                 put("{gamertag}", App.getInstance().xboxUserInfo.getGamertag());
             }
-            put("{network}", App.getInstance().network != null ? App.getInstance().network : "null");
-            put("{server}", App.getInstance().server != null ? App.getInstance().server : "null");
+            put("{network}", App.getInstance().network_info.network != null ? App.getInstance().network_info.network : "null");
+            put("{server}", App.getInstance().network_info.server != null ? App.getInstance().network_info.server : "null");
 
         }};
     }

@@ -22,7 +22,7 @@ import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.Gateway;
-import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
+import xxAROX.PresenceMan.Application.entity.infos.XboxUserInfo;
 import xxAROX.PresenceMan.Application.sockets.SocketThread;
 import xxAROX.PresenceMan.Application.ui.AUITab;
 import xxAROX.PresenceMan.Application.ui.AppUI;
@@ -342,7 +342,7 @@ public class GeneralTab extends AUITab {
 
     public void update(APIActivity activity) {
         if(server == null) return;
-        boolean connected = App.getInstance().getNetwork() != null && App.getInstance().getServer() != null;
+        boolean connected = App.getInstance().network_info.network != null && App.getInstance().network_info.server != null;
 
         if(!connected) {
             ((JLabel) server.getComponent(0)).setText("Not connected to a server");
@@ -350,10 +350,10 @@ public class GeneralTab extends AUITab {
 
             ((JLabel) server.getComponent(1)).setText("");
         } else {
-            ((JLabel) server.getComponent(0)).setText("Connected to " + App.getInstance().getNetwork());
+            ((JLabel) server.getComponent(0)).setText("Connected to " + App.getInstance().network_info.network);
             ((JLabel) server.getComponent(0)).setForeground(Color.GREEN);
 
-            ((JLabel) server.getComponent(1)).setText("Server: " + App.getInstance().getServer()); // TODO: more left
+            ((JLabel) server.getComponent(1)).setText("Server: " + App.getInstance().network_info.server); // TODO: more left
             //next line on overflow
             ((JLabel) server.getComponent(1)).setHorizontalAlignment(SwingConstants.LEFT);
 
@@ -374,16 +374,17 @@ public class GeneralTab extends AUITab {
         }
 
         if(baStatus != null) baStatus.setText("Status: " + status);
+        if (currentTick %20 == 0) update(null); // TODO: maybe remove this
     }
 
     private static String getConnectedMessage(){
-        var activity = App.getInstance().getApi_activity();
-        boolean connected = activity != null && App.getInstance().getNetwork() != null && App.getInstance().getServer() != null;
+        var activity = App.getInstance().discord_info.api_activity;
+        boolean connected = activity != null && App.getInstance().network_info.network != null && App.getInstance().network_info.server != null;
         var connected_to_backend = SocketThread.getInstance() != null && SocketThread.getInstance().getConnectionState().get().equals(SocketThread.State.CONNECTED);
         return connected ?
                 CONNECTED
-                    .replace("{server}", App.getInstance().getServer())
-                    .replace("{network}", App.getInstance().getNetwork())
+                    .replace("{server}", App.getInstance().network_info.server)
+                    .replace("{network}", App.getInstance().network_info.network)
                 //: (Gateway.connected ? HALF_CONNECTED : NOT_CONNECTED);
                 : (connected_to_backend ? HALF_CONNECTED : NOT_CONNECTED);
     }

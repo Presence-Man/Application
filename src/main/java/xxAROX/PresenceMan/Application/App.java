@@ -17,7 +17,6 @@
 
 package xxAROX.PresenceMan.Application;
 
-import com.jagrosh.discordipc.IPCClient;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.ToString;
@@ -26,8 +25,9 @@ import net.arikia.dev.drpc.DiscordRPC;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
-import xxAROX.PresenceMan.Application.entity.DiscordInfo;
-import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
+import xxAROX.PresenceMan.Application.entity.infos.DiscordInfo;
+import xxAROX.PresenceMan.Application.entity.infos.NetworkInfo;
+import xxAROX.PresenceMan.Application.entity.infos.XboxUserInfo;
 import xxAROX.PresenceMan.Application.events.IBaseListener;
 import xxAROX.PresenceMan.Application.scheduler.WaterdogScheduler;
 import xxAROX.PresenceMan.Application.sockets.SocketThread;
@@ -40,6 +40,7 @@ import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.swing.*;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -48,34 +49,26 @@ import java.util.concurrent.TimeUnit;
 @Getter
 @ToString
 public final class App {
-    @Getter static final long created = Instant.now().toEpochMilli();
-    public static Long network_session_created = null;
-    public static Long server_session_created = null;
-    public static String head_url = null;
-    public static Integer network_id = null;
-    @Deprecated private IPCClient client = new IPCClient(AppInfo.discord_application_id);
-
-    @Getter private DiscordInfo discord_info = new DiscordInfo();
-
     private static App instance;
-    @Getter private static App.Events events;
-    public SocketThread socket = null;
-    public String network = null;
-    public String server = null;
-
     public static App getInstance() {
         return instance;
     }
+    public static String head_url = null;
+
+    @Getter private static App.Events events;
+    @Getter static final long created = Instant.now().toEpochMilli();
+    public NetworkInfo network_info = new NetworkInfo();
+    public DiscordInfo discord_info = new DiscordInfo();
+    public XboxUserInfo xboxUserInfo = null;
 
     private Logger logger;
     public static AppUI ui;
+    public SocketThread socket = null;
     private WaterdogScheduler scheduler;
     private ScheduledExecutorService tickExecutor;
     private ScheduledFuture<?> tickFuture;
-    private volatile boolean shutdown = false;
     private int currentTick = 0;
-    public APIActivity api_activity = null;
-    public XboxUserInfo xboxUserInfo = null;
+    private volatile boolean shutdown = false;
 
     @SneakyThrows
     public App(Logger logger) {
@@ -124,15 +117,20 @@ public final class App {
     }
 
     public void updateServer(String new_network, String new_server) {
-        String before_network = network;
-        if (before_network == null || !before_network.equalsIgnoreCase(new_network)) {
-            network_session_created = new_network == null ? null : Instant.now().toEpochMilli();
-            network = new_network;
+        String before_network = network_info.network;
+        if (!Objects.equals(before_network, new_network)) {
+            network_info.network = new_network;
+            network_info.network_session_created = new_network == null ? null : Instant.now().toEpochMilli();
+            network_info.server = null;
+            network_info.server_session_created = network_info.network_session_created;
+            events.onNetworkChange(before_network, new_network);
+            return;
         }
-        String before_server = server;
-        if (before_server == null || !before_server.equalsIgnoreCase(new_server)) {
-            server_session_created = new_server == null ? null : Instant.now().toEpochMilli();
-            server = new_server;
+        String before_server = network_info.server;
+        if (!Objects.equals(before_server, new_server)) {
+            network_info.server_session_created = new_server == null ? null : Instant.now().toEpochMilli();
+            network_info.server = new_server;
+            events.onNetworkServerChange(network_info.network, before_server, new_server);
         }
     }
 
@@ -194,15 +192,12 @@ public final class App {
     public static void setActivity(APIActivity api_activity, boolean queue) {
         App app = App.getInstance();
         if (api_activity == null) api_activity = APIActivity.none();
-        if (api_activity.equals(app.api_activity)) return;
-        app.api_activity = api_activity;
+        if (api_activity.equals(app.discord_info.api_activity)) return;
+        app.discord_info.api_activity = api_activity;
         if (app.xboxUserInfo != null) {
             if (api_activity.getState() != null) api_activity.setState(Utils.replaceParams(api_activity.getState()));
             if (api_activity.getDetails() != null) api_activity.setDetails(Utils.replaceParams(api_activity.getDetails()));
-            if (api_activity.getLarge_icon_key() == null || api_activity.getLarge_icon_key().isBlank()) {
-                api_activity.setLarge_icon_key("bedrock");
-                // TODO: bypass
-            }
+            if (api_activity.getLarge_icon_key() == null || api_activity.getLarge_icon_key().isBlank()) api_activity.setLarge_icon_key("bedrock");
             if (api_activity.getLarge_icon_text() != null && !api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(Utils.replaceParams(api_activity.getLarge_icon_text()));
             if (App.head_url != null) {
                 api_activity.setSmall_icon_key(App.head_url);
@@ -213,10 +208,8 @@ public final class App {
         APIActivity finalApi_activity1 = api_activity;
         App.getInstance().discord_info.registerHandler(() -> {
             if (app.discord_info.ready) {
-                events.onDiscordActivityUpdate(finalApi_activity1); // TEMPORARY
-                //App.getInstance().client.sendRichPresence(APIActivity.toRichPresence(finalApi_activity1.toDiscord()));
+                events.onDiscordActivityUpdate(finalApi_activity1);
                 DiscordRPC.discordUpdatePresence(finalApi_activity1.toDiscord());
-
             } else if (queue) app.discord_info.registerHandler(() -> setActivity(finalApi_activity1, false));
         });
 

@@ -84,17 +84,15 @@ public final class APIActivity {
     }
 
     public DiscordRichPresence toDiscord() {
+        var network_info = App.getInstance().network_info;
         DiscordRichPresence.Builder activity = new DiscordRichPresence.Builder(state != null ? state : "");
         activity.setDetails(details != null ? details : "");
-        if (start != null) {
-            switch ((int) start.getValue()) {
-                case (int) -1L -> start.setValue(App.getCreated());
-                case (int) -2L -> start.setValue(App.network_session_created);
-                case (int) -3L -> start.setValue(App.server_session_created);
-            }
-        } else {
-            start = APITimestamp.CUSTOM;
-            start.setValue(App.getCreated());
+        if (start == null) start = APITimestamp.APP_START;
+        switch (start) {
+            case APP_START              -> start.setValue(App.getCreated());
+            case NETWORK_SESSION_CREATE -> start.setValue(network_info.network_session_created);
+            case SERVER_SESSION_CREATE  -> start.setValue(network_info.server_session_created);
+            case CUSTOM                 -> start.setValue(start.getValue());
         }
         activity.setStartTimestamps(start.getValue());
 
@@ -105,7 +103,8 @@ public final class APIActivity {
         return activity.build();
     }
 
-    public static RichPresence toRichPresence(DiscordRichPresence drpc) {
+    public RichPresence toRichPresence() {
+        DiscordRichPresence drpc = toDiscord();
         RichPresence.Builder builder = new RichPresence.Builder();
         return builder
                 .setState(drpc.state)

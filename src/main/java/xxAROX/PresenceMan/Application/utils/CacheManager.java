@@ -22,7 +22,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import lombok.NonNull;
 import xxAROX.PresenceMan.Application.App;
-import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
+import xxAROX.PresenceMan.Application.entity.infos.XboxUserInfo;
 
 import java.io.File;
 import java.io.FileReader;
