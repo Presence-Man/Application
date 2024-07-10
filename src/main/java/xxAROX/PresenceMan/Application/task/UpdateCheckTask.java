@@ -23,11 +23,13 @@ import lombok.NoArgsConstructor;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.ui.popup.DownloadPopup;
+import xxAROX.PresenceMan.Application.utils.Lang;
 import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -61,8 +63,8 @@ public class UpdateCheckTask implements Runnable {
     private void showUpdateQuestion(final String downloadUrl, final String latestVersion) {
         int chosen = JOptionPane.showConfirmDialog(
                 App.ui,
-                "You are running an outdated version of Presence-Man!\nCurrent version: " + AppInfo.getVersion() + "\nLatest version: " + latestVersion + "\n\nDo you want to update?", // TODO: language
-                "Update to " + latestVersion + "?", // TODO: language
+                Lang.get("ui.popup.updater.message", new HashMap<>(){{put("{latestVersion}", latestVersion);}}),
+                Lang.get("ui.popup.updater.title", new HashMap<>(){{put("{latestVersion}", latestVersion);}}),
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
         );
@@ -73,7 +75,7 @@ public class UpdateCheckTask implements Runnable {
                 downloadUrl,
                 f,
                 () -> SwingUtilities.invokeLater(() -> {
-                    JOptionPane.showMessageDialog(App.ui, "Downloaded the latest version of " + AppInfo.name + "!\nPress OK to restart.", AppInfo.name, JOptionPane.INFORMATION_MESSAGE); // TODO: language
+                    JOptionPane.showMessageDialog(App.ui, Lang.get("ui.popup.updater.done"), AppInfo.name, JOptionPane.INFORMATION_MESSAGE);
                     try {
                         System.out.println(f.getAbsolutePath());
                         Runtime.getRuntime().exec(new String[]{System.getProperty("java.home") + "/bin/java", "-jar", f.getAbsolutePath()});
