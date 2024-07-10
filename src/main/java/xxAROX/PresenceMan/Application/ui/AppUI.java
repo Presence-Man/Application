@@ -19,14 +19,11 @@ package xxAROX.PresenceMan.Application.ui;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneDarkIJTheme;
-import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneLightIJTheme;
-import com.jthemedetecor.OsThemeDetector;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.Bootstrap;
 import xxAROX.PresenceMan.Application.ui.tabs.GeneralTab;
 import xxAROX.PresenceMan.Application.ui.tabs.PartnersTab;
-import xxAROX.PresenceMan.Application.ui.tabs.PrivacyPolicyTab;
 import xxAROX.PresenceMan.Application.ui.tabs.SettingsTab;
 import xxAROX.PresenceMan.Application.utils.CacheManager;
 import xxAROX.PresenceMan.Application.utils.Tray;
@@ -41,13 +38,15 @@ import java.util.List;
 import java.util.Objects;
 
 public class AppUI extends JDialog {
+    public static int HEIGHT = 360;
+    public static int WIDTH = 600;
+
     public final JTabbedPane contentPane = new JTabbedPane();
     public final List<AUITab> tabs = new ArrayList<>();
 
     public final GeneralTab general_tab;
     public final SettingsTab settings_tab;
     public final PartnersTab partners_tab;
-    public final PrivacyPolicyTab privacy_policy_tab;
 
     public AppUI() {
         super((Dialog) null);
@@ -55,57 +54,49 @@ public class AppUI extends JDialog {
 
         this.setLookAndFeel();
         this.initWindow();
-
-        contentPane.setLayout(new GridBagLayout());
+        initContentPane();
 
         general_tab = new GeneralTab(this);
-        tabs.add(general_tab);
-        general_tab.add(contentPane);
-
         settings_tab = new SettingsTab(this);
-        tabs.add(settings_tab);
-        settings_tab.add(contentPane);
-
         partners_tab = new PartnersTab(this);
-        tabs.add(partners_tab);
-        partners_tab.add(contentPane);
-
-        privacy_policy_tab = new PrivacyPolicyTab(this);
-        tabs.add(privacy_policy_tab);
-        privacy_policy_tab.add(contentPane);
-
-        contentPane.setEnabledAt(contentPane.indexOfTab(general_tab.getName()), false);
+        loadTabs();
+        
+        contentPane.addChangeListener(e -> {
+            AUITab tab = tabs.get(contentPane.getSelectedIndex());
+            tab.update();
+        });
 
         ToolTipManager.sharedInstance().setInitialDelay(100);
         ToolTipManager.sharedInstance().setDismissDelay(10_000);
 
         SwingUtilities.updateComponentTreeUI(this);
         setVisible(false);
-        if (CacheManager.Settings.START_MINIMIZED) Tray.showInTray();
-        else setVisible(true);
+        if (!CacheManager.Settings.START_MINIMIZED) setVisible(true);
+        Tray.showInTray();
+
+        general_tab.update();
+    }
+
+    private void initContentPane() {
+        contentPane.setLayout(new GridBagLayout());
+        contentPane.setTabPlacement(JTabbedPane.LEFT);
+    }
+
+    private void loadTabs() {
+        tabs.add(general_tab);
+        general_tab.add(contentPane);
+
+        tabs.add(settings_tab);
+        settings_tab.add(contentPane);
+
+        tabs.add(partners_tab);
+        partners_tab.add(contentPane);
     }
 
     private void setLookAndFeel() {
         try {
-            final OsThemeDetector detector = OsThemeDetector.getDetector();
-            final boolean isDarkThemeUsed = detector.isDark();
-            detector.registerListener(isDark -> SwingUtilities.invokeLater(() -> {
-                if (isDark) {
-                    FlatAtomOneDarkIJTheme.setup();
-                    FlatAtomOneDarkIJTheme.setPreferredFontFamily(FlatLaf.getPreferredMonospacedFontFamily());
-                } else {
-                    FlatAtomOneLightIJTheme.setup();
-                    FlatAtomOneLightIJTheme.setPreferredFontFamily(FlatLaf.getPreferredMonospacedFontFamily());
-                }
-                FlatLaf.updateUI();
-            }));
-            if (isDarkThemeUsed) {
-                FlatAtomOneDarkIJTheme.setup();
-                FlatAtomOneDarkIJTheme.setPreferredFontFamily(FlatLaf.getPreferredMonospacedFontFamily());
-            } else {
-                FlatAtomOneLightIJTheme.setup();
-                FlatAtomOneLightIJTheme.setPreferredFontFamily(FlatLaf.getPreferredMonospacedFontFamily());
-            }
+            FlatAtomOneDarkIJTheme.setup();
+            FlatAtomOneDarkIJTheme.setPreferredFontFamily(FlatLaf.getPreferredMonospacedFontFamily());
             FlatLaf.updateUI();
         } catch (Throwable t) {
             App.getLogger().error(t);
@@ -120,11 +111,11 @@ public class AppUI extends JDialog {
             @Override
             public void windowClosing(WindowEvent e) {
                 for (AUITab tab : tabs) tab.onClose();
-                Tray.showInTray();
+                //Tray.showInTray();
                 setVisible(false);
             }
         });
-        setSize(600, 360);
+        setSize(WIDTH, HEIGHT);
         setResizable(false);
         setLocationRelativeTo(null);
         setContentPane(contentPane);

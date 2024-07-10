@@ -62,7 +62,7 @@ public final class Tray {
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     App.ui.setVisible(true);
-                    Tray.hideFromTray();
+                    //Tray.hideFromTray();
                 } else if (e.getButton() == MouseEvent.BUTTON3 && e.isPopupTrigger()) {
                     dialog.setSize(trayMenu.getPreferredSize());
                     dialog.setLocation(e.getX(), e.getY() - trayMenu.getHeight());
@@ -88,34 +88,27 @@ public final class Tray {
         }
 
         { // -- Report a bug --
-            final String TEXT = "Report a bug";
-            var item = new JMenuItem(TEXT);
-            item.addActionListener(e -> {
-                App.ui.openURL("https://github.com/Presence-Man/Application/issues");
-            });
+            var item = new JMenuItem(Lang.get("ui.tray.report_bug"));
+            item.addActionListener(e -> App.ui.openURL("https://github.com/Presence-Man/Application/issues/new"));
             arr.add(item);
         }
 
         { // -- Check for updates --
-            final String TEXT = "Check for updates";
-            var item = new JMenuItem(TEXT);
+            var item = new JMenuItem(Lang.get("ui.tray.update_checker"));
             item.addActionListener(e -> App.getInstance().getScheduler().scheduleAsync(new UpdateCheckTask(true)));
             arr.add(item);
         }
 
         { // -- Reconnect --
-            final String RECONNECT = "Reconnect to backend";
-            final String RECONNECTING = "Reconnecting..";
-
-            var reconnect = new JMenuItem(RECONNECT);
+            var reconnect = new JMenuItem(Lang.get("ui.tray.backend.reconnect"));
             reconnect.addActionListener(e -> {
                 reconnect.setEnabled(false);
-                reconnect.setText(RECONNECTING);
+                reconnect.setText(Lang.get("ui.tray.backend.reconnecting"));
                 if (SocketThread.getInstance() != null) {
                     SocketThread.getInstance().resetConnection();
                     App.getInstance().getScheduler().scheduleRepeating(() -> {
                         if (SocketThread.getInstance() != null && SocketThread.getInstance().getConnectionState().get().equals(SocketThread.State.CONNECTED)) {
-                            reconnect.setText(RECONNECT);
+                            reconnect.setText(Lang.get("ui.tray.backend.reconnect"));
                             reconnect.setEnabled(true);
                             App.getInstance().getScheduler().scheduleDelayed(() -> SocketThread.getInstance().heartbeat(), 20 * 5);
                             throw new CancellationException();
@@ -131,7 +124,7 @@ public final class Tray {
         }
 
         { // -- Exit --
-            var exit = new JMenuItem("Quit " + AppInfo.name);
+            var exit = new JMenuItem(Lang.get("ui.tray.quit"));
             exit.addActionListener(e -> {
                 if (!App.getInstance().isShutdown()) App.getInstance().shutdown();
                 System.exit(0);

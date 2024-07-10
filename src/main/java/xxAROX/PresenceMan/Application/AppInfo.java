@@ -20,7 +20,7 @@ package xxAROX.PresenceMan.Application;
 import java.util.StringJoiner;
 
 public final class AppInfo {
-    public final static int[] version = new int[]{ 1,2,12 };
+    public final static int[] version = new int[]{ 1,3,0 };
     public final static String name = "Presence-Man";
     public static String icon = "icon.png";
     public static long discord_application_id = 1133823892486623344L;
@@ -33,7 +33,7 @@ public final class AppInfo {
     public static String getVersion(CharSequence delimiter){
         StringJoiner joiner = new StringJoiner(delimiter);
         for (int part : version) joiner.add(String.valueOf(part));
-        return joiner.toString() + (development ? "-dev" : "");
+        return joiner + (development ? "-dev" : "");
     }
 
     public static void main(String[] args) {

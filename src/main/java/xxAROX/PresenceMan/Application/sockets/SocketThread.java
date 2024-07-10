@@ -70,7 +70,7 @@ public class SocketThread implements Runnable {
     public void heartbeat(Consumer<HeartbeatPacket> consumer){
         if (!connectionState.get().equals(SocketThread.State.CONNECTED)) return;
         if (session_token.get() == null && heartbeats_need_a_token) return;
-        if (heartbeat_pending.get() == 5) {
+        if (heartbeat_pending.get() == 10) {
             resetConnection();
             heartbeat_pending.set(0);
             return;
@@ -91,15 +91,16 @@ public class SocketThread implements Runnable {
             }
             heartbeat_pending.getAndDecrement();
             App.head_url = pk.getHead_url();
+            App.getInstance().network_info.network_id = pk.getNetwork_id();
             App.getInstance().updateServer(pk.getNetwork(), pk.getServer());
             APIActivity new_activity = pk.getApi_activity();
             if (new_activity == null) new_activity = APIActivity.none();
-            if (new_activity.equals(App.getInstance().getApi_activity())) return;
+            if (new_activity.equals(App.getInstance().discord_info.getApi_activity())) return;
             App.setActivity(new_activity);
         }, err -> {
             App.head_url = null;
-            App.getInstance().network = null;
-            App.getInstance().server = null;
+            App.getInstance().network_info.network = null;
+            App.getInstance().network_info.server = null;
             App.getLogger().error("Error on heartbeat: " + err);
         });
     }

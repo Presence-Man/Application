@@ -28,7 +28,6 @@ import java.util.List;
 public class Bootstrap {
     @SneakyThrows
     public static void main(String[] _args) {
-        //LOCK();
         List<String> args = Arrays.stream(_args).toList();
         List<String> lowArgs = args.stream().map(String::toLowerCase).toList();
 

@@ -19,6 +19,8 @@ package xxAROX.PresenceMan.Application.ui;
 
 import lombok.Getter;
 import lombok.ToString;
+import xxAROX.PresenceMan.Application.utils.Lang;
+import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.swing.*;
 
@@ -27,16 +29,26 @@ import javax.swing.*;
 public abstract class AUITab {
     protected final AppUI frame;
     protected final String name;
+    protected ImageIcon icon;
     private final String tip;
     protected final JPanel contentPane;
 
     public AUITab(AppUI frame, String name) {
-        this(frame, name, null);
+        this(frame, name, null, null);
     }
-    public AUITab(AppUI frame, String name, String tip) {
+    public AUITab(AppUI frame, String name, String icon) {
+        this(frame, name, icon, null);
+    }
+    public AUITab(AppUI frame, String name, String icon, String tip) {
         this.frame = frame;
+        this.icon = icon == null ? null : Utils.UIUtils.createImageIcon(icon);
+        if (this.icon != null) {
+            this.icon = new ImageIcon(this.icon.getImage());
+            tip = name;
+            name = null;
+        }
         this.name = name;
-        this.tip = tip;
+        this.tip = tip != null ? Lang.get(tip) : null;
         contentPane = new JPanel();
         contentPane.setLayout(null);
         init(contentPane);
@@ -44,12 +56,25 @@ public abstract class AUITab {
 
 
     public void add(final JTabbedPane tabbedPane) {
-        tabbedPane.addTab(this.name, null, this.contentPane, tip);
+        if (isScrollable()) {
+            JScrollPane scrollPane = new JScrollPane(contentPane);
+            scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+            scrollPane.getVerticalScrollBar().setUnitIncrement(13);
+            tabbedPane.addTab(name, icon, scrollPane, tip);
+        } else tabbedPane.addTab(name, icon, contentPane, tip);
     }
 
     protected abstract void init(final JPanel contentPane);
 
     public void tick(int currentTick) {
+    }
+
+    public boolean isScrollable() {
+        return false;
+    }
+
+    public void update() {
     }
 
     public void setReady() {

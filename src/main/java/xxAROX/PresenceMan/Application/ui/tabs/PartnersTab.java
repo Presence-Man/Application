@@ -20,67 +20,81 @@ package xxAROX.PresenceMan.Application.ui.tabs;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import lombok.SneakyThrows;
 import xxAROX.PresenceMan.Application.App;
-import xxAROX.PresenceMan.Application.AppInfo;
-import xxAROX.PresenceMan.Application.Bootstrap;
-import xxAROX.PresenceMan.Application.entity.Gateway;
 import xxAROX.PresenceMan.Application.ui.AUITab;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.ui.popup.PartnerPopup;
+import xxAROX.PresenceMan.Application.utils.Lang;
 import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class PartnersTab extends AUITab {
     private List<PartnerItem> partnerItems = new ArrayList<>();
+    boolean loaded = false;
+    JPanel base = new JPanel();
+    JScrollPane scrollPane = new JScrollPane(base);
 
     public PartnersTab(AppUI frame) {
-        super(frame, "Partners");
-        System.out.println("PartnersTab - " + Thread.currentThread().getName());
+        super(frame, "Partners", "images/partners.png");
     }
     @Override
     protected void init(JPanel contentPane) {
-        reloadPartners();
+        contentPane.removeAll();
 
-        contentPane.setLayout(new BorderLayout());
-        var border_size = 0;
-        contentPane.setBorder(BorderFactory.createEmptyBorder(border_size, border_size, border_size, border_size));
+        if(!loaded) {
+            base = new JPanel();
+            scrollPane = new JScrollPane(base);
 
-        if (partnerItems.size() == 0 || partnerItems.stream().filter(PartnerItem::isEnabled).toList().size() == 0) {
-            JLabel noPartnersLabel = new JLabel("No partnerships yet!", SwingConstants.CENTER);
-            noPartnersLabel.setForeground(new Color(0xED4245));
-            contentPane.add(noPartnersLabel, BorderLayout.CENTER);
-            contentPane.repaint();
-        } else {
-            JPanel base = new JPanel();
-            int itemCount = partnerItems.size();
-            if (itemCount == 1) base.setLayout(new GridBagLayout());
-            else if (itemCount == 2) base.setLayout(new GridBagLayout());
-            else base.setLayout(new GridLayout(0, 3, 10, 10));
-
-            JScrollPane scrollPane = new JScrollPane(base);
             scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
             scrollPane.getVerticalScrollBar().setUnitIncrement(13);
             scrollPane.setPreferredSize(new Dimension(400, 300));
 
-            for (PartnerItem item : partnerItems.stream().filter(Component::isEnabled).toList()) base.add(item);
-            contentPane.add(scrollPane, BorderLayout.CENTER);
+            JLabel loading = new JLabel(Lang.get("ui.tab.partners.loading"), SwingConstants.CENTER);
+            loading.setFont(new Font(loading.getFont().getName(), Font.BOLD, 20));
+            contentPane.add(loading, BorderLayout.CENTER);
+            contentPane.repaint();
+
+            new Thread(() -> {
+                reloadPartners();
+                loaded = true;
+
+                int itemCount = partnerItems.size();
+                if (itemCount == 1) base.setLayout(new GridBagLayout());
+                else if (itemCount == 2) base.setLayout(new GridBagLayout());
+                else base.setLayout(new GridLayout(0, 3, 10, 10));
+
+
+                for (PartnerItem item : partnerItems.stream().filter(Component::isEnabled).toList()) base.add(item);
+
+                init(contentPane);
+            }).start();
+        } else {
+            scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+            scrollPane.getVerticalScrollBar().setUnitIncrement(13);
+            scrollPane.setPreferredSize(new Dimension(400, 300));
+
+            contentPane.setLayout(new BorderLayout());
+            var border_size = 0;
+            contentPane.setBorder(BorderFactory.createEmptyBorder(border_size, border_size, border_size, border_size));
+
+            if (partnerItems.size() == 0 || partnerItems.stream().filter(PartnerItem::isEnabled).toList().size() == 0) {
+                JLabel noPartnersLabel = new JLabel(Lang.get("ui.tab.partners.nothing"), SwingConstants.CENTER);
+                noPartnersLabel.setForeground(new Color(0xED4245));
+                contentPane.add(noPartnersLabel, BorderLayout.CENTER);
+                contentPane.repaint();
+            } else contentPane.add(scrollPane, BorderLayout.CENTER);
         }
     }
 
     @Override
     public void tick(int currentTick) {
-        if (currentTick %20*5 == 0) reloadPartners();
+
     }
 
     private void reloadPartners() {
@@ -88,54 +102,16 @@ public class PartnersTab extends AUITab {
         else partnerItems = new ArrayList<>();
         var result = Utils.WebUtils.get("https://presence-man.com/api/v1/partners");
         Utils.GSON.fromJson(result.getBody(), JsonArray.class).asList().stream().map(JsonElement::getAsJsonObject).forEach(obj -> {
-            try {
-                partnerItems.add(new PartnerItem(
-                        obj.get("title").getAsString(),
-                        obj.get("about_text").getAsString(),
-                        obj.get("domain").getAsString(),
-                        obj.get("image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("image").getAsString())),
-                        obj.get("banner_image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("banner_image").getAsString())),
-                        obj.get("enabled").getAsBoolean(),
-                        obj.get("url").isJsonNull() ? null : obj.get("url").getAsString()
-                ));
-            } catch (MalformedURLException ignore) {
-            }
+            try {partnerItems.add(new PartnerItem(obj.get("title").getAsString(), obj.get("about_text").getAsString(), obj.get("domain").getAsString(), obj.get("image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("image").getAsString())), obj.get("banner_image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("banner_image").getAsString())), obj.get("enabled").getAsBoolean(), obj.get("url").isJsonNull() ? null : obj.get("url").getAsString()));} catch (MalformedURLException ignore) {}
         });
         contentPane.validate();
         contentPane.repaint();
     }
 
-    @SneakyThrows
-    private List<PartnerItem> fetchPartners() {
-        var fallback_icon = Objects.requireNonNull(Bootstrap.class.getClassLoader().getResource(AppInfo.icon));
-        if (partnerItems == null) partnerItems = new ArrayList<>();
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(new URL(Gateway.getUrl() + "/api/v1/partners").openStream()));
-            String inputLine;
-            StringBuilder content = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) content.append(inputLine);
-            in.close();
-            JsonArray partners = Utils.GSON.fromJson(content.toString(), JsonArray.class);
-            ArrayList<PartnerItem> list = new ArrayList<>();
-            partners.asList().stream().map(JsonElement::getAsJsonObject).forEach(obj -> {
-                try {
-                    list.add(new PartnerItem(
-                            obj.get("title").getAsString(),
-                            obj.get("about_text").getAsString(),
-                            obj.get("domain").getAsString(),
-                            obj.get("image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("image").getAsString())),
-                            obj.get("banner_image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("banner_image").getAsString())),
-                            obj.get("enabled").getAsBoolean(),
-                            obj.get("url").isJsonNull() ? null : obj.get("url").getAsString()
-                        ));
-                } catch (MalformedURLException ignore) {
-                }
-            });
-            return list;
-        } catch (IOException e) {
-            App.getLogger().error("Error while fetching partners: ", e);
-        }
-        return new ArrayList<>();
+    @Override
+    public void update() {
+        loaded = false;
+        init(contentPane);
     }
 
     public static class PartnerItem extends JPanel {
@@ -175,11 +151,12 @@ public class PartnersTab extends AUITab {
             this.enabled = enabled;
             this.url = url;
 
-            if (icon != null) icon = new ImageIcon(icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH));
+            if (icon != null) icon = new ImageIcon(icon.getImage().getScaledInstance(icon.getIconWidth() / 4, icon.getIconHeight() / 4, Image.SCALE_SMOOTH));
 
             setLayout(new GridLayout());
 
             JButton button = new JButton(title);
+            button.setPreferredSize(new Dimension(150,170));
             button.setIcon(icon);
             button.setHorizontalTextPosition(SwingConstants.CENTER);
             button.setVerticalTextPosition(SwingConstants.BOTTOM);

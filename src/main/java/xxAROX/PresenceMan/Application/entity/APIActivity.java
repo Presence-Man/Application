@@ -81,26 +81,44 @@ public final class APIActivity {
     }
 
     public DiscordRichPresence toDiscord() {
+        var network_info = App.getInstance().network_info;
         DiscordRichPresence.Builder activity = new DiscordRichPresence.Builder(state != null ? state : "");
         activity.setDetails(details != null ? details : "");
-        if (start != null) {
-            switch ((int) start.getValue()) {
-                case (int) -1L -> start.setValue(App.getCreated());
-                case (int) -2L -> start.setValue(App.network_session_created);
-                case (int) -3L -> start.setValue(App.server_session_created);
-            }
-        } else {
-            start = APITimestamp.CUSTOM;
-            start.setValue(App.getCreated());
+        if (start == null) start = APITimestamp.APP_START;
+        switch (start) {
+            case APP_START              -> start.setValue(App.getCreated());
+            case NETWORK_SESSION_CREATE -> start.setValue(network_info.network_session_created);
+            case SERVER_SESSION_CREATE  -> start.setValue(network_info.server_session_created);
+            case CUSTOM                 -> start.setValue(start.getValue());
         }
         activity.setStartTimestamps(start.getValue());
 
         if (end != null) activity.setEndTimestamp(end);
-        if (large_icon_key != null) activity.setBigImage(large_icon_key, large_icon_text);
+        if (large_icon_key != null) activity.setBigImage((!Long.toString(client_id).equals(Long.toString(AppInfo.discord_application_id)) ? Gateway.getUrl()+"/i/" + client_id + "/" + large_icon_key : large_icon_key), large_icon_text);
         if (small_icon_key != null) activity.setSmallImage(small_icon_key, small_icon_text);
         if (party_player_count != null) activity.setParty("display", party_player_count, party_max_player_count);
         return activity.build();
     }
+
+    /* NOTE: For bypass: */
+    /*
+    public RichPresence toRichPresence() {
+        DiscordRichPresence drpc = toDiscord();
+        RichPresence.Builder builder = new RichPresence.Builder();
+        return builder
+                .setState(drpc.state)
+                .setDetails(drpc.details)
+                .setStartTimestamp(Instant.ofEpochMilli(drpc.startTimestamp).atOffset(ZoneOffset.UTC))
+                .setEndTimestamp(Instant.ofEpochMilli(drpc.endTimestamp).atOffset(ZoneOffset.UTC))
+                .setLargeImage(drpc.largeImageKey, drpc.largeImageText)
+                .setSmallImage(drpc.smallImageKey, drpc.smallImageText)
+                .setParty(drpc.partyId, drpc.partySize, drpc.partyMax)
+                .setMatchSecret(drpc.matchSecret)
+                .setJoinSecret(drpc.joinSecret)
+                .setSpectateSecret(drpc.spectateSecret)
+                .build()
+        ;
+    }*/
 
     @Override
     public boolean equals(Object o) {
@@ -127,7 +145,6 @@ public final class APIActivity {
     }
 
     @AllArgsConstructor
-    @Deprecated
     public enum ActivityType {
         PLAYING("PLAYING"),
         STREAMING("STREAMING"),

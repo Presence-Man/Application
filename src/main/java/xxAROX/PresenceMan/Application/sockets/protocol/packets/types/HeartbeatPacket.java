@@ -32,6 +32,7 @@ public class HeartbeatPacket extends CallbackPacket {
     private String gamertag = null; // required
     private long sent = 0;
     // response
+    private Integer network_id = null;
     private APIActivity api_activity = null;
     private String network = null;
     private String server = null;
@@ -42,6 +43,7 @@ public class HeartbeatPacket extends CallbackPacket {
     protected JsonObject encodeBody(JsonObject payload) {
         payload.addProperty("xuid", xuid);
         payload.addProperty("duid", discord_user_id);
+        payload.addProperty("network_id", network_id);
         payload.addProperty("gamertag", gamertag);
         if (api_activity != null) payload.add("api_activity", api_activity.serialize());
         payload.addProperty("network", network);
@@ -49,6 +51,7 @@ public class HeartbeatPacket extends CallbackPacket {
         payload.addProperty("sent", sent);
         payload.addProperty("received", received);
         payload.addProperty("head_url", head_url);
+        payload.addProperty("network_id", network_id);
         return super.encodeBody(payload);
     }
 
@@ -63,6 +66,7 @@ public class HeartbeatPacket extends CallbackPacket {
         sent = object.has("sent") && !object.get("sent").isJsonNull() ? object.get("sent").getAsLong() : sent;
         received = object.has("received") && !object.get("received").isJsonNull() ? object.get("received").getAsLong() : null;
         head_url = object.has("head_url") && !object.get("head_url").isJsonNull() ? object.get("head_url").getAsString() : null;
+        network_id = object.has("network_id") && !object.get("network_id").isJsonNull() ? object.get("network_id").getAsInt() : null;
         super.decodeBody(object);
     }
 
