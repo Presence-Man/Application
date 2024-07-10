@@ -33,7 +33,7 @@ public final class AppInfo {
     public static String getVersion(CharSequence delimiter){
         StringJoiner joiner = new StringJoiner(delimiter);
         for (int part : version) joiner.add(String.valueOf(part));
-        return joiner.toString() + (development ? "-dev" : "");
+        return joiner + (development ? "-dev" : "");
     }
 
     public static void main(String[] args) {
