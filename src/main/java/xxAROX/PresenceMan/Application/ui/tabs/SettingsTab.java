@@ -21,61 +21,100 @@ import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.ui.AUITab;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.utils.CacheManager;
+import xxAROX.PresenceMan.Application.utils.Lang;
 import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SettingsTab extends AUITab {
     public SettingsTab(AppUI parent){
-        super(parent, "Settings");
+        super(parent, "ui.tab.settings", "images/settings.png");
+    }
+
+    @Override
+    public boolean isScrollable() {
+        return true;
     }
 
     @Override
     protected void init(JPanel contentPane) {
-        contentPane.setLayout(new GridBagLayout());
-        contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        Map<String, Runnable> before_save = new HashMap<>();
+        Map<String, Runnable> after_save = new HashMap<>();
 
-        AtomicBoolean changed = new AtomicBoolean(false);
+        contentPane.setLayout(new GridBagLayout());
+        var margin = 10;
+        contentPane.setBorder(BorderFactory.createEmptyBorder(margin, margin, margin, margin));
+
         GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.insets = new Insets(5, 5, 5, 5);
+        constraints.anchor = GridBagConstraints.NORTHWEST;
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.insets = new Insets(2, 5, 2, 5);
         constraints.weightx = 0.5;
-        constraints.ipadx = 20;
+        constraints.ipadx = 10;
         constraints.ipady = 10;
         int gridy = 0;
 
         //title
-        JLabel title = new JLabel("General settings");
+        JLabel title = new JLabel(Lang.get("ui.tab.settings.title"));
         title.setFont(new Font(title.getFont().getName(), Font.BOLD, 20));
         constraints.gridx = 0;
         constraints.gridy = gridy++;
         contentPane.add(title, constraints);
 
-        //display checkboxes under the title, one left one right
-        Utils.UIUtils.addCheckbox(contentPane, constraints, gridy++, "Start minimized", CacheManager.Settings.START_MINIMIZED, (n) -> {
-            changed.set(CacheManager.Settings.START_MINIMIZED != n);
-            CacheManager.Settings.START_MINIMIZED = n;
-        });
 
-        Utils.UIUtils.addCheckbox(contentPane, constraints, gridy++, "Enable auto-update", CacheManager.Settings.ENABLE_AUTO_UPDATE, (n) -> {
-            changed.set(CacheManager.Settings.ENABLE_AUTO_UPDATE != n);
-            CacheManager.Settings.ENABLE_AUTO_UPDATE = n;
-        });
+        Utils.UIUtils.addCheckbox(contentPane, constraints, gridy++, Lang.get("ui.tab.settings.start_minimized.title"), CacheManager.Settings.START_MINIMIZED, (n) -> before_save.put("start-minimized", () -> CacheManager.Settings.START_MINIMIZED = n));
 
+        Utils.UIUtils.addCheckbox(contentPane, constraints, gridy++, Lang.get("ui.tab.settings.auto_update.title"), CacheManager.Settings.ENABLE_AUTO_UPDATE, (n) -> before_save.put("auto-update", () -> CacheManager.Settings.ENABLE_AUTO_UPDATE = n));
+
+        Map<String, String> languages = new HashMap<>();
+        AtomicReference<String> default_val = new AtomicReference<>(null);
+        Lang.getAvailableLocales().forEach(locale -> {
+            var key = Lang.getSpecific(locale, "language.name") + " - " + Lang.get("ui.tab.settings.translated_percentage", new HashMap<>(){{put("{completion}", Lang.getSpecific(locale, "language.completion"));}});
+            languages.put(key, locale);
+            if (CacheManager.Settings.LOCALE.equals(locale)) default_val.set(key);
+        });
+        Utils.UIUtils.addDropdownMenu(contentPane, constraints, gridy++, Lang.get("ui.tab.settings.language.title"), languages, default_val.get(), (lang_name, locale) -> {
+            before_save.put("locale", () -> CacheManager.Settings.LOCALE = locale);
+            after_save.put("locale", () -> {
+                try {
+                    Utils.launch(Utils.getJarFile().orElseThrow());
+                    App.getInstance().shutdown();
+                } catch (Throwable e) {
+                    App.getLogger().error("Could not start the jar file", e);
+                    App.ui.showException(e);
+                    System.exit(1);
+                }
+                App.ui.showInfo(Lang.get("ui.tab.settings.language.success", new HashMap<>(){{
+                    put("{language}", Lang.get("language.name"));
+                    put("{locale}", locale);
+                }}));
+            });
+        });
 
         // Save button
-        JButton saveButton = new JButton("Save settings");
+        JButton saveButton = new JButton(Lang.get("ui.tab.settings.save"));
+        constraints.weightx = 0;
+        constraints.weighty = 1.0; // Push to the bottom
         constraints.gridx = 0;
         constraints.gridy = gridy;
         constraints.gridwidth = 2;
+        constraints.anchor = GridBagConstraints.SOUTHEAST;
+        constraints.fill = GridBagConstraints.NONE;
         saveButton.addActionListener(e -> {
-            if (changed.get()) {
-                CacheManager.save();
-                App.ui.showInfo("Successfully saved settings!");
-            }
+            saveButton.setFocusPainted(false);
+            for (Map.Entry<String, Runnable> entry : before_save.entrySet()) entry.getValue().run();
+            CacheManager.save();
+            for (Map.Entry<String, Runnable> entry : after_save.entrySet()) entry.getValue().run();
         });
+        saveButton.setForeground(new Color(0, 0, 0));
+        saveButton.setFocusable(false);
+        saveButton.setBackground(new Color(0, 128, 0));
+
+
         contentPane.add(saveButton, constraints);
     }
 }

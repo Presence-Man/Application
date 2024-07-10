@@ -18,7 +18,6 @@
 package xxAROX.PresenceMan.Application.entity;
 
 import com.google.gson.JsonObject;
-import com.jagrosh.discordipc.entities.RichPresence;
 import lombok.*;
 import lombok.experimental.Accessors;
 import net.arikia.dev.drpc.DiscordRichPresence;
@@ -26,8 +25,6 @@ import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.entity.enums.APITimestamp;
 
-import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -103,6 +100,8 @@ public final class APIActivity {
         return activity.build();
     }
 
+    /* NOTE: For bypass: */
+    /*
     public RichPresence toRichPresence() {
         DiscordRichPresence drpc = toDiscord();
         RichPresence.Builder builder = new RichPresence.Builder();
@@ -119,7 +118,7 @@ public final class APIActivity {
                 .setSpectateSecret(drpc.spectateSecret)
                 .build()
         ;
-    }
+    }*/
 
     @Override
     public boolean equals(Object o) {
@@ -146,7 +145,6 @@ public final class APIActivity {
     }
 
     @AllArgsConstructor
-    @Deprecated
     public enum ActivityType {
         PLAYING("PLAYING"),
         STREAMING("STREAMING"),

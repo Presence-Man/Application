@@ -70,6 +70,10 @@ public final class App {
     private int currentTick = 0;
     private volatile boolean shutdown = false;
 
+    public boolean isConnectedViaMCBE() {
+        return App.getInstance().network_info.network_id != null;
+    }
+
     @SneakyThrows
     public App(Logger logger) {
         if (instance != null) {

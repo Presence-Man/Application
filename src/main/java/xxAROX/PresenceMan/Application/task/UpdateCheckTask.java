@@ -61,8 +61,8 @@ public class UpdateCheckTask implements Runnable {
     private void showUpdateQuestion(final String downloadUrl, final String latestVersion) {
         int chosen = JOptionPane.showConfirmDialog(
                 App.ui,
-                "You are running an outdated version of Presence-Man!\nCurrent version: " + AppInfo.getVersion() + "\nLatest version: " + latestVersion + "\n\nDo you want to update?",
-                "Update to " + latestVersion + "?",
+                "You are running an outdated version of Presence-Man!\nCurrent version: " + AppInfo.getVersion() + "\nLatest version: " + latestVersion + "\n\nDo you want to update?", // TODO: language
+                "Update to " + latestVersion + "?", // TODO: language
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
         );
@@ -73,8 +73,9 @@ public class UpdateCheckTask implements Runnable {
                 downloadUrl,
                 f,
                 () -> SwingUtilities.invokeLater(() -> {
-                    JOptionPane.showMessageDialog(App.ui, "Downloaded the latest version of " + AppInfo.name + "!\nPress OK to restart.", AppInfo.name, JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(App.ui, "Downloaded the latest version of " + AppInfo.name + "!\nPress OK to restart.", AppInfo.name, JOptionPane.INFORMATION_MESSAGE); // TODO: language
                     try {
+                        System.out.println(f.getAbsolutePath());
                         Runtime.getRuntime().exec(new String[]{System.getProperty("java.home") + "/bin/java", "-jar", f.getAbsolutePath()});
                         System.exit(0);
                     } catch (IOException e) {
@@ -83,10 +84,7 @@ public class UpdateCheckTask implements Runnable {
                     }
                 }),
                 t -> {
-                    if (t != null) {
-                        App.getLogger().error("Could not download the latest version of " + AppInfo.name, t);
-                        App.ui.showException(t);
-                    }
+                    if (t != null) App.getLogger().error("Could not download the latest version of " + AppInfo.name, t);
                 }
             );
         }

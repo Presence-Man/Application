@@ -23,10 +23,10 @@ import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.Gateway;
 import xxAROX.PresenceMan.Application.entity.infos.XboxUserInfo;
-import xxAROX.PresenceMan.Application.sockets.SocketThread;
 import xxAROX.PresenceMan.Application.ui.AUITab;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.ui.popup.LoginPopup;
+import xxAROX.PresenceMan.Application.utils.Lang;
 import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.imageio.ImageIO;
@@ -39,16 +39,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class GeneralTab extends AUITab {
-    private static final String NOT_CONNECTED = "Not connected";
-    private static final String HALF_CONNECTED = "Connected to Presence-Man!";
-    private static final String CONNECTED = "Connected to {server} on {network}";
+    JLabel backend_status = new JLabel();
 
-    JLabel baStatus = new JLabel();
-
-    JPanel server = new JPanel();
+    JPanel server_info = new JPanel();
 
     public GeneralTab(AppUI frame) {
-        super(frame, "Home");
+        super(frame, "ui.tab.home", "images/home.png");
     }
 
     @Override
@@ -67,7 +63,7 @@ public class GeneralTab extends AUITab {
         constraints.weighty = 0.5;
 
         if(!logged_in) {
-            JLabel pleaseLogIn = new JLabel("Please log in with XBOX", SwingConstants.CENTER);
+            JLabel pleaseLogIn = new JLabel(Lang.get("ui.tab.home.logged_out.title"), SwingConstants.CENTER);
             pleaseLogIn.setVisible(true);
             pleaseLogIn.setFocusable(false);
             pleaseLogIn.setFont(new Font("Arial", Font.BOLD, 20)); // NOTE: maybe change this to another
@@ -85,16 +81,14 @@ public class GeneralTab extends AUITab {
 
             contentPane.add(pleaseLogIn, constraints);
 
-            login_state_button = Utils.UIUtils.addButton(contentPane, constraints, 2, "Login with XBOX", (button) -> {
-                login();
-            });
+            var login_state_button = Utils.UIUtils.addButton(contentPane, constraints, 2, Lang.get("ui.tab.home.logged_out.button"), (button) -> login());
             login_state_button.setFocusPainted(false);
             login_state_button.setForeground(new Color(0, 0, 0));
             login_state_button.setFocusable(false);
-            login_state_button.setBackground(LOGIN_COLOR);
+            login_state_button.setBackground(new Color(0, 128, 0));
 
             //add info cursive text to bottom of the page
-            JLabel info = new JLabel("Data will be stored locally. It is only used to verify you.", SwingConstants.CENTER);
+            JLabel info = new JLabel(Lang.get("ui.tab.home.logged_out.notice"), SwingConstants.CENTER);
             info.setVisible(true);
             info.setFocusable(false);
             info.setFont(new Font("Arial", Font.ITALIC, 12));
@@ -136,7 +130,7 @@ public class GeneralTab extends AUITab {
             contentPane.add(image, constraints);
 
 
-            // ICON.GAMERTAG
+            // SECTION: "GAMERTAG"
 
 
             JLabel name = new JLabel(xboxInfo.getGamertag(), SwingConstants.CENTER);
@@ -159,7 +153,7 @@ public class GeneralTab extends AUITab {
             constraints.anchor = GridBagConstraints.WEST;
 
             //Discord Status (/Username) - 2nd row, italic
-            JLabel discordStatus = new JLabel("Discord Status: " + (App.getInstance().getDiscord_info().ready ? "Connected" : "Disconnected"), SwingConstants.CENTER);
+            JLabel discordStatus = new JLabel("Discord Status: " + Lang.get(App.getInstance().getDiscord_info().ready ? "ui.tab.home.discord.connected.yes" : "ui.tab.home.discord.connected.nop"), SwingConstants.CENTER); // TODO: language
             discordStatus.setVisible(true);
             discordStatus.setFocusable(false);
             discordStatus.setFont(new Font("Arial", Font.ITALIC, 12));
@@ -175,9 +169,9 @@ public class GeneralTab extends AUITab {
 
             contentPane.add(discordStatus, constraints);
 
-            String username = App.getInstance().getDiscord_info().getUsername() != null ? "@" + App.getInstance().getDiscord_info().getUsername() : "Not connected";
+            String username = App.getInstance().getDiscord_info().getUsername() != null ? "@" + App.getInstance().getDiscord_info().getUsername() : Lang.get("ui.tab.home.discord.connected.nop"); // TODO: language
 
-            JLabel dcUser = new JLabel("Discord User: " + username, SwingConstants.CENTER);
+            JLabel dcUser = new JLabel("Discord User: " + username, SwingConstants.CENTER); // TODO: language
             dcUser.setVisible(true);
             dcUser.setFocusable(false);
             dcUser.setFont(new Font("Arial", Font.ITALIC, 12));
@@ -195,7 +189,7 @@ public class GeneralTab extends AUITab {
 
             if(App.getInstance().getDiscord_info().getUsername() == null) {
                 //add reconnect button below
-                JButton reconnect = new JButton("Reconnect");
+                JButton reconnect = new JButton(Lang.get("ui.tab.home.discord.connected.rec"));
                 reconnect.addActionListener(e -> {
                     App.getInstance().initDiscord();
                     init(contentPane);
@@ -216,14 +210,12 @@ public class GeneralTab extends AUITab {
 
             constraints.anchor = GridBagConstraints.EAST;
 
-            String status = "Loading...";
-
-            baStatus = new JLabel();
-            baStatus.setText("Status: " + status);
-            baStatus.setHorizontalAlignment(SwingConstants.CENTER);
-            baStatus.setVisible(true);
-            baStatus.setFocusable(false);
-            baStatus.setFont(new Font("Arial", Font.ITALIC, 12));
+            backend_status = new JLabel();
+            backend_status.setText(Lang.get("ui.tab.home.backend_status.conn.pre"));
+            backend_status.setHorizontalAlignment(SwingConstants.CENTER);
+            backend_status.setVisible(true);
+            backend_status.setFocusable(false);
+            backend_status.setFont(new Font("Arial", Font.ITALIC, 12));
 
             constraints.gridx = 0;          // Column 0
             constraints.gridy = 1;          // Row 0 (top)
@@ -234,9 +226,9 @@ public class GeneralTab extends AUITab {
             constraints.fill = GridBagConstraints.CENTER; // Fill horizontally
             constraints.insets = new Insets(5, 100, 5, 5);
 
-            contentPane.add(baStatus, constraints);
+            contentPane.add(backend_status, constraints);
 
-            //server
+            //server_info
             GridBagConstraints serverConst = new GridBagConstraints();
             serverConst.fill = GridBagConstraints.HORIZONTAL;
             serverConst.insets = new Insets(5, 5, 5, 5);
@@ -246,18 +238,17 @@ public class GeneralTab extends AUITab {
             serverConst.weighty = 0.5;
 
 
-
-            server = new JPanel();
-            server.setSize(500, 100);
-            server.setLayout(new GridLayout(2, 1));
-            server.setBorder(BorderFactory.createTitledBorder("Server Info"));
+            server_info = new JPanel();
+            server_info.setSize(500, 100);
+            server_info.setLayout(new GridLayout(2, 1));
+            server_info.setBorder(BorderFactory.createTitledBorder("Server Info"));
 
             JLabel serverName = new JLabel("Not connected", SwingConstants.CENTER);
             serverName.setForeground(Color.RED);
             serverName.setVisible(true);
             serverName.setFocusable(false);
             serverName.setFont(new Font("Arial", Font.ITALIC, 12));
-            server.add(serverName, serverConst);
+            server_info.add(serverName, serverConst);
 
             //add details below
 
@@ -275,7 +266,7 @@ public class GeneralTab extends AUITab {
             serverDetails.setVisible(true);
             serverDetails.setFocusable(false);
             serverDetails.setFont(new Font("Arial", Font.ITALIC, 12));
-            server.add(serverDetails, serverConst);
+            server_info.add(serverDetails, serverConst);
 
             serverConst.anchor = GridBagConstraints.CENTER;
             serverConst.gridx = 0;          // Column 0
@@ -290,14 +281,14 @@ public class GeneralTab extends AUITab {
             JLabel serverBanner = new JLabel();
             //serverBanner.setSize(500,1);
             try {
-                serverBanner.setIcon(new ImageIcon(ImageIO.read(new URL(Gateway.getUrl() + "/images/empty-banner.png"))));
-                //serverBanner.setIcon(new ImageIcon(ImageIO.read(new URL(Gateway.getUrl() + "/images/transparent-banner.png")).getScaledInstance(500,1, 4)));
+                //serverBanner.setIcon(new ImageIcon(ImageIO.read(new URL(Gateway.getUrl() + "/images/empty-banner.png"))));
+                serverBanner.setIcon(new ImageIcon(ImageIO.read(new URL(Gateway.getUrl() + "/images/transparent-banner.png")).getScaledInstance(500,1, 4)));
                 serverBanner.setVisible(false);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-            server.add(serverBanner, serverConst);
+            server_info.add(serverBanner, serverConst);
 
 
             //add server to contentPane in the bottom half
@@ -311,7 +302,7 @@ public class GeneralTab extends AUITab {
             constraints.anchor = GridBagConstraints.CENTER;   // Anchor to the top
             constraints.insets = new Insets(5, 5, 5, 5);
 
-            contentPane.add(server, constraints);
+            contentPane.add(server_info, constraints);
 
 
 
@@ -324,13 +315,11 @@ public class GeneralTab extends AUITab {
                 constraints.fill = GridBagConstraints.NONE;
                 constraints.weightx = 0;
                 constraints.weighty = 1.0; // Push to the bottom
-                login_state_button = Utils.UIUtils.addButton(contentPane, constraints, 2, LOGOUT_TEXT, (button) -> {
-                    logout();
-                });
+                var login_state_button = Utils.UIUtils.addButton(contentPane, constraints, 2, Lang.get("ui.tab.home.logged_in.button"), (button) -> logout());
                 login_state_button.setFocusPainted(false);
                 login_state_button.setForeground(new Color(0, 0, 0));
                 login_state_button.setFocusable(false);
-                login_state_button.setBackground(LOGOUT_COLOR);
+                login_state_button.setBackground(new Color(150, 56, 56));
 
             }
         }
@@ -341,73 +330,56 @@ public class GeneralTab extends AUITab {
     }
 
     public void update(APIActivity activity) {
-        if(server == null) return;
+        if(server_info == null) return;
         boolean connected = App.getInstance().network_info.network != null && App.getInstance().network_info.server != null;
+        boolean logged_in = App.getInstance().getXboxUserInfo() != null;
+        if (!logged_in) return;
 
+        var server_info_network = ((JLabel) server_info.getComponent(0));
+        var server_info_server = ((JLabel) server_info.getComponent(1));
         if(!connected) {
-            ((JLabel) server.getComponent(0)).setText(NOT_CONNECTED);
-            ((JLabel) server.getComponent(0)).setForeground(Color.RED);
-
-            ((JLabel) server.getComponent(1)).setText("");
+            if (server_info_network != null) {
+                server_info_network.setText(Lang.get("ui.tab.home.server_info.network.nop"));
+                server_info_network.setForeground(Color.RED);
+            }
+            if (server_info_server != null) {
+                server_info_server.setText(Lang.get("ui.tab.home.server_info.server.nop"));
+            }
         } else {
-            ((JLabel) server.getComponent(0)).setText(Utils.replaceParams(CONNECTED));
-            ((JLabel) server.getComponent(0)).setForeground(Color.GREEN);
-
-            ((JLabel) server.getComponent(1)).setText("Server: " + App.getInstance().network_info.server); // TODO: more left
-            //next line on overflow
-            ((JLabel) server.getComponent(1)).setHorizontalAlignment(SwingConstants.LEFT);
-
+            if (server_info_network != null) {
+                server_info_network.setText(Lang.get("ui.tab.home.server_info.network.yes"));
+                server_info_network.setForeground(new Color(0, 128, 0));
+            }
+            if (server_info_server != null) {
+                server_info_server.setText(Lang.get("ui.tab.home.server_info.server.yes")); // TODO: more left
+                // NOTE: next line on overflow
+                server_info_server.setHorizontalAlignment(SwingConstants.LEFT);
+            }
         }
-
     }
 
     @Override
     public void tick(int currentTick) {
-        String status;
+        String status = switch (App.getInstance().getSocket().getConnectionState().get()) {
+            case SHUTDOWN       -> "ui.tab.home.backend_status.conn.off";
+            case DISCONNECTED   -> "ui.tab.home.backend_status.conn.nop";
+            case CONNECTING     -> "ui.tab.home.backend_status.conn.may";
+            case CONNECTED      -> "ui.tab.home.backend_status.conn.yes";
+        };
+        if (backend_status != null) backend_status.setText(Lang.get(status));
 
-        try {
-            status = (App.getInstance().getSocket().getConnectionState().get().toString());
-            //only first letter uppercase
-            status = status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase();
-        } catch (Exception e) {
-            status = "Not connected";
-        }
-
-        if(baStatus != null) baStatus.setText("Status: " + status);
         if (currentTick %20 == 0) update(null); // TODO: maybe remove this
     }
 
-    private static String getConnectedMessage(){
-        var activity = App.getInstance().discord_info.api_activity;
-        boolean connected = activity != null && App.getInstance().network_info.network != null && App.getInstance().network_info.server != null;
-        var connected_to_backend = SocketThread.getInstance() != null && SocketThread.getInstance().getConnectionState().get().equals(SocketThread.State.CONNECTED);
-        return connected ?
-                CONNECTED
-                    .replace("{server}", App.getInstance().network_info.server)
-                    .replace("{network}", App.getInstance().network_info.network)
-                //: (Gateway.connected ? HALF_CONNECTED : NOT_CONNECTED);
-                : (connected_to_backend ? HALF_CONNECTED : NOT_CONNECTED);
-    }
 
-
-    private static final String LOGIN_TEXT = "Login";
-    public static final Color LOGIN_COLOR = new Color(59, 155, 57);
-    private static final String LOGOUT_TEXT = "Logout";
-    public static final Color LOGOUT_COLOR = new Color(150, 56, 56);
-    private JButton login_state_button;
     private LoginPopup login_popup;
     private Thread addThread;
-    private void reloadStateButton(){
-        boolean logged_in = App.getInstance().getXboxUserInfo() != null;
-        login_state_button.setText(logged_in ? LOGOUT_TEXT : LOGIN_TEXT);
-        login_state_button.setBackground(logged_in ? LOGOUT_COLOR : LOGIN_COLOR);
-    }
+
     private void closeLoginPopup() {
         login_popup.markExternalClose();
         login_popup.setVisible(false);
         login_popup.dispose();
         login_popup = null;
-        login_state_button.setEnabled(true);
     }
     private void login(){
         handleLogin(msaDeviceCodeConsumer -> {
@@ -430,7 +402,6 @@ public class GeneralTab extends AUITab {
     }
     public void logout(){
         App.getEvents().onLogout();
-        reloadStateButton();
         init(contentPane);
     }
     private void handleLogin(Function<Consumer<StepMsaDeviceCode.MsaDeviceCode>, XboxUserInfo> requestHandler) {
@@ -449,9 +420,8 @@ public class GeneralTab extends AUITab {
                     SwingUtilities.invokeLater(() -> {
                         closeLoginPopup();
                         App.getEvents().onLogin(xboxUserInfo);
-                        reloadStateButton();
-                        frame.showInfo("Logged in as " + xboxUserInfo.getGamertag() + "!");
                         init(contentPane);
+                        frame.showInfo("Logged in as " + xboxUserInfo.getGamertag() + "!");
                     });
                 }
             } catch (Throwable t) {

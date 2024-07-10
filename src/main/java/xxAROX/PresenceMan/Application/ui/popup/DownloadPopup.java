@@ -67,7 +67,7 @@ public final class DownloadPopup extends JDialog {
                 DownloadPopup.this.close(false);
             }
         });
-        this.setTitle("Updating from " + AppInfo.getVersion() + " to " + newVersion);
+        this.setTitle("Updating from " + AppInfo.getVersion() + " to " + newVersion); // TODO: language
         this.setSize(400, 110);
         this.setResizable(false);
         this.setLocationRelativeTo(this.parent);
@@ -84,7 +84,7 @@ public final class DownloadPopup extends JDialog {
             contentPane.add(this.progressBar);
         }
         {
-            JButton cancelButton = new JButton("Cancel");
+            JButton cancelButton = new JButton("Cancel"); // TODO: language
             cancelButton.setFocusPainted(false);
             cancelButton.setBounds(10, 40, 365, 20);
             cancelButton.addActionListener(event -> this.close(false));

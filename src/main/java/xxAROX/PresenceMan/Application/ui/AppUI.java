@@ -38,6 +38,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class AppUI extends JDialog {
+    public static int HEIGHT = 360;
+    public static int WIDTH = 600;
+
     public final JTabbedPane contentPane = new JTabbedPane();
     public final List<AUITab> tabs = new ArrayList<>();
 
@@ -51,25 +54,13 @@ public class AppUI extends JDialog {
 
         this.setLookAndFeel();
         this.initWindow();
-
-        contentPane.setLayout(new GridBagLayout());
-        contentPane.setTabPlacement(JTabbedPane.LEFT);
+        initContentPane();
 
         general_tab = new GeneralTab(this);
-        tabs.add(general_tab);
-        general_tab.add(contentPane);
-
         settings_tab = new SettingsTab(this);
-        tabs.add(settings_tab);
-        settings_tab.add(contentPane);
-
         partners_tab = new PartnersTab(this);
-        tabs.add(partners_tab);
-        partners_tab.add(contentPane);
-
-
-        contentPane.setEnabledAt(contentPane.indexOfTab(general_tab.getName()), false);
-        //trigger function on tab change
+        loadTabs();
+        
         contentPane.addChangeListener(e -> {
             AUITab tab = tabs.get(contentPane.getSelectedIndex());
             tab.update();
@@ -84,6 +75,22 @@ public class AppUI extends JDialog {
         Tray.showInTray();
 
         general_tab.update();
+    }
+
+    private void initContentPane() {
+        contentPane.setLayout(new GridBagLayout());
+        contentPane.setTabPlacement(JTabbedPane.LEFT);
+    }
+
+    private void loadTabs() {
+        tabs.add(general_tab);
+        general_tab.add(contentPane);
+
+        tabs.add(settings_tab);
+        settings_tab.add(contentPane);
+
+        tabs.add(partners_tab);
+        partners_tab.add(contentPane);
     }
 
     private void setLookAndFeel() {
@@ -108,7 +115,7 @@ public class AppUI extends JDialog {
                 setVisible(false);
             }
         });
-        setSize(600, 360);
+        setSize(WIDTH, HEIGHT);
         setResizable(false);
         setLocationRelativeTo(null);
         setContentPane(contentPane);

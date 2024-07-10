@@ -24,6 +24,7 @@ import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.ui.AUITab;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.ui.popup.PartnerPopup;
+import xxAROX.PresenceMan.Application.utils.Lang;
 import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.swing.*;
@@ -40,7 +41,7 @@ public class PartnersTab extends AUITab {
     JScrollPane scrollPane = new JScrollPane(base);
 
     public PartnersTab(AppUI frame) {
-        super(frame, "Partners");
+        super(frame, "Partners", "images/partners.png");
     }
     @Override
     protected void init(JPanel contentPane) {
@@ -54,7 +55,7 @@ public class PartnersTab extends AUITab {
             scrollPane.getVerticalScrollBar().setUnitIncrement(13);
             scrollPane.setPreferredSize(new Dimension(400, 300));
 
-            JLabel loading = new JLabel("Loading...", SwingConstants.CENTER);
+            JLabel loading = new JLabel(Lang.get("ui.tab.partners.loading"), SwingConstants.CENTER);
             loading.setFont(new Font(loading.getFont().getName(), Font.BOLD, 20));
             contentPane.add(loading, BorderLayout.CENTER);
             contentPane.repaint();
@@ -83,13 +84,11 @@ public class PartnersTab extends AUITab {
             contentPane.setBorder(BorderFactory.createEmptyBorder(border_size, border_size, border_size, border_size));
 
             if (partnerItems.size() == 0 || partnerItems.stream().filter(PartnerItem::isEnabled).toList().size() == 0) {
-                JLabel noPartnersLabel = new JLabel("No partnerships yet!", SwingConstants.CENTER);
+                JLabel noPartnersLabel = new JLabel(Lang.get("ui.tab.partners.nothing"), SwingConstants.CENTER);
                 noPartnersLabel.setForeground(new Color(0xED4245));
                 contentPane.add(noPartnersLabel, BorderLayout.CENTER);
                 contentPane.repaint();
-            } else {
-                contentPane.add(scrollPane, BorderLayout.CENTER);
-            }
+            } else contentPane.add(scrollPane, BorderLayout.CENTER);
         }
     }
 
@@ -103,18 +102,7 @@ public class PartnersTab extends AUITab {
         else partnerItems = new ArrayList<>();
         var result = Utils.WebUtils.get("https://presence-man.com/api/v1/partners");
         Utils.GSON.fromJson(result.getBody(), JsonArray.class).asList().stream().map(JsonElement::getAsJsonObject).forEach(obj -> {
-            try {
-                partnerItems.add(new PartnerItem(
-                        obj.get("title").getAsString(),
-                        obj.get("about_text").getAsString(),
-                        obj.get("domain").getAsString(),
-                        obj.get("image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("image").getAsString())),
-                        obj.get("banner_image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("banner_image").getAsString())),
-                        obj.get("enabled").getAsBoolean(),
-                        obj.get("url").isJsonNull() ? null : obj.get("url").getAsString()
-                ));
-            } catch (MalformedURLException ignore) {
-            }
+            try {partnerItems.add(new PartnerItem(obj.get("title").getAsString(), obj.get("about_text").getAsString(), obj.get("domain").getAsString(), obj.get("image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("image").getAsString())), obj.get("banner_image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("banner_image").getAsString())), obj.get("enabled").getAsBoolean(), obj.get("url").isJsonNull() ? null : obj.get("url").getAsString()));} catch (MalformedURLException ignore) {}
         });
         contentPane.validate();
         contentPane.repaint();

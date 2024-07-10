@@ -88,7 +88,7 @@ public final class Tray {
         }
 
         { // -- Report a bug --
-            final String TEXT = "Report a bug";
+            final String TEXT = "Report a bug"; // TODO: language
             var item = new JMenuItem(TEXT);
             item.addActionListener(e -> {
                 App.ui.openURL("https://github.com/Presence-Man/Application/issues");
@@ -97,15 +97,15 @@ public final class Tray {
         }
 
         { // -- Check for updates --
-            final String TEXT = "Check for updates";
+            final String TEXT = "Check for updates"; // TODO: language
             var item = new JMenuItem(TEXT);
             item.addActionListener(e -> App.getInstance().getScheduler().scheduleAsync(new UpdateCheckTask(true)));
             arr.add(item);
         }
 
         { // -- Reconnect --
-            final String RECONNECT = "Reconnect to backend";
-            final String RECONNECTING = "Reconnecting..";
+            final String RECONNECT = "Reconnect to backend"; // TODO: language
+            final String RECONNECTING = "Reconnecting..";    // TODO: language
 
             var reconnect = new JMenuItem(RECONNECT);
             reconnect.addActionListener(e -> {
@@ -131,7 +131,7 @@ public final class Tray {
         }
 
         { // -- Exit --
-            var exit = new JMenuItem("Quit " + AppInfo.name);
+            var exit = new JMenuItem("Quit " + AppInfo.name); // TODO: language
             exit.addActionListener(e -> {
                 if (!App.getInstance().isShutdown()) App.getInstance().shutdown();
                 System.exit(0);

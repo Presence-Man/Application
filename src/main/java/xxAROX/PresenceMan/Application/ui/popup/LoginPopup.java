@@ -51,7 +51,7 @@ public class LoginPopup extends JDialog {
                 if (!externalClose) closeListener.run();
             }
         });
-        this.setTitle("Login to XBOX Live");
+        this.setTitle("Login to XBOX Live"); // TODO: language
         this.setSize(400, 200);
         this.setResizable(false);
         this.setLocationRelativeTo(this.parent);
@@ -63,11 +63,11 @@ public class LoginPopup extends JDialog {
         JPanel contentPane = new JPanel();
         contentPane.setLayout(null);
 
-        JLabel browserLabel = new JLabel("We've opened a new browser tab for you to login.");
+        JLabel browserLabel = new JLabel("We've opened a new browser tab for you to login."); // TODO: language
         browserLabel.setBounds(10, 45, 380, 20);
         contentPane.add(browserLabel);
 
-        JLabel closeInfo = new JLabel("This popup will close automatically once you have logged in.");
+        JLabel closeInfo = new JLabel("This popup will close automatically once you have logged in."); // TODO: language
         closeInfo.setFont(new Font("Arial", Font.ITALIC, 12));
         closeInfo.setBounds(10, 75, 380, 20);
         contentPane.add(closeInfo);

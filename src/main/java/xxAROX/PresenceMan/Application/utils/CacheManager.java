@@ -17,10 +17,7 @@
 
 package xxAROX.PresenceMan.Application.utils;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import lombok.NonNull;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.entity.infos.XboxUserInfo;
 
@@ -80,24 +77,25 @@ public final class CacheManager {
         save();
     }
 
-    @NonNull
-    public static JsonElement setting(String key){
-        return settings.has(key) ? settings.get(key) : new JsonNull();
-    }
-
     public static class Settings {
         public static boolean START_MINIMIZED = false;
         public static boolean ENABLE_AUTO_UPDATE = true;
+        public static String LOCALE = Lang.DEFAULT_LOCALE;
 
         protected static void load() {
             if (!settings.has("start-minimized")) settings.addProperty("start-minimized", START_MINIMIZED);
             START_MINIMIZED = settings.get("start-minimized").getAsBoolean();
+
             if (!settings.has("enable-auto-update")) settings.addProperty("enable-auto-update", ENABLE_AUTO_UPDATE);
             ENABLE_AUTO_UPDATE = settings.get("enable-auto-update").getAsBoolean();
+
+            if (!settings.has("locale")) settings.addProperty("locale", LOCALE);
+            LOCALE = settings.get("locale").getAsString();
         }
         protected static void save() {
             settings.addProperty("start-minimized", START_MINIMIZED);
             settings.addProperty("enable-auto-update", ENABLE_AUTO_UPDATE);
+            settings.addProperty("locale", LOCALE);
         }
     }
 }

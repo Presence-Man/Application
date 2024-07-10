@@ -123,12 +123,6 @@
             <version>latest</version>
             <scope>compile</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.github.jagrosh</groupId>
-            <artifactId>DiscordIPC</artifactId>
-            <version>a8d6631</version>
-        </dependency>
     </dependencies>
 
     <build>
