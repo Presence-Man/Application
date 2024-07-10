@@ -34,6 +34,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -153,7 +154,7 @@ public class GeneralTab extends AUITab {
             constraints.anchor = GridBagConstraints.WEST;
 
             //Discord Status (/Username) - 2nd row, italic
-            JLabel discordStatus = new JLabel("Discord Status: " + Lang.get(App.getInstance().getDiscord_info().ready ? "ui.tab.home.discord.connected.yes" : "ui.tab.home.discord.connected.nop"), SwingConstants.CENTER); // TODO: language
+            JLabel discordStatus = new JLabel(Lang.get(App.getInstance().getDiscord_info().ready ? "ui.tab.home.discord.connected.yes" : "ui.tab.home.discord.connected.nop"), SwingConstants.CENTER);
             discordStatus.setVisible(true);
             discordStatus.setFocusable(false);
             discordStatus.setFont(new Font("Arial", Font.ITALIC, 12));
@@ -169,9 +170,9 @@ public class GeneralTab extends AUITab {
 
             contentPane.add(discordStatus, constraints);
 
-            String username = App.getInstance().getDiscord_info().getUsername() != null ? "@" + App.getInstance().getDiscord_info().getUsername() : Lang.get("ui.tab.home.discord.connected.nop"); // TODO: language
+            String username = App.getInstance().getDiscord_info().getUsername() != null ? "@" + App.getInstance().getDiscord_info().getUsername() : Lang.get("ui.tab.home.discord.connected.nop");
 
-            JLabel dcUser = new JLabel("Discord User: " + username, SwingConstants.CENTER); // TODO: language
+            JLabel dcUser = new JLabel(Lang.get("ui.tab.home.discord.user", new HashMap<>(){{put("{username}", username);}}), SwingConstants.CENTER);
             dcUser.setVisible(true);
             dcUser.setFocusable(false);
             dcUser.setFont(new Font("Arial", Font.ITALIC, 12));

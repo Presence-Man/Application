@@ -20,6 +20,7 @@ package xxAROX.PresenceMan.Application.ui.popup;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.ui.tabs.PartnersTab;
+import xxAROX.PresenceMan.Application.utils.Lang;
 
 import javax.swing.*;
 import java.awt.*;
@@ -82,7 +83,7 @@ public class PartnerPopup extends JDialog {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new GridLayout(1, partner.url != null ? 2 : 1, 10, 0));
 
-        JButton add_server_btn = new JButton("Add server"); // TODO: language
+        JButton add_server_btn = new JButton(Lang.get("ui.popup.partners.button.add_server"));
         add_server_btn.setPreferredSize(new Dimension(150, 50));
         add_server_btn.addActionListener(e -> {
             add_server_btn.setFocusPainted(false);
@@ -92,7 +93,7 @@ public class PartnerPopup extends JDialog {
 
         if (partner.url != null) {
             boolean is_discord_url = partner.url.toLowerCase().contains("discord") || partner.url.toLowerCase().contains("disc") || partner.url.toLowerCase().contains("dc");
-            JButton url_btn = new JButton(is_discord_url ? "Discord" : "Website"); // TODO: language
+            JButton url_btn = new JButton(Lang.get(is_discord_url ? "ui.popup.partners.button.discord" : "ui.popup.partners.button.website"));
             url_btn.setPreferredSize(new Dimension(150, 50));
             if (is_discord_url) url_btn.setBackground(new Color(88, 101, 242));
             url_btn.addActionListener(e -> {
