@@ -31,7 +31,8 @@ public class Bootstrap {
         List<String> args = Arrays.stream(_args).toList();
         List<String> lowArgs = args.stream().map(String::toLowerCase).toList();
 
-        AppInfo.development = lowArgs.contains("dev") || lowArgs.contains("development");
+        AppInfo.development = lowArgs.contains("dev") || lowArgs.contains("development") || lowArgs.contains("alpha");
+        AppInfo.alpha = lowArgs.contains("alpha");
 
         Logger logger = initializeLogger();
         if (Utils.SingleInstanceUtils.lockInstance(logger)) new App(logger);
@@ -44,7 +45,7 @@ public class Bootstrap {
     protected static Logger initializeLogger(){
         //PropertyConfigurator.configure(ClassLoader.getSystemResource("log4j.properties"));
         var logger = LogManager.getLogger(App.class);
-        //logger.setLevel(AppInfo.development ? Level.DEBUG : Level.INFO);
+        //logger.setLevel(AppInfo.development ? Level.DEBUG : Level.INFO); // TODO @KeksDev fix meee
         return logger;
     }
 }

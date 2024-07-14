@@ -25,6 +25,7 @@ public final class AppInfo {
     public static String icon = "icon.png";
     public static long discord_application_id = 1133823892486623344L;
     public static boolean development = false;
+    public static boolean alpha = false;
 
     public static String getVersion(){
         return getVersion(".");
@@ -33,7 +34,7 @@ public final class AppInfo {
     public static String getVersion(CharSequence delimiter){
         StringJoiner joiner = new StringJoiner(delimiter);
         for (int part : version) joiner.add(String.valueOf(part));
-        return joiner + (development ? "-dev" : "");
+        return joiner + (alpha ? "-alpha" : development ? "-dev" : "");
     }
 
     public static void main(String[] args) {
