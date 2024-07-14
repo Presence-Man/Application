@@ -93,7 +93,7 @@ public final class App {
         scheduler = new WaterdogScheduler();
         tickFuture = tickExecutor.scheduleAtFixedRate(this::processTick, 50, 50, TimeUnit.MILLISECONDS);
 
-        if (CacheManager.Settings.ENABLE_AUTO_UPDATE) scheduler.scheduleAsync(new UpdateCheckTask());
+        if (!AppInfo.development && CacheManager.Settings.ENABLE_AUTO_UPDATE) scheduler.scheduleAsync(new UpdateCheckTask());
         App.getInstance().getScheduler().scheduleAsync(new FetchGatewayInformationTask());
 
         SwingUtilities.invokeLater(() -> ui = new AppUI());

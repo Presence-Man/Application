@@ -37,8 +37,9 @@ public class UpdateCheckTask implements Runnable {
     private boolean show_up_to_date_dialog = false;
     @Override
     public void run() {
+        if (AppInfo.development) return;
         try {
-            String latestVersion = Utils.WebUtils.get("https://raw.githubusercontent.com/Presence-Man/Application/main/latest_version" + (AppInfo.development ? "-dev" : "") + ".txt").getBody().trim();
+            String latestVersion = Utils.WebUtils.get("https://raw.githubusercontent.com/Presence-Man/Application/main/latest_version.txt").getBody().trim();
 
             boolean updateAvailable;
             try {

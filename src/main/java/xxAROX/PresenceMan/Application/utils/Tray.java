@@ -95,6 +95,7 @@ public final class Tray {
 
         { // -- Check for updates --
             var item = new JMenuItem(Lang.get("ui.tray.update_checker"));
+            item.setEnabled(!AppInfo.development);
             item.addActionListener(e -> App.getInstance().getScheduler().scheduleAsync(new UpdateCheckTask(true)));
             arr.add(item);
         }
