@@ -99,7 +99,7 @@ public final class App {
         SwingUtilities.invokeLater(() -> ui = new AppUI());
         xboxUserInfo = CacheManager.loadXboxUserInfo();
 
-        logger.info("App is in " + (AppInfo.development ? "development" : "production") + " mode");
+        logger.info("App is in " + (AppInfo.alpha ? "Alpha" : (AppInfo.development ? "development" : "production")) + " mode");
 
         while (ui == null) {
             Thread.sleep(1000);
