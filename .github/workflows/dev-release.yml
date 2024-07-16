@@ -2,7 +2,7 @@ name: "Release development"
 
 on:
   push:
-    branches: [ "development", "socketing" ]
+    branches: [ "development" ]
 
 jobs:
   build:
@@ -43,7 +43,7 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           draft: false
-          automatic_release_tag: "v${{ steps.metadata.outputs.VERSION }}"
+          automatic_release_tag: "dev"
           prerelease: false
           title: "Development Release v${{ steps.metadata.outputs.VERSION }}"
           files: "target/Presence-Man-App-dev.jar"
