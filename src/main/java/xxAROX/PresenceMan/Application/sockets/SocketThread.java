@@ -110,8 +110,7 @@ public class SocketThread implements Runnable {
         connectionState.set(State.DISCONNECTED);
         heartbeats_need_a_token = false;
         session_token.set(null);
-        socket.close();
-        socket.connect();
+        wakeup();
     }
 
     public void tick(int currentTick) {
@@ -165,6 +164,14 @@ public class SocketThread implements Runnable {
         if (session_token.get() != null && !session_token.get().equalsIgnoreCase("")) sendPacket(new ByeByePacket());
         connectionState.set(State.SHUTDOWN);
         socket.close();
+    }
+
+    public void wakeup(){
+        if (!connectionState.get().equals(State.SHUTDOWN)) return;
+        connectionState.set(State.DISCONNECTED);
+        heartbeats_need_a_token = false;
+        session_token.set(null);
+        socket.connect();
     }
 
     public <T extends Packet> boolean sendPacket(@NonNull T packet){
