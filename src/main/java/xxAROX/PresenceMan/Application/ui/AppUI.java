@@ -22,6 +22,7 @@ import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneDarkIJT
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.Bootstrap;
+import xxAROX.PresenceMan.Application.ui.tabs.AccountsTab;
 import xxAROX.PresenceMan.Application.ui.tabs.GeneralTab;
 import xxAROX.PresenceMan.Application.ui.tabs.PartnersTab;
 import xxAROX.PresenceMan.Application.ui.tabs.SettingsTab;
@@ -46,6 +47,7 @@ public class AppUI extends JDialog {
 
     public final GeneralTab general_tab;
     public final SettingsTab settings_tab;
+    public final AccountsTab accounts_tab;
     public final PartnersTab partners_tab;
 
     public AppUI() {
@@ -58,6 +60,7 @@ public class AppUI extends JDialog {
 
         general_tab = new GeneralTab(this);
         settings_tab = new SettingsTab(this);
+        accounts_tab = new AccountsTab(this);
         partners_tab = new PartnersTab(this);
         loadTabs();
         
@@ -88,6 +91,9 @@ public class AppUI extends JDialog {
 
         tabs.add(settings_tab);
         settings_tab.add(contentPane);
+
+        tabs.add(accounts_tab);
+        accounts_tab.add(contentPane);
 
         tabs.add(partners_tab);
         partners_tab.add(contentPane);
