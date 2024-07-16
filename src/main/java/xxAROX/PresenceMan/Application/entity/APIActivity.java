@@ -66,7 +66,7 @@ public final class APIActivity {
 
     public static APIActivity deserialize(JsonObject json){
         APIActivity activity = new APIActivity();
-        activity.client_id = json.has("client_id") && !json.get("client_id").isJsonNull() ? json.get("client_id").getAsLong() : AppInfo.discord_application_id;
+        activity.client_id = json.has("client_id") && !json.get("client_id").isJsonNull() ? Long.parseLong(json.get("client_id").getAsString()) : AppInfo.discord_application_id;
         activity.type = json.has("type") && !json.get("type").isJsonNull() ? ActivityType.valueOf(json.get("type").getAsString()) : ActivityType.PLAYING;
         activity.state = json.has("state") && !json.get("state").isJsonNull() ? json.get("state").getAsString() : null;
         activity.details = json.has("details") && !json.get("details").isJsonNull() ? json.get("details").getAsString() : null;
