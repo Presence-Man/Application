@@ -92,8 +92,8 @@ public class AppUI extends JDialog {
         tabs.add(settings_tab);
         settings_tab.add(contentPane);
 
-        tabs.add(accounts_tab);
-        accounts_tab.add(contentPane);
+        //tabs.add(accounts_tab);
+        //accounts_tab.add(contentPane);
 
         tabs.add(partners_tab);
         partners_tab.add(contentPane);
