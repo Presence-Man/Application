@@ -66,7 +66,7 @@ public final class APIActivity {
 
     public static APIActivity deserialize(JsonObject json){
         APIActivity activity = new APIActivity();
-        activity.client_id = json.has("client_id") && !json.get("client_id").isJsonNull() ? json.get("client_id").getAsLong() : AppInfo.discord_application_id;
+        activity.client_id = json.has("client_id") && !json.get("client_id").isJsonNull() ? Long.parseLong(json.get("client_id").getAsString()) : AppInfo.discord_application_id;
         activity.type = json.has("type") && !json.get("type").isJsonNull() ? ActivityType.valueOf(json.get("type").getAsString()) : ActivityType.PLAYING;
         activity.state = json.has("state") && !json.get("state").isJsonNull() ? json.get("state").getAsString() : null;
         activity.details = json.has("details") && !json.get("details").isJsonNull() ? json.get("details").getAsString() : null;
@@ -81,26 +81,44 @@ public final class APIActivity {
     }
 
     public DiscordRichPresence toDiscord() {
+        var network_info = App.getInstance().network_info;
         DiscordRichPresence.Builder activity = new DiscordRichPresence.Builder(state != null ? state : "");
         activity.setDetails(details != null ? details : "");
-        if (start != null) {
-            switch ((int) start.getValue()) {
-                case (int) -1L -> start.setValue(App.getCreated());
-                case (int) -2L -> start.setValue(App.network_session_created);
-                case (int) -3L -> start.setValue(App.server_session_created);
-            }
-        } else {
-            start = APITimestamp.CUSTOM;
-            start.setValue(App.getCreated());
+        if (start == null) start = APITimestamp.APP_START;
+        switch (start) {
+            case APP_START              -> start.setValue(App.getCreated());
+            case NETWORK_SESSION_CREATE -> start.setValue(network_info.network_session_created);
+            case SERVER_SESSION_CREATE  -> start.setValue(network_info.server_session_created);
+            case CUSTOM                 -> start.setValue(start.getValue());
         }
         activity.setStartTimestamps(start.getValue());
 
         if (end != null) activity.setEndTimestamp(end);
-        if (large_icon_key != null) activity.setBigImage(large_icon_key, large_icon_text);
+        if (large_icon_key != null) activity.setBigImage((!Long.toString(client_id).equals(Long.toString(AppInfo.discord_application_id)) ? Gateway.getUrl()+"/i/da/" + client_id + "/" + large_icon_key : large_icon_key), large_icon_text);
         if (small_icon_key != null) activity.setSmallImage(small_icon_key, small_icon_text);
         if (party_player_count != null) activity.setParty("display", party_player_count, party_max_player_count);
         return activity.build();
     }
+
+    /* NOTE: For bypass: */
+    /*
+    public RichPresence toRichPresence() {
+        DiscordRichPresence drpc = toDiscord();
+        RichPresence.Builder builder = new RichPresence.Builder();
+        return builder
+                .setState(drpc.state)
+                .setDetails(drpc.details)
+                .setStartTimestamp(Instant.ofEpochMilli(drpc.startTimestamp).atOffset(ZoneOffset.UTC))
+                .setEndTimestamp(Instant.ofEpochMilli(drpc.endTimestamp).atOffset(ZoneOffset.UTC))
+                .setLargeImage(drpc.largeImageKey, drpc.largeImageText)
+                .setSmallImage(drpc.smallImageKey, drpc.smallImageText)
+                .setParty(drpc.partyId, drpc.partySize, drpc.partyMax)
+                .setMatchSecret(drpc.matchSecret)
+                .setJoinSecret(drpc.joinSecret)
+                .setSpectateSecret(drpc.spectateSecret)
+                .build()
+        ;
+    }*/
 
     @Override
     public boolean equals(Object o) {
@@ -127,7 +145,6 @@ public final class APIActivity {
     }
 
     @AllArgsConstructor
-    @Deprecated
     public enum ActivityType {
         PLAYING("PLAYING"),
         STREAMING("STREAMING"),

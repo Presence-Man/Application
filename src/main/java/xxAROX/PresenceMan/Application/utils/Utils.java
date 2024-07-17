@@ -17,23 +17,37 @@
 
 package xxAROX.PresenceMan.Application.utils;
 
+import com.google.gson.Gson;
 import org.apache.logging.log4j.Logger;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
+import xxAROX.WebRequester.WebRequester;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.ItemEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.channels.FileLock;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.*;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Utils {
+    public static final Gson GSON = new Gson();
+
     private static Map<String, String> getDefaultParams() {
         return new HashMap<>(){{
             put("{App.name}", AppInfo.name);
@@ -43,8 +57,8 @@ public class Utils {
                 put("{xuid}", App.getInstance().xboxUserInfo.getXuid());
                 put("{gamertag}", App.getInstance().xboxUserInfo.getGamertag());
             }
-            put("{network}", App.getInstance().network != null ? App.getInstance().network : "null");
-            put("{server}", App.getInstance().server != null ? App.getInstance().server : "null");
+            put("{network}", App.getInstance().network_info.network != null ? App.getInstance().network_info.network : "null");
+            put("{server}", App.getInstance().network_info.server != null ? App.getInstance().network_info.server : "null");
 
         }};
     }
@@ -56,6 +70,16 @@ public class Utils {
         if (!params.containsKey("{App.name}")) params.putAll(getDefaultParams());
         for (Map.Entry<String, String> keyValueEntry : params.entrySet()) base = base.replace(keyValueEntry.getKey(), keyValueEntry.getValue());
         return base;
+    }
+
+
+
+
+    public static Optional<File> getJarFile() {
+        try {return Optional.of(new File(App.class.getProtectionDomain().getCodeSource().getLocation().toURI()));} catch (Throwable ignored) {return Optional.empty();}
+    }
+    public static void launch(File jarFile) throws IOException {
+        new ProcessBuilder(System.getProperty("java.home") + "/bin/java", "-jar", jarFile.getAbsolutePath() + (AppInfo.development ? " development" : "")).start();
     }
 
     public static class SingleInstanceUtils {
@@ -86,8 +110,32 @@ public class Utils {
     }
 
     public static class UIUtils {
+        public static ImageIcon createImageIcon(String path) {
+            return createImageIcon(path, null);
+        }
+        public static ImageIcon createImageIcon(String path, String description) {
+            URL imgURL = null;
+            try {
+                imgURL = path.startsWith("https://") ? new URL(path) : Utils.class.getClassLoader().getResource(path);
+            } catch (MalformedURLException ignore) {
+            }
+            if (imgURL != null) return new ImageIcon(imgURL, description == null ? "" : description);
+            App.getLogger().error("Couldn't find image: " + path);
+            return null;
+        }
+
         public static JButton addButton(JPanel panel, GridBagConstraints constraints, int gridy, String text, Consumer<JButton> handler) {
             JButton button = new JButton(text);
+            button.addActionListener(event -> handler.accept(button));
+            constraints.gridx = 0;
+            constraints.gridy = gridy;
+            constraints.gridwidth = 2;
+            panel.add(button, constraints);
+            return button;
+        }
+
+        public static JButton addButton(JPanel panel, GridBagConstraints constraints, int gridy, String text, Consumer<JButton> handler, Icon i) {
+            JButton button = new JButton(text, i);
             button.addActionListener(event -> handler.accept(button));
             constraints.gridx = 0;
             constraints.gridy = gridy;
@@ -104,9 +152,28 @@ public class Utils {
             });
             constraints.gridx = 0;
             constraints.gridy = gridy;
-            constraints.gridwidth = 2;
+            constraints.gridwidth = 1;
             panel.add(checkBox, constraints);
             return checkBox;
+        }
+
+        public static <SameObj> JComboBox<String> addDropdownMenu(JPanel panel, GridBagConstraints constraints, int gridy, String title, Map<String, SameObj> options, String default_value, BiConsumer<String, SameObj> handler) {
+            JLabel titleLabel = new JLabel(title);
+            constraints.gridx = 0;
+            constraints.gridy = gridy;
+            constraints.gridwidth = 1;
+            panel.add(titleLabel, constraints);
+
+            JComboBox<String> comboBox = new JComboBox<>(options.keySet().toArray(new String[0]));
+            comboBox.setSelectedItem(default_value);
+            comboBox.addActionListener(event -> handler.accept((String) comboBox.getSelectedItem(), options.get((String) comboBox.getSelectedItem())));
+            constraints.gridx = 0;
+            constraints.gridy = gridy +1;
+            constraints.gridwidth = 1;
+            constraints.fill = GridBagConstraints.HORIZONTAL;
+            constraints.weightx = 0.5;
+            panel.add(comboBox, constraints);
+            return comboBox;
         }
 
         public static JSlider addSlider(JPanel panel, GridBagConstraints constraints, int gridy, String label, int min, int max, int initial, Consumer<Integer> handler) {
@@ -121,6 +188,95 @@ public class Utils {
             constraints.gridx = 1;
             panel.add(slider, constraints);
             return slider;
+        }
+    }
+
+    public static class ImageUtils {
+        public static ImageIcon recolorImage(ImageIcon image, Color newColor) {
+            return new ImageIcon(recolorBufferedImage(toBufferedImage(image.getImage(), image.getIconHeight(), image.getIconWidth()), newColor));
+        }
+
+        public static BufferedImage toBufferedImage(Image img, int w, int h) {
+            if (img instanceof BufferedImage) return (BufferedImage) img;
+            BufferedImage bimage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+
+            Graphics2D bGr = bimage.createGraphics();
+            bGr.drawImage(img, 0, 0, null);
+            bGr.dispose();
+
+            return bimage;
+        }
+
+        private static BufferedImage recolorBufferedImage(BufferedImage image, Color newColor) {
+            int width = image.getWidth();
+            int height = image.getHeight();
+
+            BufferedImage recoloredImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int rgba = image.getRGB(x, y);
+                    Color col = new Color(rgba, true);
+                    if (col.getAlpha() != 0) recoloredImage.setRGB(x, y, newColor.getRGB());
+                    else recoloredImage.setRGB(x, y, rgba);
+                }
+            }
+            return recoloredImage;
+        }
+    }
+
+    public static class WebUtils {
+        public static WebRequester.Result get(String url) {return get(url, new HashMap<>());}
+        public static WebRequester.Result get(String url, Map<String, String> headers) {
+            WebRequester.init(GSON, App.getInstance().getTickExecutor());
+            try {
+                return WebRequester.get(url, headers).get();
+            } catch (ExecutionException | InterruptedException e) {
+                App.getLogger().error("Error while executing GET request: ", e);
+            }
+            return null;
+        }
+        public static WebRequester.Result post(String url) {return post(url, new HashMap<>(), new HashMap<>());}
+        public static WebRequester.Result post(String url, Map<String, String> headers) {return post(url, headers, new HashMap<>());}
+        public static WebRequester.Result post(String url, Map<String, String> headers, Map<String, String> body) {
+            WebRequester.init(GSON, App.getInstance().getTickExecutor());
+            try {
+                return WebRequester.post(url, headers, body).get();
+            } catch (ExecutionException | InterruptedException e) {
+                App.getLogger().error("Error while executing POST request: ", e);
+            }
+            return null;
+        }
+    }
+
+    public static class FileUtils {
+        public static Map<Path, byte[]> getFilesInDirectory(final String assetPath) throws IOException, URISyntaxException {
+            final Path path = getPath(Utils.class.getClassLoader().getResource(assetPath).toURI());
+            return getFilesInPath(path);
+        }
+
+        private static Path getPath(final URI uri) throws IOException {
+            try {
+                return Paths.get(uri);
+            } catch (FileSystemNotFoundException e) {
+                FileSystems.newFileSystem(uri, Collections.emptyMap());
+                return Paths.get(uri);
+            }
+        }
+
+        private static Map<Path, byte[]> getFilesInPath(final Path path) throws IOException {
+            try (Stream<Path> stream = Files.list(path)) {
+                return stream
+                        .filter(Files::isRegularFile)
+                        .sorted(Comparator.comparing(Path::toString))
+                        .collect(Collectors.toMap(
+                                f -> f,
+                                f -> {try {return Files.readAllBytes(f);} catch (IOException e) {throw new UncheckedIOException(e);}},
+                                (u, v) -> {throw new IllegalStateException("Duplicate key");},
+                                LinkedHashMap::new
+                        ))
+                ;
+            }
         }
     }
 }

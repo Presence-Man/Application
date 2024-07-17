@@ -20,8 +20,10 @@ package xxAROX.PresenceMan.Application.ui.popup;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.ui.AppUI;
+import xxAROX.PresenceMan.Application.utils.Lang;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.function.Consumer;
@@ -50,7 +52,7 @@ public class LoginPopup extends JDialog {
                 if (!externalClose) closeListener.run();
             }
         });
-        this.setTitle("Login to XBOX live");
+        this.setTitle(Lang.get("ui.popup.login.title"));
         this.setSize(400, 200);
         this.setResizable(false);
         this.setLocationRelativeTo(this.parent);
@@ -62,12 +64,13 @@ public class LoginPopup extends JDialog {
         JPanel contentPane = new JPanel();
         contentPane.setLayout(null);
 
-        JLabel browserLabel = new JLabel("Please look at your browser!");
-        browserLabel.setBounds(10, 10, 380, 20);
+        JLabel browserLabel = new JLabel(Lang.get("ui.popup.login.browser"));
+        browserLabel.setBounds(10, 45, 380, 20);
         contentPane.add(browserLabel);
 
-        JLabel closeInfo = new JLabel("The popup will close automatically after you have been logged in.");
-        closeInfo.setBounds(10, 100, 380, 20);
+        JLabel closeInfo = new JLabel(Lang.get("ui.popup.login.closing"));
+        closeInfo.setFont(new Font("Arial", Font.ITALIC, 12));
+        closeInfo.setBounds(10, 75, 380, 20);
         contentPane.add(closeInfo);
         setContentPane(contentPane);
     }

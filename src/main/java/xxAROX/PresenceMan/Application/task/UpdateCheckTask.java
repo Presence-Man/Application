@@ -23,13 +23,13 @@ import lombok.NoArgsConstructor;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.ui.popup.DownloadPopup;
+import xxAROX.PresenceMan.Application.utils.Lang;
+import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.util.HashMap;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -37,28 +37,16 @@ public class UpdateCheckTask implements Runnable {
     private boolean show_up_to_date_dialog = false;
     @Override
     public void run() {
+        if (AppInfo.development) return;
         try {
-            URL url = new URL("https://raw.githubusercontent.com/Presence-Man/Application/main/latest_version" + (AppInfo.development ? "-dev" : "") + ".txt");
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            con.setRequestProperty("User-Agent", AppInfo.name + "/" + AppInfo.getVersion());
-            con.setConnectTimeout(5000);
-            con.setReadTimeout(5000);
-
-            InputStream in = con.getInputStream();
-            byte[] bytes = new byte[1024];
-            int read;
-            StringBuilder builder = new StringBuilder();
-            while ((read = in.read(bytes)) != -1) builder.append(new String(bytes, 0, read));
-            con.disconnect();
-            String latestVersion = builder.toString().trim();
+            String latestVersion = Utils.WebUtils.get("https://raw.githubusercontent.com/Presence-Man/Application/main/latest_version.txt").getBody().trim();
 
             boolean updateAvailable;
             try {
                 Semver versionSemver = new Semver(AppInfo.getVersion());
                 Semver latestVersionSemver = new Semver(latestVersion);
                 updateAvailable = latestVersionSemver.isGreaterThan(versionSemver);
-                if (AppInfo.development || versionSemver.isGreaterThan(latestVersionSemver)) App.getLogger().warn("You are running a dev version of Presence-Man");
+                if (AppInfo.development && versionSemver.isGreaterThan(latestVersionSemver)) App.getLogger().warn("You are running a dev version of Presence-Man");
             } catch (Throwable t) {
                 updateAvailable = !AppInfo.getVersion().equals(latestVersion);
             }
@@ -76,8 +64,8 @@ public class UpdateCheckTask implements Runnable {
     private void showUpdateQuestion(final String downloadUrl, final String latestVersion) {
         int chosen = JOptionPane.showConfirmDialog(
                 App.ui,
-                "You are running an outdated version of Presence-Man!\nCurrent version: " + AppInfo.getVersion() + "\nLatest version: " + latestVersion + "\n\nDo you want to update?",
-                AppInfo.name + " update",
+                Lang.get("ui.popup.updater.message", new HashMap<>(){{put("{latestVersion}", latestVersion);}}),
+                Lang.get("ui.popup.updater.title", new HashMap<>(){{put("{latestVersion}", latestVersion);}}),
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
         );
@@ -88,8 +76,9 @@ public class UpdateCheckTask implements Runnable {
                 downloadUrl,
                 f,
                 () -> SwingUtilities.invokeLater(() -> {
-                    JOptionPane.showMessageDialog(App.ui, "Downloaded the latest version of " + AppInfo.name + "!\nPress OK to restart.", AppInfo.name, JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(App.ui, Lang.get("ui.popup.updater.done"), AppInfo.name, JOptionPane.INFORMATION_MESSAGE);
                     try {
+                        System.out.println(f.getAbsolutePath());
                         Runtime.getRuntime().exec(new String[]{System.getProperty("java.home") + "/bin/java", "-jar", f.getAbsolutePath()});
                         System.exit(0);
                     } catch (IOException e) {
@@ -98,10 +87,7 @@ public class UpdateCheckTask implements Runnable {
                     }
                 }),
                 t -> {
-                    if (t != null) {
-                        App.getLogger().error("Could not download the latest version of " + AppInfo.name, t);
-                        App.ui.showException(t);
-                    }
+                    if (t != null) App.getLogger().error("Could not download the latest version of " + AppInfo.name, t);
                 }
             );
         }

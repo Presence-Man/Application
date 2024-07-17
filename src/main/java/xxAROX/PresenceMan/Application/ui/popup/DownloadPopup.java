@@ -19,6 +19,7 @@ package xxAROX.PresenceMan.Application.ui.popup;
 
 import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.ui.AppUI;
+import xxAROX.PresenceMan.Application.utils.Lang;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
@@ -30,6 +31,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
 public final class DownloadPopup extends JDialog {
@@ -41,6 +43,7 @@ public final class DownloadPopup extends JDialog {
 
     private JProgressBar progressBar;
     private Thread downloadThread;
+    private String newVersion;
 
     public DownloadPopup(AppUI parent, String url, File file, Runnable finishListener, Consumer<Throwable> stopConsumer) {
         super(parent, true);
@@ -49,6 +52,9 @@ public final class DownloadPopup extends JDialog {
         this.file = file;
         this.finishListener = finishListener;
         this.stopConsumer = stopConsumer;
+
+        String[] split = url.split("/");
+        this.newVersion = split[split.length - 2];
 
         this.initWindow();
         this.initComponents();
@@ -63,7 +69,7 @@ public final class DownloadPopup extends JDialog {
                 DownloadPopup.this.close(false);
             }
         });
-        this.setTitle("Downloading...");
+        this.setTitle(Lang.get("ui.popup.updater.note", new HashMap<>(){{put("{newVersion}", newVersion);}}));
         this.setSize(400, 110);
         this.setResizable(false);
         this.setLocationRelativeTo(this.parent);
@@ -80,7 +86,7 @@ public final class DownloadPopup extends JDialog {
             contentPane.add(this.progressBar);
         }
         {
-            JButton cancelButton = new JButton("Cancel");
+            JButton cancelButton = new JButton("cancel");
             cancelButton.setFocusPainted(false);
             cancelButton.setBounds(10, 40, 365, 20);
             cancelButton.addActionListener(event -> this.close(false));

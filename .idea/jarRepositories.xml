@@ -14,6 +14,11 @@
     <remote-repository>
       <option name="id" value="ProjectRepo" />
       <option name="name" value="ProjectRepo" />
+      <option name="url" value="file://C:\Users\benes\Documents\GitHub\PresenceMan\Application/lib" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="ProjectRepo" />
+      <option name="name" value="ProjectRepo" />
       <option name="url" value="file://C:\Users\JSohnB21109\OneDrive - Kreis Gütersloh (für Ems-Berufskolleg)\Dokumente\Development\Presence-Man\Application/lib" />
     </remote-repository>
     <remote-repository>

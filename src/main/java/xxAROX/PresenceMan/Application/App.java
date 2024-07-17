@@ -25,8 +25,10 @@ import net.arikia.dev.drpc.DiscordRPC;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
-import xxAROX.PresenceMan.Application.entity.DiscordInfo;
-import xxAROX.PresenceMan.Application.entity.XboxUserInfo;
+import xxAROX.PresenceMan.Application.entity.Gateway;
+import xxAROX.PresenceMan.Application.entity.infos.DiscordInfo;
+import xxAROX.PresenceMan.Application.entity.infos.NetworkInfo;
+import xxAROX.PresenceMan.Application.entity.infos.XboxUserInfo;
 import xxAROX.PresenceMan.Application.events.IBaseListener;
 import xxAROX.PresenceMan.Application.scheduler.WaterdogScheduler;
 import xxAROX.PresenceMan.Application.sockets.SocketThread;
@@ -35,11 +37,14 @@ import xxAROX.PresenceMan.Application.task.UpdateCheckTask;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.utils.CacheManager;
 import xxAROX.PresenceMan.Application.utils.ThreadFactoryBuilder;
-import xxAROX.PresenceMan.Application.utils.Tray;
 import xxAROX.PresenceMan.Application.utils.Utils;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.io.IOException;
+import java.net.URL;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -48,32 +53,33 @@ import java.util.concurrent.TimeUnit;
 @Getter
 @ToString
 public final class App {
-    @Getter static final long created = Instant.now().toEpochMilli();
-    public static Long network_session_created = null;
-    public static Long server_session_created = null;
-    public static String head_url = null;
-
-    @Getter private DiscordInfo discord_info = new DiscordInfo();
-
     private static App instance;
-    @Getter private static App.Events events;
-    public SocketThread socket = null;
-    public String network = null;
-    public String server = null;
 
     public static App getInstance() {
         return instance;
     }
+    public static String head_url = null;
 
+    @Getter private static App.Events events;
+    @Getter static final long created = Instant.now().toEpochMilli();
     private Logger logger;
     public static AppUI ui;
+    public SocketThread socket = null;
     private WaterdogScheduler scheduler;
     private ScheduledExecutorService tickExecutor;
     private ScheduledFuture<?> tickFuture;
-    private volatile boolean shutdown = false;
     private int currentTick = 0;
-    public APIActivity api_activity = null;
+    private volatile boolean shutdown = false;
+
+    public NetworkInfo network_info = new NetworkInfo();
+    public DiscordInfo discord_info = new DiscordInfo();
     public XboxUserInfo xboxUserInfo = null;
+
+    private ImageIcon transparent_banner = null; // Cache
+
+    public boolean isConnectedViaMCBE() {
+        return App.getInstance().network_info.network_id != null;
+    }
 
     @SneakyThrows
     public App(Logger logger) {
@@ -89,27 +95,29 @@ public final class App {
         initDiscord();
 
         ThreadFactoryBuilder builder = ThreadFactoryBuilder.builder().format("Tick Executor - #%d").build();
-        tickExecutor = Executors.newScheduledThreadPool(1, builder);
+        tickExecutor = Executors.newScheduledThreadPool(10, builder);
 
         scheduler = new WaterdogScheduler();
         tickFuture = tickExecutor.scheduleAtFixedRate(this::processTick, 50, 50, TimeUnit.MILLISECONDS);
 
-        SwingUtilities.invokeLater(() -> ui = new AppUI());
-        if (CacheManager.Settings.ENABLE_AUTO_UPDATE) scheduler.scheduleAsync(new UpdateCheckTask());
+        if (!AppInfo.development && CacheManager.Settings.ENABLE_AUTO_UPDATE) scheduler.scheduleAsync(new UpdateCheckTask());
         App.getInstance().getScheduler().scheduleAsync(new FetchGatewayInformationTask());
 
+        SwingUtilities.invokeLater(() -> ui = new AppUI());
         xboxUserInfo = CacheManager.loadXboxUserInfo();
-        logger.info("App is in " + (AppInfo.development ? "development" : "production") + " mode");
 
-        while (ui == null) {Thread.sleep(1000);}
+        logger.info("App is in " + (AppInfo.alpha ? "Alpha" : (AppInfo.development ? "development" : "production")) + " mode");
+
+        while (ui == null) {
+            Thread.sleep(1000);
+        }
         ui.setReady();
-        new Tray();
     }
 
     private void tick(int currentTick) {
         scheduler.scheduleAsync(DiscordRPC::discordRunCallbacks);
         if (socket != null) socket.tick(currentTick);
-        if (App.ui != null) App.ui.general_tab.tick();
+        if (App.ui != null) App.ui.tabs.forEach(t -> t.tick(currentTick));
         scheduler.onTick(currentTick);
     }
 
@@ -120,15 +128,20 @@ public final class App {
     }
 
     public void updateServer(String new_network, String new_server) {
-        String before_network = network;
-        if (before_network == null || !before_network.equalsIgnoreCase(new_network)) {
-            network_session_created = new_network == null ? null : Instant.now().toEpochMilli();
-            network = new_network;
+        String before_network = network_info.network;
+        if (!Objects.equals(before_network, new_network)) {
+            network_info.network = new_network;
+            network_info.network_session_created = new_network == null ? null : Instant.now().toEpochMilli();
+            network_info.server = null;
+            network_info.server_session_created = network_info.network_session_created;
+            events.onNetworkChange(before_network, new_network);
+            return;
         }
-        String before_server = server;
-        if (before_server == null || !before_server.equalsIgnoreCase(new_server)) {
-            server_session_created = new_server == null ? null : Instant.now().toEpochMilli();
-            server = new_server;
+        String before_server = network_info.server;
+        if (!Objects.equals(before_server, new_server)) {
+            network_info.server_session_created = new_server == null ? null : Instant.now().toEpochMilli();
+            network_info.server = new_server;
+            events.onNetworkServerChange(network_info.network, before_server, new_server);
         }
     }
 
@@ -179,8 +192,9 @@ public final class App {
                 })
                 .build()
         ;
-        DiscordRPC.discordInitialize(discord_info.getCurrent_application_id(), handlers, false);
-        DiscordRPC.discordRegister(discord_info.getCurrent_application_id(), "");
+
+        DiscordRPC.discordInitialize(application_id, handlers, true);
+        DiscordRPC.discordRegister(application_id, null);
     }
 
     public static void setActivity(APIActivity api_activity) {
@@ -189,8 +203,8 @@ public final class App {
     public static void setActivity(APIActivity api_activity, boolean queue) {
         App app = App.getInstance();
         if (api_activity == null) api_activity = APIActivity.none();
-        if (api_activity.equals(app.api_activity)) return;
-        app.api_activity = api_activity;
+        if (api_activity.equals(app.discord_info.api_activity)) return;
+        app.discord_info.api_activity = api_activity;
         if (app.xboxUserInfo != null) {
             if (api_activity.getState() != null) api_activity.setState(Utils.replaceParams(api_activity.getState()));
             if (api_activity.getDetails() != null) api_activity.setDetails(Utils.replaceParams(api_activity.getDetails()));
@@ -209,6 +223,8 @@ public final class App {
                 DiscordRPC.discordUpdatePresence(finalApi_activity1.toDiscord());
             } else if (queue) app.discord_info.registerHandler(() -> setActivity(finalApi_activity1, false));
         });
+
+        if(ui != null) ui.general_tab.update(api_activity);
     }
 
     public static Logger getLogger(){
@@ -221,6 +237,17 @@ public final class App {
             tick(++currentTick);
         } catch (Exception e) {
             logger.error("Error while ticking application!", e);
+        }
+    }
+
+    public ImageIcon getTransparentBanner() {
+        if (transparent_banner != null) return transparent_banner;
+        try {
+            //transparent_banner = new ImageIcon(ImageIO.read(new URL(Gateway.getUrl() + "/images/empty-banner.png")).getScaledInstance(500,1, 4));
+            transparent_banner = new ImageIcon(ImageIO.read(new URL(Gateway.getUrl() + "/images/transparent-banner.png")).getScaledInstance(500,1, 4));
+            return transparent_banner;
+        } catch (IOException ignore) {
+            return null;
         }
     }
 
@@ -241,7 +268,7 @@ public final class App {
 
         @Override
         public void onDiscordReady(DiscordInfo info) {
-            logger.info("Welcome @" + info.getUsername() + ", discord is ready!");
+            logger.debug("Welcome @" + info.getUsername() + ", discord-rpc is ready!");
             setActivity(APIActivity.none());
         }
     }

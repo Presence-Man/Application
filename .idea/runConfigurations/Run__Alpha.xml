@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run: Alpha" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="xxAROX.PresenceMan.Application.Bootstrap" />
+    <module name="Application" />
+    <option name="PROGRAM_PARAMETERS" value="development alpha" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

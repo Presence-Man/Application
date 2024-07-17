@@ -17,7 +17,6 @@
 
 package xxAROX.PresenceMan.Application.sockets;
 
-import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.NonNull;
 import xxAROX.PresenceMan.Application.App;
@@ -31,10 +30,13 @@ import xxAROX.PresenceMan.Application.sockets.protocol.packets.Packet;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.ByeByePacket;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.HeartbeatPacket;
 import xxAROX.PresenceMan.Application.sockets.protocol.packets.types.UnknownPacket;
+import xxAROX.PresenceMan.Application.utils.Utils;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -51,16 +53,22 @@ public class SocketThread implements Runnable {
 
     private final Integer default_tries = 10;
     private final AtomicInteger tries_left = new AtomicInteger(default_tries);
+    @Getter private final List<Consumer<Packet>> packetHandler = new ArrayList<>();
 
     public SocketThread() {
         try {
             instance = this;
             backend_address = new InetSocketAddress(Gateway.ip, Gateway.usual_port +1);
-            App.getLogger().info("Backend identified as " + backend_address.getAddress().getHostAddress() + ":" + backend_address.getPort());
+            App.getLogger().info("Backend socket located at " + backend_address.getAddress().getHostAddress() + ":" + backend_address.getPort());
             socket = new Socket(this);
         } catch (Exception e) {
             App.getLogger().error("Error while creating socket: ", e);
         }
+        packetHandler.add(this::handlePacket);
+    }
+
+    private void handlePacket(Packet _packet) {
+        System.out.println("Handling " + _packet.getPacketType() + "!");
     }
 
     public void heartbeat() {
@@ -70,7 +78,7 @@ public class SocketThread implements Runnable {
     public void heartbeat(Consumer<HeartbeatPacket> consumer){
         if (!connectionState.get().equals(SocketThread.State.CONNECTED)) return;
         if (session_token.get() == null && heartbeats_need_a_token) return;
-        if (heartbeat_pending.get() == 5) {
+        if (heartbeat_pending.get() == 10) {
             resetConnection();
             heartbeat_pending.set(0);
             return;
@@ -91,15 +99,16 @@ public class SocketThread implements Runnable {
             }
             heartbeat_pending.getAndDecrement();
             App.head_url = pk.getHead_url();
+            App.getInstance().network_info.network_id = pk.getNetwork_id();
             App.getInstance().updateServer(pk.getNetwork(), pk.getServer());
             APIActivity new_activity = pk.getApi_activity();
             if (new_activity == null) new_activity = APIActivity.none();
-            if (new_activity.equals(App.getInstance().getApi_activity())) return;
+            if (new_activity.equals(App.getInstance().discord_info.getApi_activity())) return;
             App.setActivity(new_activity);
         }, err -> {
             App.head_url = null;
-            App.getInstance().network = null;
-            App.getInstance().server = null;
+            App.getInstance().network_info.network = null;
+            App.getInstance().network_info.server = null;
             App.getLogger().error("Error on heartbeat: " + err);
         });
     }
@@ -109,8 +118,7 @@ public class SocketThread implements Runnable {
         connectionState.set(State.DISCONNECTED);
         heartbeats_need_a_token = false;
         session_token.set(null);
-        socket.close();
-        socket.connect();
+        wakeup();
     }
 
     public void tick(int currentTick) {
@@ -134,7 +142,7 @@ public class SocketThread implements Runnable {
                 }
             }
         }
-        if (currentTick %30 == 0) heartbeat();
+        if (currentTick %40 == 0) heartbeat();
     }
 
     @Override public void run() {
@@ -149,10 +157,13 @@ public class SocketThread implements Runnable {
                 if (buffer != null && !buffer.isEmpty()) {
                     Packet packet = PacketPool.decode(buffer);
                     if (packet instanceof UnknownPacket) continue;
-                    if (packet instanceof CallbackPacket callbackPacket && callbackPacket.getCallback_id() != null) {
+                    else if (packet instanceof CallbackPacket callbackPacket && callbackPacket.getCallback_id() != null) {
                         CallbackPacket cbp = CallbackPacketManager.handle(callbackPacket);
                         if (cbp != null) sendPacket(cbp);
+                        continue;
                     }
+                    System.out.println(packet);
+                    packetHandler.forEach(consumer -> consumer.accept(packet));
                 }
             }
         } while (!connectionState.get().equals(State.SHUTDOWN));
@@ -166,6 +177,14 @@ public class SocketThread implements Runnable {
         socket.close();
     }
 
+    public void wakeup(){
+        if (!connectionState.get().equals(State.SHUTDOWN)) return;
+        connectionState.set(State.DISCONNECTED);
+        heartbeats_need_a_token = false;
+        session_token.set(null);
+        socket.connect();
+    }
+
     public <T extends Packet> boolean sendPacket(@NonNull T packet){
         if (connectionState.get().equals(State.SHUTDOWN) || connectionState.get().equals(State.DISCONNECTED)) return false;
         if (!connectionState.get().equals(State.CONNECTED) && packet instanceof HeartbeatPacket) return false;
@@ -175,7 +194,7 @@ public class SocketThread implements Runnable {
         }
 
         try {
-            byte[] compressed = GzipCompressor.getInstance().compress(new Gson().toJson(packet.encode()));
+            byte[] compressed = GzipCompressor.getInstance().compress(Utils.GSON.toJson(packet.encode()));
             DatagramPacket pk = new DatagramPacket(compressed, compressed.length, backend_address.getAddress(), backend_address.getPort());
             try {
                 socket.getSocket().send(pk);
