@@ -21,7 +21,6 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
-import xxAROX.PresenceMan.Application.entity.Gateway;
 import xxAROX.PresenceMan.Application.entity.infos.XboxUserInfo;
 import xxAROX.PresenceMan.Application.ui.AUITab;
 import xxAROX.PresenceMan.Application.ui.AppUI;
@@ -29,11 +28,8 @@ import xxAROX.PresenceMan.Application.ui.popup.LoginPopup;
 import xxAROX.PresenceMan.Application.utils.Lang;
 import xxAROX.PresenceMan.Application.utils.Utils;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -109,7 +105,7 @@ public class GeneralTab extends AUITab {
 
             //show image left to name in 50x50px
             JLabel image = new JLabel();
-            image.setIcon(new ImageIcon(xboxInfo.getProfileImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)));
+            image.setIcon(new ImageIcon(xboxInfo.getHeadImage(true).getScaledInstance(30, 30, Image.SCALE_SMOOTH)));
             image.setVisible(true);
             image.setFocusable(false);
 
@@ -280,13 +276,8 @@ public class GeneralTab extends AUITab {
 
             JLabel serverBanner = new JLabel();
             //serverBanner.setSize(500,1);
-            try {
-                //serverBanner.setIcon(new ImageIcon(ImageIO.read(new URL(Gateway.getUrl() + "/images/empty-banner.png"))));
-                serverBanner.setIcon(new ImageIcon(ImageIO.read(new URL(Gateway.getUrl() + "/images/transparent-banner.png")).getScaledInstance(500,1, 4)));
-                serverBanner.setVisible(false);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            serverBanner.setIcon(App.getInstance().getTransparentBanner());
+            serverBanner.setVisible(false);
 
             server_info.add(serverBanner, serverConst);
 

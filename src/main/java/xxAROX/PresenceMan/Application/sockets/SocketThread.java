@@ -35,6 +35,8 @@ import xxAROX.PresenceMan.Application.utils.Utils;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -51,6 +53,7 @@ public class SocketThread implements Runnable {
 
     private final Integer default_tries = 10;
     private final AtomicInteger tries_left = new AtomicInteger(default_tries);
+    @Getter private final List<Consumer<Packet>> packetHandler = new ArrayList<>();
 
     public SocketThread() {
         try {
@@ -61,6 +64,11 @@ public class SocketThread implements Runnable {
         } catch (Exception e) {
             App.getLogger().error("Error while creating socket: ", e);
         }
+        packetHandler.add(this::handlePacket);
+    }
+
+    private void handlePacket(Packet _packet) {
+        System.out.println("Handling " + _packet.getPacketType() + "!");
     }
 
     public void heartbeat() {
@@ -134,7 +142,7 @@ public class SocketThread implements Runnable {
                 }
             }
         }
-        if (currentTick %30 == 0) heartbeat();
+        if (currentTick %40 == 0) heartbeat();
     }
 
     @Override public void run() {
@@ -149,10 +157,13 @@ public class SocketThread implements Runnable {
                 if (buffer != null && !buffer.isEmpty()) {
                     Packet packet = PacketPool.decode(buffer);
                     if (packet instanceof UnknownPacket) continue;
-                    if (packet instanceof CallbackPacket callbackPacket && callbackPacket.getCallback_id() != null) {
+                    else if (packet instanceof CallbackPacket callbackPacket && callbackPacket.getCallback_id() != null) {
                         CallbackPacket cbp = CallbackPacketManager.handle(callbackPacket);
                         if (cbp != null) sendPacket(cbp);
+                        continue;
                     }
+                    System.out.println(packet);
+                    packetHandler.forEach(consumer -> consumer.accept(packet));
                 }
             }
         } while (!connectionState.get().equals(State.SHUTDOWN));

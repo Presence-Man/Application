@@ -14,7 +14,6 @@
 
 package xxAROX.PresenceMan.Application.entity.infos;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 import net.raphimc.minecraftauth.MinecraftAuth;
@@ -29,11 +28,24 @@ import java.io.IOException;
 import java.net.URL;
 
 @Getter
-@AllArgsConstructor
 @ToString
 public final class XboxUserInfo {
-    private String xuid;
-    private String gamertag;
+    private final String xuid;
+    private final String gamertag;
+
+    public static final String default_skin_url = "https://presence-man.com/api/v1/images/skins/{xuid}"; // ONLY HARDCODED PRESENCE-MAN LINK!!
+    public static final String default_head_url = "https://presence-man.com/api/v1/images/heads/{xuid}"; // ONLY HARDCODED PRESENCE-MAN LINK!!
+
+    public String skin_url = null;
+    public String head_url = null;
+
+    public Image skin = null; // CACHED
+    public Image head = null; // CACHED
+
+    public XboxUserInfo(String xuid, String gamertag) {
+        this.xuid = xuid;
+        this.gamertag = gamertag;
+    }
 
     public static final AbstractStep<?, StepFullBedrockSession.FullBedrockSession> DEVICE_CODE_LOGIN = MinecraftAuth.builder()
             .withClientId(MicrosoftConstants.BEDROCK_ANDROID_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
@@ -47,17 +59,43 @@ public final class XboxUserInfo {
         gamertag = session.getMcChain().getDisplayName();
     }
 
-    public Image getProfileImage() {
+    public Image getHeadImage() {
+        return getHeadImage(false);
+    }
+
+    public Image getHeadImage(boolean regenerate) {
+        if (!regenerate && head != null) return head;
         Image img = null;
         try {
-            img = ImageIO.read(new URL("https://presence-man.com/api/v1/images/heads/" + xuid));
+            head_url = default_head_url.replace("{xuid}", xuid);
+            img = ImageIO.read(new URL(head_url));
         } catch (Exception e) {
             App.getLogger().error("Error while fetching head: ", e);
             try {
-                img = ImageIO.read(new URL("https://minecraftfaces.com/wp-content/bigfaces/big-steve-face.png"));
+                img = ImageIO.read(new URL(head_url = default_head_url));
             } catch (IOException ignored) {}
         }
+        head = img;
+        return img;
+    }
 
+    public Image getSkinImage() {
+        return getSkinImage(false);
+    }
+
+    public Image getSkinImage(boolean regenerate) {
+        if (!regenerate && skin != null) return skin;
+        Image img = null;
+        try {
+            skin_url = default_skin_url.replace("{xuid}", xuid);
+            img = ImageIO.read(new URL(skin_url));
+        } catch (Exception e) {
+            App.getLogger().error("Error while fetching head: ", e);
+            try {
+                img = ImageIO.read(new URL(skin_url = default_skin_url));
+            } catch (IOException ignored) {}
+        }
+        skin = img;
         return img;
     }
 }

@@ -25,6 +25,7 @@ import net.arikia.dev.drpc.DiscordRPC;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
+import xxAROX.PresenceMan.Application.entity.Gateway;
 import xxAROX.PresenceMan.Application.entity.infos.DiscordInfo;
 import xxAROX.PresenceMan.Application.entity.infos.NetworkInfo;
 import xxAROX.PresenceMan.Application.entity.infos.XboxUserInfo;
@@ -38,7 +39,10 @@ import xxAROX.PresenceMan.Application.utils.CacheManager;
 import xxAROX.PresenceMan.Application.utils.ThreadFactoryBuilder;
 import xxAROX.PresenceMan.Application.utils.Utils;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.io.IOException;
+import java.net.URL;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -50,6 +54,7 @@ import java.util.concurrent.TimeUnit;
 @ToString
 public final class App {
     private static App instance;
+
     public static App getInstance() {
         return instance;
     }
@@ -57,10 +62,6 @@ public final class App {
 
     @Getter private static App.Events events;
     @Getter static final long created = Instant.now().toEpochMilli();
-    public NetworkInfo network_info = new NetworkInfo();
-    public DiscordInfo discord_info = new DiscordInfo();
-    public XboxUserInfo xboxUserInfo = null;
-
     private Logger logger;
     public static AppUI ui;
     public SocketThread socket = null;
@@ -69,6 +70,12 @@ public final class App {
     private ScheduledFuture<?> tickFuture;
     private int currentTick = 0;
     private volatile boolean shutdown = false;
+
+    public NetworkInfo network_info = new NetworkInfo();
+    public DiscordInfo discord_info = new DiscordInfo();
+    public XboxUserInfo xboxUserInfo = null;
+
+    private ImageIcon transparent_banner = null; // Cache
 
     public boolean isConnectedViaMCBE() {
         return App.getInstance().network_info.network_id != null;
@@ -230,6 +237,17 @@ public final class App {
             tick(++currentTick);
         } catch (Exception e) {
             logger.error("Error while ticking application!", e);
+        }
+    }
+
+    public ImageIcon getTransparentBanner() {
+        if (transparent_banner != null) return transparent_banner;
+        try {
+            //transparent_banner = new ImageIcon(ImageIO.read(new URL(Gateway.getUrl() + "/images/empty-banner.png")).getScaledInstance(500,1, 4));
+            transparent_banner = new ImageIcon(ImageIO.read(new URL(Gateway.getUrl() + "/images/transparent-banner.png")).getScaledInstance(500,1, 4));
+            return transparent_banner;
+        } catch (IOException ignore) {
+            return null;
         }
     }
 
