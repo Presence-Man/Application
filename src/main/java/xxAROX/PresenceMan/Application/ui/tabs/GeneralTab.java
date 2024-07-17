@@ -105,7 +105,7 @@ public class GeneralTab extends AUITab {
 
             //show image left to name in 50x50px
             JLabel image = new JLabel();
-            image.setIcon(new ImageIcon(xboxInfo.getHeadImage(true).getScaledInstance(30, 30, Image.SCALE_SMOOTH)));
+            image.setIcon(new ImageIcon(xboxInfo.getHeadImage(true).getScaledInstance(45, 45, Image.SCALE_SMOOTH)));
             image.setVisible(true);
             image.setFocusable(false);
 
