@@ -37,6 +37,7 @@ import xxAROX.PresenceMan.Application.task.UpdateCheckTask;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.utils.CacheManager;
 import xxAROX.PresenceMan.Application.utils.ThreadFactoryBuilder;
+import xxAROX.PresenceMan.Application.utils.Tray;
 import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.imageio.ImageIO;
@@ -148,6 +149,7 @@ public final class App {
     public void shutdown() {
         if (shutdown) return;
         shutdown = true;
+        Tray.hideFromTray();
 
         try {
             Thread.sleep(500);
