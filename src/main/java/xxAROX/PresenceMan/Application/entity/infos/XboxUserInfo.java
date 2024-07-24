@@ -45,6 +45,8 @@ public final class XboxUserInfo {
     public XboxUserInfo(String xuid, String gamertag) {
         this.xuid = xuid;
         this.gamertag = gamertag;
+        skin_url = default_skin_url.replace("{xuid}", xuid);
+        head_url = default_head_url.replace("{xuid}", xuid);
     }
 
     public static final AbstractStep<?, StepFullBedrockSession.FullBedrockSession> DEVICE_CODE_LOGIN = MinecraftAuth.builder()
@@ -67,7 +69,6 @@ public final class XboxUserInfo {
         if (!regenerate && head != null) return head;
         Image img = null;
         try {
-            head_url = default_head_url.replace("{xuid}", xuid);
             img = ImageIO.read(new URL(head_url));
         } catch (Exception e) {
             App.getLogger().error("Error while fetching head: ", e);
@@ -87,7 +88,6 @@ public final class XboxUserInfo {
         if (!regenerate && skin != null) return skin;
         Image img = null;
         try {
-            skin_url = default_skin_url.replace("{xuid}", xuid);
             img = ImageIO.read(new URL(skin_url));
         } catch (Exception e) {
             App.getLogger().error("Error while fetching head: ", e);
