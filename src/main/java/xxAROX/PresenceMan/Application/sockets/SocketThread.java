@@ -20,6 +20,7 @@ package xxAROX.PresenceMan.Application.sockets;
 import lombok.Getter;
 import lombok.NonNull;
 import xxAROX.PresenceMan.Application.App;
+import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.Gateway;
 import xxAROX.PresenceMan.Application.sockets.protocol.CallbackPacketManager;
@@ -58,8 +59,9 @@ public class SocketThread implements Runnable {
     public SocketThread() {
         try {
             instance = this;
-            backend_address = new InetSocketAddress(Gateway.ip, Gateway.usual_port +1);
+            backend_address = new InetSocketAddress(Gateway.ip, Gateway.usual_port +(AppInfo.development ? 3 : 1));
             App.getLogger().info("Backend socket located at " + backend_address.getAddress().getHostAddress() + ":" + backend_address.getPort());
+            App.getLogger().info("Backend Rest-API located at " + Gateway.getUrl());
             socket = new Socket(this);
         } catch (Exception e) {
             App.getLogger().error("Error while creating socket: ", e);
