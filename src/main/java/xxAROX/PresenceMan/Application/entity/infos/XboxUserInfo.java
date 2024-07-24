@@ -20,7 +20,6 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
 import net.raphimc.minecraftauth.util.MicrosoftConstants;
-import xxAROX.PresenceMan.Application.App;
 import xxAROX.PresenceMan.Application.entity.Gateway;
 
 import javax.imageio.ImageIO;
@@ -67,7 +66,7 @@ public final class XboxUserInfo {
         return Gateway.getUrl() + skin_url;
     }
     public String getHeadURL(){
-        return Gateway.getUrl() + head_url;
+        return (Gateway.broken ? "https://presence-man.com" : Gateway.getUrl()) + head_url;
     }
 
     public Image getHeadImage() {
@@ -79,9 +78,8 @@ public final class XboxUserInfo {
         try {
             img = ImageIO.read(new URL(getHeadURL()));
         } catch (Exception e) {
-            App.getLogger().error("Error while fetching head: ", e);
             try {
-                img = ImageIO.read(new URL(head_url = "https://presence-man.com" + default_head_url));
+                img = ImageIO.read(new URL("https://presence-man.com" + default_head_url));
             } catch (IOException ignored) {}
         }
         head = img;
@@ -96,9 +94,8 @@ public final class XboxUserInfo {
         try {
             img = ImageIO.read(new URL(getSkinURL()));
         } catch (Exception e) {
-            App.getLogger().error("Error while fetching head: ", e);
             try {
-                img = ImageIO.read(new URL(skin_url = "https://presence-man.com" + Gateway.getUrl() + default_skin_url));
+                img = ImageIO.read(new URL("https://presence-man.com" + Gateway.getUrl() + default_skin_url));
             } catch (IOException ignored) {}
         }
         skin = img;

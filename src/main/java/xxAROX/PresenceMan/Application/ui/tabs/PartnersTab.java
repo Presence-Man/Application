@@ -21,6 +21,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import xxAROX.PresenceMan.Application.App;
+import xxAROX.PresenceMan.Application.entity.Gateway;
 import xxAROX.PresenceMan.Application.ui.AUITab;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.ui.popup.PartnerPopup;
@@ -100,7 +101,7 @@ public class PartnersTab extends AUITab {
     private void reloadPartners() {
         if (partnerItems != null) partnerItems.clear();
         else partnerItems = new ArrayList<>();
-        var result = Utils.WebUtils.get("https://presence-man.com/api/v1/partners");
+        var result = Utils.WebUtils.get(Gateway.getUrl()+"/api/v1/partners");
         Utils.GSON.fromJson(result.getBody(), JsonArray.class).asList().stream().map(JsonElement::getAsJsonObject).forEach(obj -> {
             try {partnerItems.add(new PartnerItem(obj.get("title").getAsString(), obj.get("about_text").getAsString(), obj.get("domain").getAsString(), obj.get("image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("image").getAsString())), obj.get("banner_image").isJsonNull() ? null : new ImageIcon(new URL(obj.get("banner_image").getAsString())), obj.get("enabled").getAsBoolean(), obj.get("url").isJsonNull() ? null : obj.get("url").getAsString()));} catch (MalformedURLException ignore) {}
         });

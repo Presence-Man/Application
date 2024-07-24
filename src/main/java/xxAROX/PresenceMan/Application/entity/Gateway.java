@@ -26,8 +26,7 @@ public class Gateway {
     public static Integer port = 15151;
     public static Integer usual_port = 15151;
 
-    public static boolean broken = false;
-    public static boolean broken_popup = false;
+    public static boolean broken = true;
 
     public static String getUrl() {
         return protocol + (AppInfo.development && address.contains("presence-man.com") ? "develop." + address : address) + (port == null ? "" : ":" + port+(AppInfo.development ? 2 : 0));
