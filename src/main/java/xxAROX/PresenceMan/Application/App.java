@@ -212,7 +212,7 @@ public final class App {
             if (api_activity.getLarge_icon_text() != null && !api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(Utils.replaceParams(api_activity.getLarge_icon_text()));
 
             // NOTE: Player head
-            api_activity.setSmall_icon_key(app.xboxUserInfo.getHead_url());
+            api_activity.setSmall_icon_key(app.xboxUserInfo.getHeadURL()/* + "/" + System.currentTimeMillis() /* BYPASS DISCORD CACHE */);
             if (api_activity.getSmall_icon_text() == null) api_activity.setSmall_icon_text(app.xboxUserInfo.getGamertag());
         }
         App.getInstance().initDiscord(String.valueOf(api_activity.getClient_id()));
