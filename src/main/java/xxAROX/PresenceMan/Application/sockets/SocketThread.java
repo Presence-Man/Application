@@ -116,7 +116,6 @@ public class SocketThread implements Runnable {
     }
 
     public void resetConnection(){
-        System.out.println(App.getInstance().xboxUserInfo.getHeadURL());
         App.getLogger().info("Resetting connection..");
         connectionState.set(State.DISCONNECTED);
         heartbeats_need_a_token = false;
