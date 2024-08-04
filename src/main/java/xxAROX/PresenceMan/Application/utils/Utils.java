@@ -230,22 +230,24 @@ public class Utils {
         public static WebRequester.Result get(String url, Map<String, String> headers) {
             WebRequester.init(GSON, App.getInstance().getTickExecutor());
             try {
-                return WebRequester.get(url, headers).get();
+                var result = WebRequester.get(url, headers).get();
+                return result;
             } catch (ExecutionException | InterruptedException e) {
-                App.getLogger().error("Error while executing GET request: ", e);
+                App.getLogger().error("Error while GET: " + e.getMessage());
+                return null;
             }
-            return null;
         }
         public static WebRequester.Result post(String url) {return post(url, new HashMap<>(), new HashMap<>());}
         public static WebRequester.Result post(String url, Map<String, String> headers) {return post(url, headers, new HashMap<>());}
         public static WebRequester.Result post(String url, Map<String, String> headers, Map<String, String> body) {
             WebRequester.init(GSON, App.getInstance().getTickExecutor());
             try {
-                return WebRequester.post(url, headers, body).get();
+                var result = WebRequester.post(url, headers, body).get();
+                return result;
             } catch (ExecutionException | InterruptedException e) {
-                App.getLogger().error("Error while executing POST request: ", e);
+                App.getLogger().error("Error while POST: " + e.getMessage());
+                return null;
             }
-            return null;
         }
     }
 

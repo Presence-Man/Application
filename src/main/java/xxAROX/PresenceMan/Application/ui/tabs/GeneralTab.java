@@ -105,7 +105,7 @@ public class GeneralTab extends AUITab {
 
             //show image left to name in 50x50px
             JLabel image = new JLabel();
-            image.setIcon(new ImageIcon(xboxInfo.getHeadImage(true).getScaledInstance(30, 30, Image.SCALE_SMOOTH)));
+            image.setIcon(new ImageIcon(xboxInfo.getHeadImage(true).getScaledInstance(45, 45, Image.SCALE_SMOOTH)));
             image.setVisible(true);
             image.setFocusable(false);
 
@@ -351,12 +351,15 @@ public class GeneralTab extends AUITab {
 
     @Override
     public void tick(int currentTick) {
-        String status = switch (App.getInstance().getSocket().getConnectionState().get()) {
-            case SHUTDOWN       -> "ui.tab.home.backend_status.conn.off";
-            case DISCONNECTED   -> "ui.tab.home.backend_status.conn.nop";
-            case CONNECTING     -> "ui.tab.home.backend_status.conn.may";
-            case CONNECTED      -> "ui.tab.home.backend_status.conn.yes";
-        };
+        String status = "ui.tab.home.backend_status.conn.off";
+        if (App.getInstance().getSocket() != null) {
+            status = switch (App.getInstance().getSocket().getConnectionState().get()) {
+                case SHUTDOWN       -> "ui.tab.home.backend_status.conn.off";
+                case DISCONNECTED   -> "ui.tab.home.backend_status.conn.nop";
+                case CONNECTING     -> "ui.tab.home.backend_status.conn.may";
+                case CONNECTED      -> "ui.tab.home.backend_status.conn.yes";
+            };
+        }
         if (backend_status != null) backend_status.setText(Lang.get(status));
 
         if (currentTick %20 == 0) update(null); // TODO: maybe remove this

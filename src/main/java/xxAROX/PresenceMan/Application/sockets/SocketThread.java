@@ -20,6 +20,7 @@ package xxAROX.PresenceMan.Application.sockets;
 import lombok.Getter;
 import lombok.NonNull;
 import xxAROX.PresenceMan.Application.App;
+import xxAROX.PresenceMan.Application.AppInfo;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.Gateway;
 import xxAROX.PresenceMan.Application.sockets.protocol.CallbackPacketManager;
@@ -58,8 +59,9 @@ public class SocketThread implements Runnable {
     public SocketThread() {
         try {
             instance = this;
-            backend_address = new InetSocketAddress(Gateway.ip, Gateway.usual_port +1);
+            backend_address = new InetSocketAddress(Gateway.ip, Gateway.usual_port +(AppInfo.development ? 3 : 1));
             App.getLogger().info("Backend socket located at " + backend_address.getAddress().getHostAddress() + ":" + backend_address.getPort());
+            App.getLogger().info("Backend Rest-API located at " + Gateway.getUrl());
             socket = new Socket(this);
         } catch (Exception e) {
             App.getLogger().error("Error while creating socket: ", e);
@@ -78,7 +80,7 @@ public class SocketThread implements Runnable {
     public void heartbeat(Consumer<HeartbeatPacket> consumer){
         if (!connectionState.get().equals(SocketThread.State.CONNECTED)) return;
         if (session_token.get() == null && heartbeats_need_a_token) return;
-        if (heartbeat_pending.get() == 10) {
+        if (heartbeat_pending.get() == 5) {
             resetConnection();
             heartbeat_pending.set(0);
             return;
@@ -126,20 +128,16 @@ public class SocketThread implements Runnable {
         if (xboxInfo == null) return;
         if (connectionState.get().equals(State.DISCONNECTED) && currentTick %(20*5) == 0) {
             if (tries_left.getAndDecrement() <= 0) {
-                App.getLogger().error("Connection can't be established, shutting down..");
-                shutdown();
+                App.getLogger().info(tries_left.get() +1 == default_tries ? "Connecting.." : "Reconnecting..");
+                tries_left.set(default_tries);
             } else {
                 connectionState.set(State.CONNECTING);
-                App.getLogger().info(tries_left.get() +1 == default_tries ? "Connecting.." : "Reconnecting..");
                 if (socket.connect()) {
                     connectionState.set(State.CONNECTED);
                     App.getLogger().info(tries_left.get() +1 == default_tries ? "Connected!" : "Reconnected!");
                     tries_left.set(default_tries);
                     heartbeat();
-                } else {
-                    connectionState.set(State.DISCONNECTED);
-                    App.getLogger().warn(tries_left.get() +1 == default_tries ? "Failed to connect to backend!" :"Reconnecting failed!");
-                }
+                } else connectionState.set(State.DISCONNECTED);
             }
         }
         if (currentTick %40 == 0) heartbeat();
@@ -162,31 +160,33 @@ public class SocketThread implements Runnable {
                         if (cbp != null) sendPacket(cbp);
                         continue;
                     }
-                    System.out.println(packet);
+                    // NOTE: IDK if that works \_('.')_/
                     packetHandler.forEach(consumer -> consumer.accept(packet));
                 }
             }
-        } while (!connectionState.get().equals(State.SHUTDOWN));
+        } while (socket != null);
         App.getLogger().debug("[SocketThread]: Bye!");
     }
 
     public void shutdown(){
-        if (connectionState.get().equals(State.SHUTDOWN)) return;
+        if (socket == null) return;
         if (session_token.get() != null && !session_token.get().equalsIgnoreCase("")) sendPacket(new ByeByePacket());
         connectionState.set(State.SHUTDOWN);
         socket.close();
+        socket = null;
     }
 
     public void wakeup(){
-        if (!connectionState.get().equals(State.SHUTDOWN)) return;
+        if (socket != null) return;
         connectionState.set(State.DISCONNECTED);
         heartbeats_need_a_token = false;
         session_token.set(null);
+        socket = new Socket(this);
         socket.connect();
     }
 
     public <T extends Packet> boolean sendPacket(@NonNull T packet){
-        if (connectionState.get().equals(State.SHUTDOWN) || connectionState.get().equals(State.DISCONNECTED)) return false;
+        if (socket == null || connectionState.get().equals(State.DISCONNECTED)) return false;
         if (!connectionState.get().equals(State.CONNECTED) && packet instanceof HeartbeatPacket) return false;
         if (session_token.get() != null) packet.setToken(session_token.get());
         if (packet instanceof HeartbeatPacket heartbeatPacket) {

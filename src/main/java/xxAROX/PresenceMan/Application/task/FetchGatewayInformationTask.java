@@ -42,14 +42,11 @@ public class FetchGatewayInformationTask extends Task {
     }
 
     public static void ping_backend() {
-        String content = Utils.WebUtils.get(Gateway.getUrl()).getBody();
-        var result = content.toLowerCase().contains("jan sohn / xxarox");
-
-        Gateway.broken = result;
+        var response = Utils.WebUtils.get(Gateway.getUrl());
+        var result = response != null && response.getBody().toLowerCase().contains("jan sohn / xxarox");
         if (result) {
             ReconnectingTask.deactivate();
             Gateway.broken = false;
-            Gateway.broken_popup = false;
             App.getInstance().initSocket();
         } else {
             Gateway.broken = true;

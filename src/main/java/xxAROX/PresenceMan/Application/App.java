@@ -37,6 +37,7 @@ import xxAROX.PresenceMan.Application.task.UpdateCheckTask;
 import xxAROX.PresenceMan.Application.ui.AppUI;
 import xxAROX.PresenceMan.Application.utils.CacheManager;
 import xxAROX.PresenceMan.Application.utils.ThreadFactoryBuilder;
+import xxAROX.PresenceMan.Application.utils.Tray;
 import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.imageio.ImageIO;
@@ -148,6 +149,7 @@ public final class App {
     public void shutdown() {
         if (shutdown) return;
         shutdown = true;
+        Tray.hideFromTray();
 
         try {
             Thread.sleep(500);
@@ -210,10 +212,10 @@ public final class App {
             if (api_activity.getDetails() != null) api_activity.setDetails(Utils.replaceParams(api_activity.getDetails()));
             if (api_activity.getLarge_icon_key() == null || api_activity.getLarge_icon_key().isBlank()) api_activity.setLarge_icon_key("bedrock");
             if (api_activity.getLarge_icon_text() != null && !api_activity.getLarge_icon_text().isBlank()) api_activity.setLarge_icon_text(Utils.replaceParams(api_activity.getLarge_icon_text()));
-            if (App.head_url != null) {
-                api_activity.setSmall_icon_key(App.head_url);
-                if (api_activity.getSmall_icon_text() == null) api_activity.setSmall_icon_text(app.xboxUserInfo.getGamertag());
-            }
+
+            // NOTE: Player head
+            api_activity.setSmall_icon_key(app.xboxUserInfo.getHeadURL() + "/" + (System.currentTimeMillis() /1000) /* NOTE: BYPASS DISCORD CACHE */);
+            if (api_activity.getSmall_icon_text() == null) api_activity.setSmall_icon_text(app.xboxUserInfo.getGamertag());
         }
         App.getInstance().initDiscord(String.valueOf(api_activity.getClient_id()));
         APIActivity finalApi_activity1 = api_activity;
