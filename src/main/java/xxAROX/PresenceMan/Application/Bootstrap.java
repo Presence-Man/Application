@@ -22,10 +22,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xxAROX.PresenceMan.Application.utils.Utils;
 
+import java.awt.*;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Bootstrap {
+    public static Font GGSANS = null;
+
     @SneakyThrows
     public static void main(String[] _args) {
         List<String> args = Arrays.stream(_args).toList();
@@ -35,6 +40,8 @@ public class Bootstrap {
         AppInfo.alpha = lowArgs.contains("alpha");
 
         Logger logger = initializeLogger();
+        addFont(logger);
+
         if (Utils.SingleInstanceUtils.lockInstance(logger)) new App(logger);
         else {
             logger.error("Application is already running, shutting down this one..");
@@ -47,5 +54,13 @@ public class Bootstrap {
         var logger = LogManager.getLogger(App.class);
         //logger.setLevel(AppInfo.development ? Level.DEBUG : Level.INFO); // TODO @KeksDev fix meee
         return logger;
+    }
+
+    protected static void addFont(Logger logger) {
+        try {
+            Bootstrap.GGSANS = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(Bootstrap.class.getClassLoader().getResourceAsStream("ggsans.ttf")));
+        } catch (FontFormatException | IOException e) {
+            logger.error(e);
+        }
     }
 }

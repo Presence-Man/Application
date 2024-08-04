@@ -20,6 +20,7 @@ package xxAROX.PresenceMan.Application.ui.tabs;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 import xxAROX.PresenceMan.Application.App;
+import xxAROX.PresenceMan.Application.Bootstrap;
 import xxAROX.PresenceMan.Application.entity.APIActivity;
 import xxAROX.PresenceMan.Application.entity.infos.XboxUserInfo;
 import xxAROX.PresenceMan.Application.ui.AUITab;
@@ -30,7 +31,6 @@ import xxAROX.PresenceMan.Application.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -148,44 +148,10 @@ public class GeneralTab extends AUITab {
 
             constraints.anchor = GridBagConstraints.WEST;
 
-            //Discord Status (/Username) - 2nd row, italic
-            JLabel discordStatus = new JLabel(Lang.get(App.getInstance().getDiscord_info().ready ? "ui.tab.home.discord.connected.yes" : "ui.tab.home.discord.connected.nop"), SwingConstants.CENTER);
-            discordStatus.setVisible(true);
-            discordStatus.setFocusable(false);
-            discordStatus.setFont(new Font("Arial", Font.ITALIC, 12));
-
-            constraints.gridx = 0;          // Column 0
-            constraints.gridy = 1;          // Row 0 (top)
-            constraints.gridwidth = 1;      // Span 1 column
-            constraints.gridheight = 1;     // Span 1 row
-            constraints.weightx = 1.0;      // Expand horizontally
-            constraints.weighty = 0.0;      // Do not expand vertically
-            constraints.fill = GridBagConstraints.CENTER; // Fill horizontally
-            constraints.insets = new Insets(5, 5, 5, 100);
-
-            contentPane.add(discordStatus, constraints);
-
-            String username = App.getInstance().getDiscord_info().getUsername() != null ? "@" + App.getInstance().getDiscord_info().getUsername() : Lang.get("ui.tab.home.discord.connected.nop");
-
-            JLabel dcUser = new JLabel(Lang.get("ui.tab.home.discord.user", new HashMap<>(){{put("{username}", username);}}), SwingConstants.CENTER);
-            dcUser.setVisible(true);
-            dcUser.setFocusable(false);
-            dcUser.setFont(new Font("Arial", Font.ITALIC, 12));
-
-            constraints.gridx = 0;          // Column 0
-            constraints.gridy = 1;          // Row 0 (top)
-            constraints.gridwidth = 1;      // Span 1 column
-            constraints.gridheight = 1;     // Span 1 row
-            constraints.weightx = 1.0;      // Expand horizontally
-            constraints.weighty = 0.0;      // Do not expand vertically
-            constraints.fill = GridBagConstraints.CENTER; // Fill horizontally
-            constraints.insets = new Insets(5, 5, 30, 100);
-
-            contentPane.add(dcUser, constraints);
-
-            if(App.getInstance().getDiscord_info().getUsername() == null) {
+            if (App.getInstance().getDiscord_info().getUsername() == null) {
                 //add reconnect button below
-                JButton reconnect = new JButton(Lang.get("ui.tab.home.discord.connected.rec"));
+                JButton reconnect = new JButton("", Utils.UIUtils.createImageIcon("images/discord-logo-blue-sm.png"));
+                reconnect.setForeground(new Color(0x5865F2));
                 reconnect.addActionListener(e -> {
                     App.getInstance().initDiscord();
                     init(contentPane);
@@ -200,6 +166,24 @@ public class GeneralTab extends AUITab {
                 constraints.insets = new Insets(70, 5, 5, 25);
 
                 contentPane.add(reconnect, constraints);
+            } else {
+                //Discord Status (/Username) - 2nd row, italic
+                JLabel discordStatus = new JLabel("  "+Lang.get("ui.tab.home.discord.connected"), Utils.UIUtils.createImageIcon("images/discord-logo-blue-sm.png"), SwingConstants.CENTER);
+                discordStatus.setVisible(true);
+                discordStatus.setFocusable(false);
+                discordStatus.setBackground(new Color(0x5865F2));
+                discordStatus.setFont(Bootstrap.GGSANS.deriveFont(Font.PLAIN, 12)); // TODO: Use that front everywhere
+
+                constraints.gridx = 0;          // Column 0
+                constraints.gridy = 1;          // Row 0 (top)
+                constraints.gridwidth = 1;      // Span 1 column
+                constraints.gridheight = 1;     // Span 1 row
+                constraints.weightx = 1.0;      // Expand horizontally
+                constraints.weighty = 0.0;      // Do not expand vertically
+                constraints.fill = GridBagConstraints.CENTER; // Fill horizontally
+                constraints.insets = new Insets(5, 5, 5, 100);
+
+                contentPane.add(discordStatus, constraints);
             }
 
             //Backend status
