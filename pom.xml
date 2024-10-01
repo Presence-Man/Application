@@ -92,7 +92,7 @@
         <dependency>
             <groupId>net.raphimc</groupId>
             <artifactId>MinecraftAuth</artifactId>
-            <version>4.1.0</version>
+            <version>4.1.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.Dansoftowner</groupId>
